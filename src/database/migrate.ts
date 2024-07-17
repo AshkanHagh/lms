@@ -1,10 +1,10 @@
-import { migrate } from "drizzle-orm/neon-serverless/migrator";
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { Client } from "@neondatabase/serverless";
+import { migrate } from 'drizzle-orm/neon-http/migrator';
+import { drizzle } from 'drizzle-orm/neon-http';
+import { neon } from '@neondatabase/serverless';
 
-const migrationClient = new Client(process.env.DATABASE_URL);
+const migrationClient = neon(process.env.DATABASE_URL);
 const migration = async () => {
     await migrate(drizzle(migrationClient), {migrationsFolder : './src/database/migrations'});
-    await migrationClient.end();
+    process.exit(1);
 }
 migration();
