@@ -8,7 +8,7 @@ export const NotificationType = pgEnum('type', ['new_episode', 'replay', 'ticket
 
 export const userTable = pgTable('users', {
     id : uuid('id').primaryKey().defaultRandom(),
-    name : varchar('name', {length : 255}).notNull(),
+    name : varchar('name', {length : 255}),
     email : varchar('email', {length : 255}).unique().notNull(),
     plan : PlanEnum('plan').default('free'),
     customerId : varchar('customer_id', {length : 255}).unique(),

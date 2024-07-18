@@ -1,0 +1,15 @@
+import type { TInsertCache } from '../../types/index.type';
+import { redis } from './redis.config';
+
+export const insertHashCache = async <T>(hashKey : string, keyValue : TInsertCache<T>) : Promise<void> => {
+    await redis.hset(hashKey, keyValue);
+    await redis.expire(hashKey, 604800);
+}
+
+export const getAllHashCache = async <T>(hashKey : string) : Promise<T> => {
+    return await redis.hgetall(hashKey) as T;
+}
+
+export const deleteHashCache = async (hashKey : string) : Promise<void> => {
+    await redis.del(hashKey);
+}

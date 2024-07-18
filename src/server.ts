@@ -1,5 +1,5 @@
-import app from './app';
+import { server } from './socket/socket.config';
 
 const PORT : number | 9780 = process.env.PORT || 9780;
 
-app.listen(PORT, () => console.log(`Started server on ${PORT}`));
+server.listen(PORT, () => console.log(`Started server on ${PORT}`));

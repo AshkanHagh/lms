@@ -84,14 +84,14 @@ class InvalidVerifyCode extends ErrorHandler {
     }
 }
 
-class EmailOrUsernameExistsError extends ErrorHandler {
+class EmailAlreadyExists extends ErrorHandler {
     constructor(message : string = 'Email or Username already exists') {
-        super(message, 409); // 409 Conflict
+        super(message, 409);
     }
 }
 
-class InvalidEmailOrPasswordError extends ErrorHandler {
-    constructor(message : string = 'Invalid email or password') {
+class InvalidEmailError extends ErrorHandler {
+    constructor(message : string = 'Invalid email') {
         super(message, 401);
     }
 }
@@ -116,6 +116,6 @@ class PasswordValidationError extends ErrorHandler {
 
 export {BadRequestError, UnauthorizedError, ForbiddenError, ResourceNotFoundError, PasswordDoesNotMatch, UpdateFollowerInfoError,
     InvalidUserIdError, LoginRequiredError, InternalServerError, AccessTokenInvalidError, ValidationError, RoleForbiddenError,
-    TokenRefreshError, RouteNowFoundError, InvalidEmailOrPasswordError, EmailOrUsernameExistsError, InvalidVerifyCode, UserNotFoundError,
+    TokenRefreshError, RouteNowFoundError, InvalidEmailError, EmailAlreadyExists, InvalidVerifyCode, UserNotFoundError,
     PasswordValidationError
 };

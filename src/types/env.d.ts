@@ -20,6 +20,11 @@ declare global {
       SMTP_PASSWORD : string;
       ORIGIN : string;
       SENTRY_KEY : string;
+      CLERK_SECRET_KEY : string;
+      CLERK_PUBLISHABLE_KEY : string;
+      CLOUDINARY_CLOUD_NAME : string;
+      CLOUDINARY_API_KEY : string;
+      CLOUDINARY_API_SECRET : string;
     }
   }
 }
