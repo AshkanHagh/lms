@@ -1,1 +1,0 @@
-ALTER TABLE "course_tags" DROP CONSTRAINT "course_tags_tags_unique";
