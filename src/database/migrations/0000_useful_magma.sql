@@ -1,5 +1,5 @@
 DO $$ BEGIN
- CREATE TYPE "public"."type" AS ENUM('new_episode', 'replay', 'ticket');
+ CREATE TYPE "public"."type" AS ENUM('deposit', 'withdrawal');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -22,18 +22,31 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."state" AS ENUM('completed', 'in_progress');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."status" AS ENUM('publish', 'private');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "carts" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid,
 	"course_id" uuid
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "chapter_details" (
+CREATE TABLE IF NOT EXISTS "chapter_videos" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"chapter_id" uuid,
 	"title" text NOT NULL,
-	"thumbnail" text NOT NULL,
-	"url" text NOT NULL,
-	"time" integer DEFAULT 0
+	"video_thumbnail" text NOT NULL,
+	"video_url" text NOT NULL,
+	"video_time" integer DEFAULT 0
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "comments" (
@@ -45,6 +58,7 @@ CREATE TABLE IF NOT EXISTS "comments" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "course_benefit" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"course_id" uuid,
 	"title" text NOT NULL,
 	"details" text NOT NULL
@@ -65,11 +79,11 @@ CREATE TABLE IF NOT EXISTS "course_comments" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "course_details" (
 	"course_id" uuid PRIMARY KEY NOT NULL,
-	"prerequisite" text NOT NULL,
 	"view" integer DEFAULT 0,
 	"reviews" integer DEFAULT 0,
 	"rating" integer DEFAULT 0,
-	"students" integer DEFAULT 0
+	"students" integer DEFAULT 0,
+	"complete_time" integer DEFAULT 0
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "ratings" (
@@ -87,11 +101,15 @@ CREATE TABLE IF NOT EXISTS "course_reviews" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "courses" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"teacher_id" uuid,
 	"title" text NOT NULL,
 	"details" text NOT NULL,
-	"teacher_id" uuid,
-	"complete_time" integer DEFAULT 0,
 	"price" integer NOT NULL,
+	"image" text NOT NULL,
+	"visibility" "status" DEFAULT 'private',
+	"prerequisite" text,
+	"state" "state" DEFAULT 'in_progress',
+	"discount" integer DEFAULT 0,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now()
 );
@@ -155,7 +173,7 @@ CREATE TABLE IF NOT EXISTS "subscriptions" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"name" varchar(255) NOT NULL,
+	"name" varchar(255),
 	"email" varchar(255) NOT NULL,
 	"plan" "plan" DEFAULT 'free',
 	"customer_id" varchar(255),
@@ -180,7 +198,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "chapter_details" ADD CONSTRAINT "chapter_details_chapter_id_course_chapters_id_fk" FOREIGN KEY ("chapter_id") REFERENCES "public"."course_chapters"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "chapter_videos" ADD CONSTRAINT "chapter_videos_chapter_id_course_chapters_id_fk" FOREIGN KEY ("chapter_id") REFERENCES "public"."course_chapters"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -318,7 +336,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "userId_index_cart" ON "carts" USING btree ("user_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "courseId_index_chapterDetails" ON "chapter_details" USING btree ("chapter_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "courseId_index_chapterDetails" ON "chapter_videos" USING btree ("chapter_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "authorId_index_comment" ON "comments" USING btree ("author_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "courseId_index_benefit" ON "course_benefit" USING btree ("course_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "courseId_index_chapter" ON "course_chapters" USING btree ("course_id");--> statement-breakpoint

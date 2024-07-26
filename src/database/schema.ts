@@ -5,6 +5,9 @@ export const PlanEnum = pgEnum('plan', ['free', 'premium']);
 export const RoleEnum = pgEnum('role', ['teacher', 'admin', 'user']);
 export const SubscriptionPeriodEnum = pgEnum('subscription_period', ['monthly', 'yearly']);
 export const NotificationType = pgEnum('type', ['new_episode', 'replay', 'ticket']);
+export const visibilityEnum = pgEnum('status', ['publish', 'private']);
+export const completionStateEnum = pgEnum('state', ['completed', 'in_progress']);
+export const walletType = pgEnum('type', ['deposit', 'withdrawal'])
 
 export const userTable = pgTable('users', {
     id : uuid('id').primaryKey().defaultRandom(),
@@ -22,11 +25,15 @@ export const userTable = pgTable('users', {
 
 export const courseTable = pgTable('courses', {
     id : uuid('id').primaryKey().defaultRandom(),
+    teacherId : uuid('teacher_id').references(() => userTable.id, {onDelete : 'cascade'}),
     title : text('title').notNull(),
     details : text('details').notNull(),
-    teacherId : uuid('teacher_id').references(() => userTable.id, {onDelete : 'cascade'}),
-    completeTime : integer('complete_time').default(0),
     price : integer('price').notNull(),
+    image : text('image').notNull(),
+    visibility : visibilityEnum('visibility').default('private'),
+    prerequisite : text('prerequisite'),
+    state : completionStateEnum('state').default('in_progress'),
+    discount : integer('discount').default(0),
     createdAt : timestamp('created_at').defaultNow(),
     updatedAt : timestamp('updated_at').defaultNow().$onUpdate(() => new Date())
 }, table => ({
@@ -35,14 +42,15 @@ export const courseTable = pgTable('courses', {
 
 export const courseDetailTable = pgTable('course_details', {
     courseId : uuid('course_id').primaryKey().references(() => courseTable.id, {onDelete : 'cascade'}),
-    prerequisite : text('prerequisite').notNull(),
     view : integer('view').default(0),
     totalReviews : integer('reviews').default(0),
     totalRating : integer('rating').default(0),
-    totalStudents : integer('students').default(0)
+    totalStudents : integer('students').default(0),
+    completeTime : integer('complete_time').default(0),
 });
 
 export const courseBenefitTable = pgTable('course_benefit', {
+    id : uuid('id').primaryKey().defaultRandom(),
     courseId : uuid('course_id').references(() => courseTable.id, {onDelete : 'cascade'}),
     title : text('title').notNull(),
     details : text('details').notNull()
@@ -59,12 +67,13 @@ export const courseChaptersTable = pgTable('course_chapters', {
     courseIdIndex : index('courseId_index_chapter').on(table.courseId)
 }));
 
-export const chapterDetailsTable = pgTable('chapter_details', {
+export const chapterVideosTable = pgTable('chapter_videos', {
+    id : uuid('id').primaryKey().defaultRandom(),
     chapterId : uuid('chapter_id').references(() => courseChaptersTable.id, {onDelete : 'cascade'}),
-    title : text('title').notNull(),
-    videoThumbnail : text('thumbnail').notNull(),
-    videoUrl : text('url').notNull(),
-    videoTime : integer('time').default(0),
+    videoTitle : text('title').notNull(),
+    videoThumbnail : text('video_thumbnail').notNull(),
+    videoUrl : text('video_url').notNull(),
+    videoTime : integer('video_time').default(0),
 }, table => ({
     courseIdIndex : index('courseId_index_chapterDetails').on(table.chapterId)
 }));
@@ -185,7 +194,7 @@ export const userTableRelations = relations(userTable, ({one, many}) => ({
         references : [notificationTable.to],
         relationName : 'notifications'
     }),
-    carts : many(cartTable)
+    carts : many(cartTable),
 }));
 
 export const courseTableRelations = relations(courseTable, ({one, many}) => ({
@@ -225,9 +234,9 @@ export const courseChaptersTableRelations = relations(courseChaptersTable, ({one
     })
 }));
 
-export const chapterDetailsTableRelations = relations(chapterDetailsTable, ({one}) => ({
+export const chapterDetailsTableRelations = relations(chapterVideosTable, ({one}) => ({
     chapter : one(courseChaptersTable, {
-        fields : [chapterDetailsTable.chapterId],
+        fields : [chapterVideosTable.chapterId],
         references : [courseChaptersTable.id]
     })
 }));
@@ -348,4 +357,4 @@ export const cartTableRelations = relations(cartTable, ({one}) => ({
         fields : [cartTable.userId],
         references : [userTable.id]
     }),
-}))
+}));

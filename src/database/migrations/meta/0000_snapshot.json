@@ -1,5 +1,5 @@
 {
-  "id": "17cb316d-3b21-429c-a51c-45b36f2e9e6b",
+  "id": "245ed9c6-5830-4417-9ec3-2f5271a2da09",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -76,10 +76,17 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.chapter_details": {
-      "name": "chapter_details",
+    "public.chapter_videos": {
+      "name": "chapter_videos",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
         "chapter_id": {
           "name": "chapter_id",
           "type": "uuid",
@@ -92,20 +99,20 @@
           "primaryKey": false,
           "notNull": true
         },
-        "thumbnail": {
-          "name": "thumbnail",
+        "video_thumbnail": {
+          "name": "video_thumbnail",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "url": {
-          "name": "url",
+        "video_url": {
+          "name": "video_url",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "time": {
-          "name": "time",
+        "video_time": {
+          "name": "video_time",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -130,9 +137,9 @@
         }
       },
       "foreignKeys": {
-        "chapter_details_chapter_id_course_chapters_id_fk": {
-          "name": "chapter_details_chapter_id_course_chapters_id_fk",
-          "tableFrom": "chapter_details",
+        "chapter_videos_chapter_id_course_chapters_id_fk": {
+          "name": "chapter_videos_chapter_id_course_chapters_id_fk",
+          "tableFrom": "chapter_videos",
           "tableTo": "course_chapters",
           "columnsFrom": [
             "chapter_id"
@@ -224,6 +231,13 @@
       "name": "course_benefit",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
         "course_id": {
           "name": "course_id",
           "type": "uuid",
@@ -411,12 +425,6 @@
           "primaryKey": true,
           "notNull": true
         },
-        "prerequisite": {
-          "name": "prerequisite",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "view": {
           "name": "view",
           "type": "integer",
@@ -440,6 +448,13 @@
         },
         "students": {
           "name": "students",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "complete_time": {
+          "name": "complete_time",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -597,6 +612,12 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "teacher_id": {
+          "name": "teacher_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "title": {
           "name": "title",
           "type": "text",
@@ -609,24 +630,46 @@
           "primaryKey": false,
           "notNull": true
         },
-        "teacher_id": {
-          "name": "teacher_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "complete_time": {
-          "name": "complete_time",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
         "price": {
           "name": "price",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
+        },
+        "image": {
+          "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "visibility": {
+          "name": "visibility",
+          "type": "status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'private'"
+        },
+        "prerequisite": {
+          "name": "prerequisite",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "state": {
+          "name": "state",
+          "type": "state",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'in_progress'"
+        },
+        "discount": {
+          "name": "discount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
         },
         "created_at": {
           "name": "created_at",
@@ -1320,7 +1363,7 @@
           "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "email": {
           "name": "email",
@@ -1428,9 +1471,8 @@
       "name": "type",
       "schema": "public",
       "values": [
-        "new_episode",
-        "replay",
-        "ticket"
+        "deposit",
+        "withdrawal"
       ]
     },
     "public.plan": {
@@ -1456,6 +1498,22 @@
       "values": [
         "monthly",
         "yearly"
+      ]
+    },
+    "public.state": {
+      "name": "state",
+      "schema": "public",
+      "values": [
+        "completed",
+        "in_progress"
+      ]
+    },
+    "public.status": {
+      "name": "status",
+      "schema": "public",
+      "values": [
+        "publish",
+        "private"
       ]
     }
   },

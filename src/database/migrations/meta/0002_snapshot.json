@@ -1,6 +1,6 @@
 {
-  "id": "ade5912d-3930-443e-8fe3-7c4cb68b6015",
-  "prevId": "245ed9c6-5830-4417-9ec3-2f5271a2da09",
+  "id": "6614f582-ca36-46df-afc6-fbb799648444",
+  "prevId": "ade5912d-3930-443e-8fe3-7c4cb68b6015",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -793,15 +793,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "course_tags_tags_unique": {
-          "name": "course_tags_tags_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "tags"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "public.notifications": {
       "name": "notifications",

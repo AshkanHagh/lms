@@ -1,5 +1,5 @@
 import { getAllHashCache } from '../database/cache/index.cache';
-import { insertAuthInfo, selectWithCondition } from '../database/queries/user.query';
+import { insertUserDetails, selectWithCondition } from '../database/queries/user.query';
 import { emailEvent } from '../events/email.event';
 import { EmailAlreadyExists, InvalidEmailError, InvalidVerifyCode, LoginRequiredError, TokenRefreshError } from '../libs/utils';
 import { generateActivationToken, verifyActivationToken } from '../libs/utils/activation-token';
@@ -35,7 +35,7 @@ export const verifyAccountService = async <T extends 'login' | 'register'>(activ
 
         if(service === 'register') {
             if(desiredUser) throw new EmailAlreadyExists();
-            const insertResult : TSelectUser = await insertAuthInfo({email});
+            const insertResult : TSelectUser = await insertUserDetails({email});
             return insertResult
         }
         return desiredUser;
@@ -82,7 +82,7 @@ export const socialAuthService = async (name : string, email : string, image : s
         const desiredUser : TSelectUser = await selectWithCondition(email, 'fullData');
         if(desiredUser) return desiredUser;
 
-        const userDetails : TSelectUser = await insertAuthInfo({name, email, image});
+        const userDetails : TSelectUser = await insertUserDetails({name, email, image});
         return userDetails
         
     } catch (err : unknown) {

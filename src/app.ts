@@ -5,10 +5,10 @@ import helmet from 'helmet';
 import compression from 'compression';
 
 import authRoute from './routes/auth.route';
+import coursesRoute from './routes/course.route';
 
 import { RouteNowFoundError } from './libs/utils';
 import { ErrorMiddleware } from './middlewares/error';
-import { rateLimit } from './middlewares/rate-limit';
 
 const app = express();
 
@@ -26,12 +26,12 @@ app.use(compression());
 //     next();
 // });
 
-
-app.get('/', rateLimit(1000), (req : Request, res : Response) => res.status(200).json({success : true, message : 'Welcome'}));
+app.get('/', (req : Request, res : Response) => res.status(200).json({success : true, message : 'Welcome'}));
 
 app.use('/api/v1/auth', authRoute);
+app.use('/api/v1/courses', coursesRoute);
 
-app.all('*', rateLimit(100), (req : Request, res : Response, next : NextFunction) => {
+app.all('*', (req : Request, res : Response, next : NextFunction) => {
     next(new RouteNowFoundError(`Route : ${req.originalUrl} not found`));
 });
 

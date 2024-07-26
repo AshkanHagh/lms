@@ -13,3 +13,15 @@ export const getAllHashCache = async <T>(hashKey : string) : Promise<T> => {
 export const deleteHashCache = async (hashKey : string) : Promise<void> => {
     await redis.del(hashKey);
 }
+
+export const getHashCache = async <T>(hashKey : string, hashIndex : string) : Promise<T> => {
+    return await redis.hget(hashKey, hashIndex) as T;
+}
+
+export const insertHashListCache = async <T>(hashKey : string, hashIndex : string, hashValue : T) : Promise<void> => {
+    await redis.hmset(hashKey, hashIndex, JSON.stringify(hashValue));
+}
+
+export const removeFromHashListCache = async (hashKey : string, hashIndex : string) : Promise<void> => {
+    await redis.hdel(hashKey, hashIndex);
+}

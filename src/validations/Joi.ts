@@ -23,3 +23,11 @@ export const socialAuthValidation = Joi.object({
     email : Joi.string().email().max(255).required().trim(),
     image : Joi.string().required().trim()
 });
+
+// export const courseValidation = Joi.object({
+//     title : Joi.string().max(500).required().trim(),
+//     details : Joi.string().max(500).required().trim(),
+//     prerequisite : Joi.array().required(),
+//     image : Joi.string().required().trim(),
+//     price : Joi.number().required()
+// });

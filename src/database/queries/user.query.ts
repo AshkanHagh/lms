@@ -15,9 +15,14 @@ Promise<SelectCondition<T>> => {
     return desiredUser[0] as SelectCondition<T>;
 }
 
-export const insertAuthInfo = async (insertData : Partial<Pick<TSelectUser, 'name' | 'email' | 'image'>>) : Promise<TSelectUser> => {
+export const insertUserDetails = async (insertData : Partial<Pick<TSelectUser, 'name' | 'email' | 'image'>>) : Promise<TSelectUser> => {
     const [userDetails] : TSelectUser[] = await db.insert(userTable).values(
-        insertData as Pick<TSelectUser, 'name' | 'email' | 'image'>
-    ).returning();
+        insertData as Pick<TSelectUser, 'name' | 'email' | 'image'>).returning();
     return userDetails;
+}
+
+export const updateInformation = async (name : string, currentUserId : string) : Promise<{name : string | null}> => {
+    const userDetail : {name : string | null}[] = await db.update(userTable).set({name}).
+    where(eq(userTable.id, currentUserId)).returning({name : userTable.name});
+    return userDetail[0];
 }

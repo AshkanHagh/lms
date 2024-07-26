@@ -1,5 +1,6 @@
 import type { InferSelectModel } from 'drizzle-orm';
-import type { userTable } from '../database/schema';
+import type { chapterVideosTable, courseBenefitTable, courseChaptersTable, courseTable, courseTagsTable, userTable } from '../database/schema';
+import type { UploadApiResponse } from 'cloudinary';
 
 export type TErrorHandler = {
     statusCode : number; message : string
@@ -19,6 +20,22 @@ export type TVerifyAccount = {
 
 export type TSelectUser = InferSelectModel<typeof userTable>;
 export type TModifiedUser = Omit<TSelectUser, 'customerId'>;
+
+export type TSelectCourse = InferSelectModel<typeof courseTable>;
+export type InsectCourseDetails = Pick<TSelectCourse, 'title' | 'details' | 'price' | 'image' | 'prerequisite' | 'teacherId'>;
+export type InsectCourseDetailsBody = 
+Pick<TSelectCourse, 'title' | 'details' | 'price' | 'image' | 'teacherId'> & {prerequisite : string[]};
+
+export type TSelectCourseBenefit = InferSelectModel<typeof courseBenefitTable>;
+
+export type TSelectChapter = InferSelectModel<typeof courseChaptersTable>;
+export type ModifiedChapterDetail = Omit<TSelectChapter, 'id'>
+
+export type TSelectVideoDetails = InferSelectModel<typeof chapterVideosTable>
+
+export type courseBenefitAndDetails = {
+    benefits : TSelectCourseBenefit[]; course : TSelectCourse
+}
 
 export type TUserResultClient = Omit<TSelectUser, 'updatedAt' | 'createdAt' | 'customerId'>;
 
@@ -42,3 +59,25 @@ declare module 'express-serve-static-core' {
         user? : TSelectUser;
     }
 }
+
+export type UpdateAccount = {
+    firstName : string | undefined; lastName : string | undefined
+}
+
+export type insertChapterBody = {
+    videoDetails : TSelectVideoDetails[]; chapterDetails : ModifiedChapterDetail
+}
+
+export type ChapterAndVideoDetails = {
+    videoDetail : TSelectVideoDetails[]; chapterDetails : TSelectChapter
+}
+
+export type uploadVideoDetailResponse = {
+    videoTitle : string;
+    videoUploadResponse : UploadApiResponse;
+    thumbnailUploadResponse : UploadApiResponse;
+}
+
+export type TSelectTags = InferSelectModel<typeof courseTagsTable>;
+
+export type CourseParams = {courseId : string};
