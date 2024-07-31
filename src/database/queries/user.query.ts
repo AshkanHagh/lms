@@ -1,13 +1,12 @@
 import { eq } from 'drizzle-orm';
-import { db } from '../db';
+import { db } from '..';
 import { userTable } from '../schema';
 import type { SelectCondition, TModifiedUser, TSelectUser } from '../../types/index.type';
 
 export const selectWithCondition = async <T extends 'emailOnly' | 'fullData'>(email : string, service : T) : 
 Promise<SelectCondition<T>> => {
-
     if(service === 'emailOnly') {
-        const desiredUser : Pick<TModifiedUser, 'email'>[] =  await db.select({email : userTable.email})
+        const desiredUser : Pick<TModifiedUser, 'email'>[] = await db.select({email : userTable.email})
         .from(userTable).where(eq(userTable.email, email));
         return desiredUser[0] as SelectCondition<T>;
     }

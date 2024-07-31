@@ -43,7 +43,6 @@
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.9.14",
     "p-limit": "^6.1.0",
-    "stripe": "^16.2.0",
-    "uuidv4": "^6.2.13"
+    "stripe": "^16.2.0"
   }
 }

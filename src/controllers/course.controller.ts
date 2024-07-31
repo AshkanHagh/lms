@@ -1,16 +1,14 @@
 import type { Request, Response, NextFunction } from 'express';
 import { CatchAsyncError } from '../middlewares/catchAsyncError';
-import type { ChapterAndVideoDetails, courseBenefitAndDetails, CourseParams, InsectCourseDetailsBody, insertChapterBody, TSelectCourse, TSelectCourseBenefit } from '../types/index.type';
+import type { ChapterAndVideoDetails, courseBenefitAndDetails, CourseGeneric, CourseParams, InsectCourseDetailsBody, insertChapterBody, TSelectCourse, TSelectCourseBenefit } from '../types/index.type';
 import { courseBenefitService, createCourseChapterService, createCourseService, editCourseDetailsService } from '../services/course.service';
 
 export const createCourse = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
     try {
-        const { title, details, price, image, prerequisite } = req.body as InsectCourseDetailsBody;
+        const { title } = req.body as InsectCourseDetailsBody<CourseGeneric<'insert'>>;
         const currentUserId : string = req.user!.id;
 
-        const courseDetails : TSelectCourse = await createCourseService({
-            title, details, price, image, prerequisite, teacherId : currentUserId
-        });
+        const courseDetails : TSelectCourse = await createCourseService({title, teacherId : currentUserId});
         res.status(200).json({success : true, courseDetails});
         
     } catch (error : unknown) {
@@ -21,11 +19,13 @@ export const createCourse = CatchAsyncError(async (req : Request, res : Response
 export const editCourseDetails = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
     try {
         const { courseId } = req.params as CourseParams;
-        const { title, details, price, image, prerequisite, tags } = req.body as InsectCourseDetailsBody & {tags : string[]};
+        const { title, description, price, image, prerequisite, tags 
+        } = req.body as InsectCourseDetailsBody<CourseGeneric<'update'>> & {tags : string[]};
+        
         const currentUserId = req.user!.id;
 
         const updatedDetails : TSelectCourse = await editCourseDetailsService({
-            title, details, price, image, teacherId : currentUserId, prerequisite
+            title, description, price, image, teacherId : currentUserId, prerequisite
         }, courseId, currentUserId, tags);
         res.status(200).json({success : true, course : updatedDetails});
         

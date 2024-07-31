@@ -1,23 +1,20 @@
 import { eq, inArray } from 'drizzle-orm';
-import type { ChapterAndVideoDetails, InsectCourseDetails, ModifiedChapterDetail, TSelectChapter, TSelectCourse, TSelectCourseBenefit, TSelectTags, TSelectVideoDetails } from '../../types/index.type';
-import { db } from '../db';
-import { chapterVideosTable, courseBenefitTable, courseChaptersTable, courseDetailTable, courseTable, courseTagsTable } from '../schema';
+import type { ChapterAndVideoDetails, InsectCourseDetails, ModifiedChapterDetail, TSelectChapter, TSelectCourse, TSelectCourseBenefit, 
+    TSelectTags, TSelectVideoDetails } from '../../types/index.type';
+import { db } from '..';
+import { chapterVideosTable, courseBenefitTable, courseChaptersTable, courseTable, courseTagsTable } from '../schema';
 
-export const insertCourse = async (details : InsectCourseDetails) : Promise<TSelectCourse> => {
-    const courseDetail : TSelectCourse[] = await db.transaction(async trx => {
-        const courseDetail = await trx.insert(courseTable).values(details).returning();
-        await trx.insert(courseDetailTable).values({courseId : courseDetail[0].id})
-        return courseDetail
-    });
-    return courseDetail[0];
+export const insertCourse = async (details : Pick<InsectCourseDetails, 'title' | 'teacherId'>) : Promise<TSelectCourse> => {
+    const [courseDetail] = await db.insert(courseTable).values(details).returning();
+    return courseDetail
 }
 
 export const insertCourseBenefit = async (benefit : Omit<TSelectCourseBenefit, 'id'>[]) : Promise<TSelectCourseBenefit[]> => {
     return await db.insert(courseBenefitTable).values(benefit).returning();
 }
 
-export const updateCourse = async (course : Partial<InsectCourseDetails>, courseId : string) : Promise<TSelectCourse> => {
-    const updatedDetails : TSelectCourse[] = await db.update(courseTable).set(course).where(eq(courseTable.id, courseId)).returning();
+export const updateCourse = async (courseDetails : Partial<InsectCourseDetails>, courseId : string) : Promise<TSelectCourse> => {
+    const updatedDetails : TSelectCourse[] = await db.update(courseTable).set(courseDetails).where(eq(courseTable.id, courseId)).returning();
     return updatedDetails[0]
 }
 
@@ -47,7 +44,7 @@ export const findSimilarTags = async (courseId : string) : Promise<TSelectTags[]
     return await db.query.courseTagsTable.findMany({where : (table, funcs) => funcs.eq(table.courseId, courseId)});
 }
 
-export const insertNewTags = async (tags : Pick<TSelectTags, 'tags'>[]) : Promise<TSelectTags[]> => {
+export const insertNewTags = async (tags : Pick<TSelectTags, 'tags' | 'courseId'>[]) : Promise<TSelectTags[]> => {
     return await db.insert(courseTagsTable).values(tags).returning();
 }
 

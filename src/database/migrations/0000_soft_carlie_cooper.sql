@@ -1,5 +1,17 @@
 DO $$ BEGIN
- CREATE TYPE "public"."type" AS ENUM('deposit', 'withdrawal');
+ CREATE TYPE "public"."chapter" AS ENUM('free', 'premium');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."chapter_visibility" AS ENUM('publish', 'draft');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."type" AS ENUM('new_episode', 'replay', 'ticket');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -23,30 +35,17 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."state" AS ENUM('completed', 'in_progress');
+ CREATE TYPE "public"."visibility" AS ENUM('publish', 'unpublish');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
-DO $$ BEGIN
- CREATE TYPE "public"."status" AS ENUM('publish', 'private');
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "carts" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" uuid,
-	"course_id" uuid
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "chapter_videos" (
+CREATE TABLE IF NOT EXISTS "videos" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"chapter_id" uuid,
 	"title" text NOT NULL,
-	"video_thumbnail" text NOT NULL,
 	"video_url" text NOT NULL,
-	"video_time" integer DEFAULT 0
+	"state" "chapter" DEFAULT 'premium'
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "comments" (
@@ -57,18 +56,27 @@ CREATE TABLE IF NOT EXISTS "comments" (
 	"updated_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "course_benefit" (
+CREATE TABLE IF NOT EXISTS "complete_state" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid,
+	"course_id" uuid,
+	"chapter_id" uuid,
+	"percent" smallint DEFAULT 0
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "benefit" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"course_id" uuid,
 	"title" text NOT NULL,
 	"details" text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "course_chapters" (
+CREATE TABLE IF NOT EXISTS "chapters" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"course_id" uuid,
-	"title" text NOT NULL,
-	"chapter_episodes" integer DEFAULT 0
+	"title" varchar(255) NOT NULL,
+	"description" text NOT NULL,
+	"visibility" "chapter_visibility" DEFAULT 'draft'
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "course_comments" (
@@ -77,19 +85,10 @@ CREATE TABLE IF NOT EXISTS "course_comments" (
 	CONSTRAINT "course_comments_course_id_comment_id_pk" PRIMARY KEY("course_id","comment_id")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "course_details" (
-	"course_id" uuid PRIMARY KEY NOT NULL,
-	"view" integer DEFAULT 0,
-	"reviews" integer DEFAULT 0,
-	"rating" integer DEFAULT 0,
-	"students" integer DEFAULT 0,
-	"complete_time" integer DEFAULT 0
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "ratings" (
 	"course_id" uuid,
 	"user_id" uuid,
-	"rate" integer DEFAULT 0,
+	"rate" real DEFAULT 0,
 	CONSTRAINT "ratings_course_id_user_id_pk" PRIMARY KEY("course_id","user_id")
 );
 --> statement-breakpoint
@@ -103,18 +102,16 @@ CREATE TABLE IF NOT EXISTS "courses" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"teacher_id" uuid,
 	"title" text NOT NULL,
-	"details" text NOT NULL,
-	"price" integer NOT NULL,
-	"image" text NOT NULL,
-	"visibility" "status" DEFAULT 'private',
+	"description" text,
 	"prerequisite" text,
-	"state" "state" DEFAULT 'in_progress',
-	"discount" integer DEFAULT 0,
+	"price" real,
+	"image" text,
+	"visibility" "visibility" DEFAULT 'unpublish',
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "course_tags" (
+CREATE TABLE IF NOT EXISTS "tags" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"course_id" uuid,
 	"tags" text NOT NULL
@@ -134,17 +131,12 @@ CREATE TABLE IF NOT EXISTS "purchase" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"course_id" uuid,
 	"user_id" uuid,
+	"discount" real DEFAULT 0,
+	"price" real NOT NULL,
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "purchase_details" (
-	"purchase_id" uuid PRIMARY KEY NOT NULL,
-	"price" integer NOT NULL,
-	"discount" integer DEFAULT 0,
-	"quantity" integer DEFAULT 1
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "comment_replies" (
+CREATE TABLE IF NOT EXISTS "replies" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"comment_id" uuid,
 	"author_id" uuid,
@@ -186,19 +178,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 );
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "carts" ADD CONSTRAINT "carts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "carts" ADD CONSTRAINT "carts_course_id_courses_id_fk" FOREIGN KEY ("course_id") REFERENCES "public"."courses"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "chapter_videos" ADD CONSTRAINT "chapter_videos_chapter_id_course_chapters_id_fk" FOREIGN KEY ("chapter_id") REFERENCES "public"."course_chapters"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "videos" ADD CONSTRAINT "videos_chapter_id_chapters_id_fk" FOREIGN KEY ("chapter_id") REFERENCES "public"."chapters"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -210,13 +190,31 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "course_benefit" ADD CONSTRAINT "course_benefit_course_id_courses_id_fk" FOREIGN KEY ("course_id") REFERENCES "public"."courses"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "complete_state" ADD CONSTRAINT "complete_state_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "course_chapters" ADD CONSTRAINT "course_chapters_course_id_courses_id_fk" FOREIGN KEY ("course_id") REFERENCES "public"."courses"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "complete_state" ADD CONSTRAINT "complete_state_course_id_courses_id_fk" FOREIGN KEY ("course_id") REFERENCES "public"."courses"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "complete_state" ADD CONSTRAINT "complete_state_chapter_id_chapters_id_fk" FOREIGN KEY ("chapter_id") REFERENCES "public"."chapters"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "benefit" ADD CONSTRAINT "benefit_course_id_courses_id_fk" FOREIGN KEY ("course_id") REFERENCES "public"."courses"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "chapters" ADD CONSTRAINT "chapters_course_id_courses_id_fk" FOREIGN KEY ("course_id") REFERENCES "public"."courses"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -229,12 +227,6 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "course_comments" ADD CONSTRAINT "course_comments_comment_id_comments_id_fk" FOREIGN KEY ("comment_id") REFERENCES "public"."comments"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "course_details" ADD CONSTRAINT "course_details_course_id_courses_id_fk" FOREIGN KEY ("course_id") REFERENCES "public"."courses"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -270,7 +262,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "course_tags" ADD CONSTRAINT "course_tags_course_id_courses_id_fk" FOREIGN KEY ("course_id") REFERENCES "public"."courses"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "tags" ADD CONSTRAINT "tags_course_id_courses_id_fk" FOREIGN KEY ("course_id") REFERENCES "public"."courses"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -300,19 +292,13 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "purchase_details" ADD CONSTRAINT "purchase_details_purchase_id_purchase_id_fk" FOREIGN KEY ("purchase_id") REFERENCES "public"."purchase"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "replies" ADD CONSTRAINT "replies_comment_id_comments_id_fk" FOREIGN KEY ("comment_id") REFERENCES "public"."comments"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "comment_replies" ADD CONSTRAINT "comment_replies_comment_id_comments_id_fk" FOREIGN KEY ("comment_id") REFERENCES "public"."comments"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "comment_replies" ADD CONSTRAINT "comment_replies_author_id_users_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "replies" ADD CONSTRAINT "replies_author_id_users_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -335,22 +321,24 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "userId_index_cart" ON "carts" USING btree ("user_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "courseId_index_chapterDetails" ON "chapter_videos" USING btree ("chapter_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "courseId_index_chapterDetails" ON "videos" USING btree ("chapter_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "authorId_index_comment" ON "comments" USING btree ("author_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "courseId_index_benefit" ON "course_benefit" USING btree ("course_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "courseId_index_chapter" ON "course_chapters" USING btree ("course_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "title_index" ON "courses" USING btree ("title");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "teacher_index" ON "courses" USING btree ("teacher_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "tags_index" ON "course_tags" USING btree ("tags");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "complete_userId_index" ON "complete_state" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "complete_course_id" ON "complete_state" USING btree ("course_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "benefit_courseId_index" ON "benefit" USING btree ("course_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "courseId_index_chapter" ON "chapters" USING btree ("course_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "course_title_index" ON "courses" USING btree ("title");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "course_index" ON "courses" USING btree ("description");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "course_teacherId_index" ON "courses" USING btree ("teacher_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "tags_index" ON "tags" USING btree ("tags");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "from_Index_notification" ON "notifications" USING btree ("from");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "to_Index_notification" ON "notifications" USING btree ("to");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "courseId_index_purchase" ON "purchase" USING btree ("course_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "userId_index_purchase" ON "purchase" USING btree ("user_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "authorId_index_replies" ON "comment_replies" USING btree ("author_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "commentId_index_replies" ON "comment_replies" USING btree ("comment_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "authorId_index_replies" ON "replies" USING btree ("author_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "commentId_index_replies" ON "replies" USING btree ("comment_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "courseId_index_review" ON "reviews" USING btree ("course_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "authorId_index_review" ON "reviews" USING btree ("author_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "userId_index_subscription" ON "subscriptions" USING btree ("user_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "email_index" ON "users" USING btree ("email");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "role_index" ON "users" USING btree ("role");
+CREATE INDEX IF NOT EXISTS "user_email_index" ON "users" USING btree ("email");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_role_index" ON "users" USING btree ("role");

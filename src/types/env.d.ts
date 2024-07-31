@@ -2,8 +2,8 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       PORT : number;
-      NODE_ENV: string;
-      DATABASE_URL: string;
+      NODE_ENV : string;
+      DATABASE_URL : string;
       REDIS_URL : string;
       UPSTASH_REDIS_REST_URL: string;
       UPSTASH_REDIS_REST_TOKEN: string;

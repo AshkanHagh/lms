@@ -1,21 +1,16 @@
 import { getAllHashCache, getHashCache, insertHashCache, insertHashListCache, removeFromHashListCache } from '../database/cache/index.cache';
-import { findSimilarTags, insertChapterAndVideos, insertCourse, insertCourseBenefit, insertNewTags, removeTags, updateCourse, updateTags } from '../database/queries/course.query';
+import { findSimilarTags, insertChapterAndVideos, insertCourse, insertCourseBenefit, insertNewTags, removeTags, 
+    updateCourse, updateTags } from '../database/queries/course.query';
 import { ForbiddenError } from '../libs/utils';
 import ErrorHandler from '../libs/utils/errorHandler';
-import type { ChapterAndVideoDetails, courseBenefitAndDetails, InsectCourseDetailsBody, ModifiedChapterDetail, TErrorHandler, TSelectCourse, TSelectCourseBenefit, TSelectTags, TSelectVideoDetails, uploadVideoDetailResponse, } from '../types/index.type';
+import type { ChapterAndVideoDetails, courseBenefitAndDetails, CourseGeneric, InsectCourseDetailsBody, ModifiedChapterDetail, TagsEntries, TErrorHandler, TSelectCourse, TSelectCourseBenefit, TSelectTags, TSelectVideoDetails, uploadVideoDetailResponse, } from '../types/index.type';
 import { v2 as cloudinary, type UploadApiResponse } from 'cloudinary';
 import pLimit from 'p-limit';
-import { uuid } from 'uuidv4';
 
-export const createCourseService = async (courseDetail : InsectCourseDetailsBody) : Promise<TSelectCourse> => {
+export const createCourseService = async <T extends CourseGeneric<'insert'>>(courseDetail : InsectCourseDetailsBody<T>) : Promise<TSelectCourse> => {
     try {
-        const uploadedResponse : UploadApiResponse = await cloudinary.uploader.upload(courseDetail.image);
-        courseDetail.image = uploadedResponse.secure_url;
-
-        const {prerequisite, ...others} = courseDetail;
-        const courseDetails : TSelectCourse = await insertCourse({...others, prerequisite : prerequisite.join(' ')});
+        const courseDetails : TSelectCourse = await insertCourse(courseDetail);
         await insertHashCache(`course:${courseDetails.id}`, courseDetails);
-
         return courseDetails;
         
     } catch (err : unknown) {
@@ -24,29 +19,33 @@ export const createCourseService = async (courseDetail : InsectCourseDetailsBody
     }
 };
 
-export const editCourseDetailsService = async (courseDetail : Partial<InsectCourseDetailsBody>, courseId : string, 
-    currentUserId : string, tags : string[]) : Promise<TSelectCourse> => {
+export const editCourseDetailsService = async <B extends CourseGeneric<'update'>>(courseDetail : Partial<InsectCourseDetailsBody<B>>, 
+    courseId : string, currentUserId : string, tags : string[]) : Promise<TSelectCourse> => {
     try {
-        const courseTeacherId : string = await getHashCache(`course:${courseId}`, 'teacherId');
-        if(courseTeacherId !== currentUserId) throw new ForbiddenError();
+        let currentTags : TSelectTags[];
+        const [courseCache, currentTagsData] : [TSelectCourse, Record<string, string>] = await Promise.all([
+            getAllHashCache<TSelectCourse>(`course:${courseId}`), getAllHashCache<Record<string, string>>(`course_tags:${courseId}`)
+        ]);
+        if(courseCache.teacherId !== currentUserId) throw new ForbiddenError();
 
         const newTagsSet : Set<string> = new Set(tags);
-        const currentTags : TSelectTags[] = await findSimilarTags(courseId);
+
+        const entries : TagsEntries[] = Object.entries(currentTagsData).map(([key, value]) => ({key, value}));
+        currentTags = entries.map(entry => JSON.parse(entry.value)) as TSelectTags[];
+        if(Object.keys(currentTagsData).length === 0) currentTags = await findSimilarTags(courseId) as TSelectTags[];
+
         const existingTagsSet : Set<string> = new Set(currentTags.map(tag => tag.tags));
-
-        await handleInitialTags(currentTags, tags, courseId);
-
         const tagsToAdd : string[] = tags.filter(tag => !existingTagsSet.has(tag));
         const removedTags : TSelectTags[] = currentTags.filter(tagObj => !newTagsSet.has(tagObj.tags))
         const updatedTags : TSelectTags[] = currentTags.filter(tagObj => newTagsSet.has(tagObj.tags) && !tags.includes(tagObj.tags));
 
         await handleTags(tagsToAdd, removedTags, updatedTags, courseId);
+        const uploadedImageUrl : string | undefined = await handleImageUpload(courseDetail.image!, courseCache.image);
 
-        const { prerequisite, ...others } = courseDetail;
         const updatedDetails : TSelectCourse = await updateCourse({
-            ...others, prerequisite : prerequisite !== undefined ? prerequisite.join(' ') : undefined}, courseId);
+            ...courseDetail, image : uploadedImageUrl, prerequisite : courseDetail.prerequisite?.join(' ')
+        }, courseId);
         await insertHashCache(`course:${courseId}`, updatedDetails);
-
         return updatedDetails;
 
     } catch (err : unknown) {
@@ -66,21 +65,13 @@ Promise<void> => {
         () => removeTagsIfNeeded(removedTags, courseId),
         ...updatedTags.map(tag => () => updateTags(tag.id, tag.tags))
     ];
-
     await Promise.all(operations.map(operation  => operation()));
-}
-
-const handleInitialTags = async (currentTags : TSelectTags[], tags : string[], courseId : string) : Promise<void> => {
-    if (currentTags.length === 0 && tags.length > 0) {
-        const newTags : TSelectTags[] = await insertNewTags(combineTagAndCourseId(tags, courseId));
-        newTags.map(async tag => await insertHashListCache(`course_tags${courseId}`, tag.id, tag))
-    }
 }
 
 export const insertNewTagsIfNeeded = async (tagsToAdd : string[], courseId : string) : Promise<void> => {
     if(tagsToAdd.length > 0) {
         const newTags : TSelectTags[] = await insertNewTags(combineTagAndCourseId(tagsToAdd, courseId));
-        newTags.map(async tag => await insertHashListCache(`course_tags${courseId}`, tag.id, tag))
+        newTags.map(async tag => await insertHashListCache(`course_tags:${courseId}`, tag.id, tag))
     }
 }
 
@@ -89,6 +80,15 @@ const removeTagsIfNeeded = async (removedTags : TSelectTags[], courseId : string
         await removeTags(removedTags.map(tag => tag.id));
         removedTags.map(async tag => await removeFromHashListCache(`course_tags:${courseId}`, tag.id));
     }
+}
+const handleImageUpload = async (newImage : string | null, currentImage : string | null) : Promise<string | undefined> => {
+    if(currentImage && currentImage.length > 0) {
+        await cloudinary.uploader.destroy(currentImage.split('/').pop()!.split('.')[0]);
+        const uploadResponse = await cloudinary.uploader.upload(newImage!);
+        return uploadResponse.secure_url;
+    }
+    const uploadedResponse : UploadApiResponse | undefined = newImage ? await cloudinary.uploader.upload(newImage) : undefined
+    return uploadedResponse ? uploadedResponse.secure_url : undefined;
 }
 
 export const courseBenefitService = async (benefits : Omit<TSelectCourseBenefit, 'id'>[], courseId : string, currentUserId : string) : 
@@ -110,35 +110,30 @@ export const courseBenefitService = async (benefits : Omit<TSelectCourseBenefit,
     }
 }
 
-export const createCourseChapterService = async (
-    videoDetails : TSelectVideoDetails[], chapterDetail : Pick<ModifiedChapterDetail, 'title'>, courseId : string, currentUserId : string) : 
-    Promise<ChapterAndVideoDetails> => {
+export const createCourseChapterService = async (videoDetails : TSelectVideoDetails[], chapterDetail : ModifiedChapterDetail, 
+    courseId : string, currentUserId : string) : Promise<ChapterAndVideoDetails> => {
     try {
         const uploadedResponse : uploadVideoDetailResponse[] = await uploadVideoDetails(videoDetails);
         const responseMap : Map<string, uploadVideoDetailResponse> = new Map(uploadedResponse.map(upload => [upload.videoTitle, upload]));
 
         videoDetails.forEach(video => {
             const upload : uploadVideoDetailResponse | undefined = responseMap.get(video.videoTitle);
-            if(upload) {
-                video.videoThumbnail = upload.thumbnailUploadResponse.secure_url;
-                video.videoUrl = upload.videoUploadResponse.secure_url;
-                video.videoTime = Math.floor(upload.videoUploadResponse.duration);
-            }
+            if(upload) video.videoUrl = upload.videoUploadResponse.secure_url;
         });
 
         const courseTeacherId : string = await getHashCache(`course:${courseId}`, 'teacherId');
         if(courseTeacherId !== currentUserId) throw new ForbiddenError();
         
-        const { chapterDetails, videoDetail : newVideoDetails } = await insertChapterAndVideos({
-            ...chapterDetail, courseId : courseId, chapterEpisodes : videoDetails.length
+        const { chapterDetails, videoDetail } = await insertChapterAndVideos({
+            ...chapterDetail, courseId : courseId
         }, videoDetails);
 
         await insertHashCache(`course:${courseId}:chapters:${chapterDetails.id}`, chapterDetails),
-        await Promise.all(newVideoDetails.map(async video => {
+        await Promise.all(videoDetail.map(async video => {
             insertHashListCache(`chapter_videos:${chapterDetails.id}`, video.videoTitle, video);
         }));
 
-        return { chapterDetails : chapterDetails, videoDetail : newVideoDetails } as ChapterAndVideoDetails;
+        return { chapterDetails : chapterDetails, videoDetail } as ChapterAndVideoDetails;
         
     } catch (err : unknown) {
         const error = err as TErrorHandler;
@@ -151,12 +146,9 @@ const uploadVideoDetails = async (videoDetails : TSelectVideoDetails[]) : Promis
     const uploadResponse : Promise<uploadVideoDetailResponse>[] = videoDetails.map(video => {
         return limit(async () => {
             const videoUploadResponse : UploadApiResponse = await cloudinary.uploader.upload_large(video.videoUrl, {
-                resource_type : 'video', public_id : `video_${video.videoTitle.replace(/ /g, '_')}_${uuid()}`
+                resource_type : 'video'
             });
-            const thumbnailUploadResponse : UploadApiResponse = await cloudinary.uploader.upload(video.videoThumbnail, {
-                public_id : `thumbnail_${video.videoTitle.replace(/ /g, '_')}_${uuid()}`
-            });
-            return {videoTitle : video.videoTitle, videoUploadResponse, thumbnailUploadResponse};
+            return {videoTitle : video.videoTitle, videoUploadResponse};
         });
     });
     const uploadedResponse : uploadVideoDetailResponse[] = await Promise.all(uploadResponse);

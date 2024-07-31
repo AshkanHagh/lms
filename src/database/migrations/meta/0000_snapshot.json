@@ -1,83 +1,11 @@
 {
-  "id": "ff61edbe-e2ae-438a-bc1e-c924f8be76ef",
+  "id": "11cf2d68-e2eb-4a25-9332-bfc400ce6323",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.carts": {
-      "name": "carts",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "course_id": {
-          "name": "course_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "userId_index_cart": {
-          "name": "userId_index_cart",
-          "columns": [
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "carts_user_id_users_id_fk": {
-          "name": "carts_user_id_users_id_fk",
-          "tableFrom": "carts",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "carts_course_id_courses_id_fk": {
-          "name": "carts_course_id_courses_id_fk",
-          "tableFrom": "carts",
-          "tableTo": "courses",
-          "columnsFrom": [
-            "course_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.chapter_videos": {
-      "name": "chapter_videos",
+    "public.videos": {
+      "name": "videos",
       "schema": "",
       "columns": {
         "id": {
@@ -99,24 +27,19 @@
           "primaryKey": false,
           "notNull": true
         },
-        "video_thumbnail": {
-          "name": "video_thumbnail",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "video_url": {
           "name": "video_url",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "video_time": {
-          "name": "video_time",
-          "type": "integer",
+        "state": {
+          "name": "state",
+          "type": "chapter",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "default": 0
+          "default": "'premium'"
         }
       },
       "indexes": {
@@ -137,10 +60,10 @@
         }
       },
       "foreignKeys": {
-        "chapter_videos_chapter_id_course_chapters_id_fk": {
-          "name": "chapter_videos_chapter_id_course_chapters_id_fk",
-          "tableFrom": "chapter_videos",
-          "tableTo": "course_chapters",
+        "videos_chapter_id_chapters_id_fk": {
+          "name": "videos_chapter_id_chapters_id_fk",
+          "tableFrom": "videos",
+          "tableTo": "chapters",
           "columnsFrom": [
             "chapter_id"
           ],
@@ -227,8 +150,121 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.course_benefit": {
-      "name": "course_benefit",
+    "public.complete_state": {
+      "name": "complete_state",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "course_id": {
+          "name": "course_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "chapter_id": {
+          "name": "chapter_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "percent": {
+          "name": "percent",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "complete_userId_index": {
+          "name": "complete_userId_index",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "complete_course_id": {
+          "name": "complete_course_id",
+          "columns": [
+            {
+              "expression": "course_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "complete_state_user_id_users_id_fk": {
+          "name": "complete_state_user_id_users_id_fk",
+          "tableFrom": "complete_state",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "complete_state_course_id_courses_id_fk": {
+          "name": "complete_state_course_id_courses_id_fk",
+          "tableFrom": "complete_state",
+          "tableTo": "courses",
+          "columnsFrom": [
+            "course_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "complete_state_chapter_id_chapters_id_fk": {
+          "name": "complete_state_chapter_id_chapters_id_fk",
+          "tableFrom": "complete_state",
+          "tableTo": "chapters",
+          "columnsFrom": [
+            "chapter_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.benefit": {
+      "name": "benefit",
       "schema": "",
       "columns": {
         "id": {
@@ -258,8 +294,8 @@
         }
       },
       "indexes": {
-        "courseId_index_benefit": {
-          "name": "courseId_index_benefit",
+        "benefit_courseId_index": {
+          "name": "benefit_courseId_index",
           "columns": [
             {
               "expression": "course_id",
@@ -275,9 +311,9 @@
         }
       },
       "foreignKeys": {
-        "course_benefit_course_id_courses_id_fk": {
-          "name": "course_benefit_course_id_courses_id_fk",
-          "tableFrom": "course_benefit",
+        "benefit_course_id_courses_id_fk": {
+          "name": "benefit_course_id_courses_id_fk",
+          "tableFrom": "benefit",
           "tableTo": "courses",
           "columnsFrom": [
             "course_id"
@@ -292,8 +328,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.course_chapters": {
-      "name": "course_chapters",
+    "public.chapters": {
+      "name": "chapters",
       "schema": "",
       "columns": {
         "id": {
@@ -311,16 +347,23 @@
         },
         "title": {
           "name": "title",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "chapter_episodes": {
-          "name": "chapter_episodes",
-          "type": "integer",
+        "visibility": {
+          "name": "visibility",
+          "type": "chapter_visibility",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "default": 0
+          "default": "'draft'"
         }
       },
       "indexes": {
@@ -341,9 +384,9 @@
         }
       },
       "foreignKeys": {
-        "course_chapters_course_id_courses_id_fk": {
-          "name": "course_chapters_course_id_courses_id_fk",
-          "tableFrom": "course_chapters",
+        "chapters_course_id_courses_id_fk": {
+          "name": "chapters_course_id_courses_id_fk",
+          "tableFrom": "chapters",
           "tableTo": "courses",
           "columnsFrom": [
             "course_id"
@@ -415,71 +458,6 @@
       },
       "uniqueConstraints": {}
     },
-    "public.course_details": {
-      "name": "course_details",
-      "schema": "",
-      "columns": {
-        "course_id": {
-          "name": "course_id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "view": {
-          "name": "view",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "reviews": {
-          "name": "reviews",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "rating": {
-          "name": "rating",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "students": {
-          "name": "students",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "complete_time": {
-          "name": "complete_time",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "course_details_course_id_courses_id_fk": {
-          "name": "course_details_course_id_courses_id_fk",
-          "tableFrom": "course_details",
-          "tableTo": "courses",
-          "columnsFrom": [
-            "course_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "public.ratings": {
       "name": "ratings",
       "schema": "",
@@ -498,7 +476,7 @@
         },
         "rate": {
           "name": "rate",
-          "type": "integer",
+          "type": "real",
           "primaryKey": false,
           "notNull": false,
           "default": 0
@@ -624,31 +602,11 @@
           "primaryKey": false,
           "notNull": true
         },
-        "details": {
-          "name": "details",
+        "description": {
+          "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
-        },
-        "price": {
-          "name": "price",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "image": {
-          "name": "image",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "visibility": {
-          "name": "visibility",
-          "type": "status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'private'"
+          "notNull": false
         },
         "prerequisite": {
           "name": "prerequisite",
@@ -656,20 +614,25 @@
           "primaryKey": false,
           "notNull": false
         },
-        "state": {
-          "name": "state",
-          "type": "state",
+        "price": {
+          "name": "price",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "image": {
+          "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "visibility": {
+          "name": "visibility",
+          "type": "visibility",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "default": "'in_progress'"
-        },
-        "discount": {
-          "name": "discount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
+          "default": "'unpublish'"
         },
         "created_at": {
           "name": "created_at",
@@ -687,8 +650,8 @@
         }
       },
       "indexes": {
-        "title_index": {
-          "name": "title_index",
+        "course_title_index": {
+          "name": "course_title_index",
           "columns": [
             {
               "expression": "title",
@@ -702,8 +665,23 @@
           "method": "btree",
           "with": {}
         },
-        "teacher_index": {
-          "name": "teacher_index",
+        "course_index": {
+          "name": "course_index",
+          "columns": [
+            {
+              "expression": "description",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "course_teacherId_index": {
+          "name": "course_teacherId_index",
           "columns": [
             {
               "expression": "teacher_id",
@@ -736,8 +714,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.course_tags": {
-      "name": "course_tags",
+    "public.tags": {
+      "name": "tags",
       "schema": "",
       "columns": {
         "id": {
@@ -778,9 +756,9 @@
         }
       },
       "foreignKeys": {
-        "course_tags_course_id_courses_id_fk": {
-          "name": "course_tags_course_id_courses_id_fk",
-          "tableFrom": "course_tags",
+        "tags_course_id_courses_id_fk": {
+          "name": "tags_course_id_courses_id_fk",
+          "tableFrom": "tags",
           "tableTo": "courses",
           "columnsFrom": [
             "course_id"
@@ -933,6 +911,19 @@
           "primaryKey": false,
           "notNull": false
         },
+        "discount": {
+          "name": "discount",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "price": {
+          "name": "price",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -1004,58 +995,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.purchase_details": {
-      "name": "purchase_details",
-      "schema": "",
-      "columns": {
-        "purchase_id": {
-          "name": "purchase_id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "price": {
-          "name": "price",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "discount": {
-          "name": "discount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "quantity": {
-          "name": "quantity",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 1
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "purchase_details_purchase_id_purchase_id_fk": {
-          "name": "purchase_details_purchase_id_purchase_id_fk",
-          "tableFrom": "purchase_details",
-          "tableTo": "purchase",
-          "columnsFrom": [
-            "purchase_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.comment_replies": {
-      "name": "comment_replies",
+    "public.replies": {
+      "name": "replies",
       "schema": "",
       "columns": {
         "id": {
@@ -1131,9 +1072,9 @@
         }
       },
       "foreignKeys": {
-        "comment_replies_comment_id_comments_id_fk": {
-          "name": "comment_replies_comment_id_comments_id_fk",
-          "tableFrom": "comment_replies",
+        "replies_comment_id_comments_id_fk": {
+          "name": "replies_comment_id_comments_id_fk",
+          "tableFrom": "replies",
           "tableTo": "comments",
           "columnsFrom": [
             "comment_id"
@@ -1144,9 +1085,9 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "comment_replies_author_id_users_id_fk": {
-          "name": "comment_replies_author_id_users_id_fk",
-          "tableFrom": "comment_replies",
+        "replies_author_id_users_id_fk": {
+          "name": "replies_author_id_users_id_fk",
+          "tableFrom": "replies",
           "tableTo": "users",
           "columnsFrom": [
             "author_id"
@@ -1415,8 +1356,8 @@
         }
       },
       "indexes": {
-        "email_index": {
-          "name": "email_index",
+        "user_email_index": {
+          "name": "user_email_index",
           "columns": [
             {
               "expression": "email",
@@ -1430,8 +1371,8 @@
           "method": "btree",
           "with": {}
         },
-        "role_index": {
-          "name": "role_index",
+        "user_role_index": {
+          "name": "user_role_index",
           "columns": [
             {
               "expression": "role",
@@ -1467,12 +1408,29 @@
     }
   },
   "enums": {
+    "public.chapter": {
+      "name": "chapter",
+      "schema": "public",
+      "values": [
+        "free",
+        "premium"
+      ]
+    },
+    "public.chapter_visibility": {
+      "name": "chapter_visibility",
+      "schema": "public",
+      "values": [
+        "publish",
+        "draft"
+      ]
+    },
     "public.type": {
       "name": "type",
       "schema": "public",
       "values": [
-        "deposit",
-        "withdrawal"
+        "new_episode",
+        "replay",
+        "ticket"
       ]
     },
     "public.plan": {
@@ -1500,20 +1458,12 @@
         "yearly"
       ]
     },
-    "public.state": {
-      "name": "state",
-      "schema": "public",
-      "values": [
-        "completed",
-        "in_progress"
-      ]
-    },
-    "public.status": {
-      "name": "status",
+    "public.visibility": {
+      "name": "visibility",
       "schema": "public",
       "values": [
         "publish",
-        "private"
+        "unpublish"
       ]
     }
   },

@@ -1,94 +1,96 @@
 import { relations } from 'drizzle-orm';
-import { pgTable, uuid, varchar, pgEnum, timestamp, index, text, integer, primaryKey, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, varchar, pgEnum, timestamp, index, text, primaryKey, boolean, smallint, real, uuid } from 'drizzle-orm/pg-core';
 
-export const PlanEnum = pgEnum('plan', ['free', 'premium']);
-export const RoleEnum = pgEnum('role', ['teacher', 'admin', 'user']);
-export const SubscriptionPeriodEnum = pgEnum('subscription_period', ['monthly', 'yearly']);
-export const NotificationType = pgEnum('type', ['new_episode', 'replay', 'ticket']);
-export const visibilityEnum = pgEnum('status', ['publish', 'private']);
-export const completionStateEnum = pgEnum('state', ['completed', 'in_progress']);
-export const walletType = pgEnum('type', ['deposit', 'withdrawal'])
+export const planEnum = pgEnum('plan', ['free', 'premium']);
+export const roleEnum = pgEnum('role', ['teacher', 'admin', 'user']);
+export const subscriptionPeriodEnum = pgEnum('subscription_period', ['monthly', 'yearly']);
+
+export const notificationType = pgEnum('type', ['new_episode', 'replay', 'ticket']);
+export const visibilityEnum = pgEnum('visibility', ['publish', 'unpublish']);
+export const chapterVisibilityEnum = pgEnum('chapter_visibility', ['publish', 'draft']);
+
+export const chapterEnum = pgEnum('chapter', ['free', 'premium']);
 
 export const userTable = pgTable('users', {
     id : uuid('id').primaryKey().defaultRandom(),
     name : varchar('name', {length : 255}),
     email : varchar('email', {length : 255}).unique().notNull(),
-    plan : PlanEnum('plan').default('free'),
+    plan : planEnum('plan').default('free'),
     customerId : varchar('customer_id', {length : 255}).unique(),
-    role : RoleEnum('role').default('user'),
+    role : roleEnum('role').default('user'),
     image : text('image'),
     createdAt : timestamp('created_at').defaultNow(),
     updatedAt : timestamp('updated_at').defaultNow().$onUpdate(() => new Date())
 }, table => ({
-    emailIndex : index('email_index').on(table.email), roleIndex : index('role_index').on(table.role)
+    emailIndex : index('user_email_index').on(table.email), roleIndex : index('user_role_index').on(table.role)
 }));
 
 export const courseTable = pgTable('courses', {
     id : uuid('id').primaryKey().defaultRandom(),
     teacherId : uuid('teacher_id').references(() => userTable.id, {onDelete : 'cascade'}),
     title : text('title').notNull(),
-    details : text('details').notNull(),
-    price : integer('price').notNull(),
-    image : text('image').notNull(),
-    visibility : visibilityEnum('visibility').default('private'),
+    description : text('description'),
     prerequisite : text('prerequisite'),
-    state : completionStateEnum('state').default('in_progress'),
-    discount : integer('discount').default(0),
+    price : real('price'),
+    image : text('image'),
+    visibility : visibilityEnum('visibility').default('unpublish'),
     createdAt : timestamp('created_at').defaultNow(),
     updatedAt : timestamp('updated_at').defaultNow().$onUpdate(() => new Date())
 }, table => ({
-    titleIndex : index('title_index').on(table.title), teacherIndex : index('teacher_index').on(table.teacherId)
+    titleIndex : index('course_title_index').on(table.title), descriptionIndex : index('course_index').on(table.description),
+    teacherIndex : index('course_teacherId_index').on(table.teacherId)
 }));
 
-export const courseDetailTable = pgTable('course_details', {
-    courseId : uuid('course_id').primaryKey().references(() => courseTable.id, {onDelete : 'cascade'}),
-    view : integer('view').default(0),
-    totalReviews : integer('reviews').default(0),
-    totalRating : integer('rating').default(0),
-    totalStudents : integer('students').default(0),
-    completeTime : integer('complete_time').default(0),
-});
-
-export const courseBenefitTable = pgTable('course_benefit', {
+export const courseBenefitTable = pgTable('benefit', {
     id : uuid('id').primaryKey().defaultRandom(),
     courseId : uuid('course_id').references(() => courseTable.id, {onDelete : 'cascade'}),
     title : text('title').notNull(),
     details : text('details').notNull()
 }, table => ({
-    courseIdIndex : index('courseId_index_benefit').on(table.courseId)
+    courseIdIndex : index('benefit_courseId_index').on(table.courseId)
 }));
 
-export const courseChaptersTable = pgTable('course_chapters', {
+export const courseChaptersTable = pgTable('chapters', {
     id : uuid('id').primaryKey().defaultRandom(),
     courseId : uuid('course_id').references(() => courseTable.id, {onDelete : 'cascade'}),
-    title : text('title').notNull(),
-    chapterEpisodes : integer('chapter_episodes').default(0)
+    title : varchar('title', {length : 255}).notNull(),
+    description : text('description').notNull(),
+    visibility : chapterVisibilityEnum('visibility').default('draft'),
 }, table => ({
     courseIdIndex : index('courseId_index_chapter').on(table.courseId)
 }));
 
-export const chapterVideosTable = pgTable('chapter_videos', {
+export const chapterVideosTable = pgTable('videos', {
     id : uuid('id').primaryKey().defaultRandom(),
     chapterId : uuid('chapter_id').references(() => courseChaptersTable.id, {onDelete : 'cascade'}),
     videoTitle : text('title').notNull(),
-    videoThumbnail : text('video_thumbnail').notNull(),
     videoUrl : text('video_url').notNull(),
-    videoTime : integer('video_time').default(0),
+    state : chapterEnum('state').default('premium')
 }, table => ({
     courseIdIndex : index('courseId_index_chapterDetails').on(table.chapterId)
 }));
 
-export const courseTagsTable = pgTable('course_tags', {
+export const courseTagsTable = pgTable('tags', {
     id : uuid('id').primaryKey().defaultRandom(),
     courseId : uuid('course_id').references(() => courseTable.id, {onDelete : 'cascade'}),
     tags : text('tags').notNull()
 }, table => ({tagsIndex : index('tags_index').on(table.tags)}));
 
+export const completeState = pgTable('complete_state', {
+    id : uuid('id').primaryKey().defaultRandom(),
+    userId : uuid('user_id').references(() => userTable.id),
+    courseId : uuid('course_id').references(() => courseTable.id),
+    chapterId : uuid('chapter_id').references(() => courseChaptersTable.id),
+    percent : smallint('percent').default(0),
+}, table => ({
+    userIdIndex : index('complete_userId_index').on(table.userId), courseIdIndex : index('complete_course_id').on(table.courseId)
+}));
+
 export const subscriptionTable = pgTable('subscriptions', {
     id : uuid('id').primaryKey().defaultRandom(),
     userId : uuid('user_id').references(() => userTable.id, {onDelete : 'cascade'}),
-    plan : PlanEnum('plan').notNull(),
-    period : SubscriptionPeriodEnum('subscription_period').notNull(),
+    plan : planEnum('plan').notNull(),
+    period : subscriptionPeriodEnum('subscription_period').notNull(),
     startDate : timestamp('start_date').defaultNow(),
     endDate : timestamp('endDate')
 }, table => ({userIdIndex : index('userId_index_subscription').on(table.userId)}));
@@ -97,18 +99,13 @@ export const purchaseCoursesTable = pgTable('purchase', {
     id : uuid('id').primaryKey().defaultRandom(),
     courseId : uuid('course_id').references(() => courseTable.id, {onDelete : 'cascade'}),
     userId : uuid('user_id').references(() => userTable.id, {onDelete : 'cascade'}),
+    discount : real('discount').default(0),
+    totalPrice : real('price').notNull(),
     createdAt : timestamp('created_at').defaultNow(),
 }, table => ({
     courseIdIndex : index('courseId_index_purchase').on(table.courseId), 
     userIdIndex : index('userId_index_purchase').on(table.userId)
 }));
-
-export const purchaseDetailsTable = pgTable('purchase_details', {
-    purchaseId : uuid('purchase_id').primaryKey().references(() => purchaseCoursesTable.id),
-    totalPrice : integer('price').notNull(),
-    discount : integer('discount').default(0),
-    quantity : integer('quantity').default(1),
-});
 
 export const reviewTable = pgTable('reviews', {
     id : uuid('id').primaryKey().defaultRandom(),
@@ -125,7 +122,7 @@ export const reviewTable = pgTable('reviews', {
 export const courseRatingTable = pgTable('ratings', {
     courseId : uuid('course_id').references(() => courseTable.id, {onDelete : 'cascade'}),
     userId : uuid('user_id').references(() => userTable.id, {onDelete : 'cascade'}),
-    rate : integer('rate').default(0),
+    rate : real('rate').default(0),
 }, table => ({pk : primaryKey({columns : [table.courseId, table.userId]})}));
 
 export const commentTable = pgTable('comments', {
@@ -136,7 +133,7 @@ export const commentTable = pgTable('comments', {
     updatedAt : timestamp('updated_at').defaultNow().$onUpdate(() => new Date())
 }, table => ({authorIdIndex : index('authorId_index_comment').on(table.authorId)}));
 
-export const repliesTable = pgTable('comment_replies', {
+export const repliesTable = pgTable('replies', {
     id : uuid('id').primaryKey().defaultRandom(),
     commentId : uuid('comment_id').references(() => commentTable.id, {onDelete : 'cascade'}),
     authorId : uuid('author_id').references(() => userTable.id, {onDelete : 'cascade'}),
@@ -162,7 +159,7 @@ export const notificationTable = pgTable('notifications', {
     id : uuid('id').primaryKey().defaultRandom(),
     from : uuid('from').references(() => userTable.id, {onDelete : 'cascade'}).notNull(),
     to : uuid('to').references(() => userTable.id, {onDelete : 'cascade'}).notNull(),
-    type : NotificationType('type'),
+    type : notificationType('type'),
     read : boolean('read').default(false),
     createdAt : timestamp('createdAt').defaultNow(),
     updatedAt : timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
@@ -170,12 +167,6 @@ export const notificationTable = pgTable('notifications', {
     fromIndex : index('from_Index_notification').on(table.from), 
     toIndex : index('to_Index_notification').on(table.to), 
 }));
-
-export const cartTable = pgTable('carts', {
-    id : uuid('id').primaryKey().defaultRandom(),
-    userId : uuid('user_id').references(() => userTable.id, {onDelete : 'cascade'}),
-    courseId : uuid('course_id').references(() => courseTable.id, {onDelete : 'cascade'}),
-}, table => ({userIdIndex : index('userId_index_cart').on(table.userId)}))
 
 export const userTableRelations = relations(userTable, ({one, many}) => ({
     courses : many(courseTable),
@@ -194,7 +185,7 @@ export const userTableRelations = relations(userTable, ({one, many}) => ({
         references : [notificationTable.to],
         relationName : 'notifications'
     }),
-    carts : many(cartTable),
+    complete_state : one(completeState)
 }));
 
 export const courseTableRelations = relations(courseTable, ({one, many}) => ({
@@ -202,21 +193,28 @@ export const courseTableRelations = relations(courseTable, ({one, many}) => ({
         fields : [courseTable.teacherId],
         references : [userTable.id]
     }),
-    details : one(courseDetailTable),
     benefits : many(courseBenefitTable),
     chapters : many(courseChaptersTable),
     tags : many(courseTagsTable),
+    completeState : many(completeState),
     purchases : many(purchaseCoursesTable),
     reviews : many(reviewTable),
     comments : many(courseCommentsTable),
     rating : many(courseRatingTable),
-    carts : many(cartTable)
 }));
 
-export const courseDetailTableRelations = relations(courseDetailTable, ({one}) => ({
+export const completeStateRelations = relations(completeState, ({one}) => ({
     course : one(courseTable, {
-        fields : [courseDetailTable.courseId],
+        fields : [completeState.courseId],
         references : [courseTable.id]
+    }),
+    user : one(userTable, {
+        fields : [completeState.userId],
+        references : [userTable.id]
+    }),
+    chapter : one(courseChaptersTable, {
+        fields : [completeState.chapterId],
+        references : [courseChaptersTable.id]
     })
 }));
 
@@ -263,13 +261,6 @@ export const purchaseCoursesTableRelations = relations(purchaseCoursesTable, ({o
     user : one(userTable, {
         fields : [purchaseCoursesTable.userId],
         references : [userTable.id]
-    })
-}));
-
-export const purchaseDetailsTableRelations = relations(purchaseDetailsTable, ({one}) => ({
-    purchase : one(purchaseCoursesTable, {
-        fields : [purchaseDetailsTable.purchaseId],
-        references : [purchaseCoursesTable.id]
     })
 }));
 
@@ -346,15 +337,4 @@ export const notificationTableRelations = relations(notificationTable, ({one}) =
         references : [userTable.id],
         relationName : 'notifications'
     })
-}));
-
-export const cartTableRelations = relations(cartTable, ({one}) => ({
-    course : one(courseTable, {
-        fields : [cartTable.courseId],
-        references : [courseTable.id]
-    }),
-    user : one(userTable, {
-        fields : [cartTable.userId],
-        references : [userTable.id]
-    }),
 }));

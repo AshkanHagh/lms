@@ -22,14 +22,16 @@ export type TSelectUser = InferSelectModel<typeof userTable>;
 export type TModifiedUser = Omit<TSelectUser, 'customerId'>;
 
 export type TSelectCourse = InferSelectModel<typeof courseTable>;
-export type InsectCourseDetails = Pick<TSelectCourse, 'title' | 'details' | 'price' | 'image' | 'prerequisite' | 'teacherId'>;
-export type InsectCourseDetailsBody = 
-Pick<TSelectCourse, 'title' | 'details' | 'price' | 'image' | 'teacherId'> & {prerequisite : string[]};
+export type InsectCourseDetails = Pick<TSelectCourse, 'title' | 'description' | 'prerequisite' | 'price' | 'image' | 'teacherId'>;
+
+export type InsectCourseDetailsBody<T> = 
+T extends 'insert' ? Pick<TSelectCourse, 'title' | 'teacherId'> : 
+Omit<TSelectCourse, 'id' | 'createdAt' | 'updatedAt' | 'prerequisite'> & {prerequisite : string[]};
 
 export type TSelectCourseBenefit = InferSelectModel<typeof courseBenefitTable>;
 
 export type TSelectChapter = InferSelectModel<typeof courseChaptersTable>;
-export type ModifiedChapterDetail = Omit<TSelectChapter, 'id'>
+export type ModifiedChapterDetail = Omit<TSelectChapter, 'id' | 'visibility'>
 
 export type TSelectVideoDetails = InferSelectModel<typeof chapterVideosTable>
 
@@ -75,9 +77,12 @@ export type ChapterAndVideoDetails = {
 export type uploadVideoDetailResponse = {
     videoTitle : string;
     videoUploadResponse : UploadApiResponse;
-    thumbnailUploadResponse : UploadApiResponse;
 }
 
 export type TSelectTags = InferSelectModel<typeof courseTagsTable>;
 
 export type CourseParams = {courseId : string};
+
+export type CourseGeneric<T extends 'insert' | 'update'> = T
+
+export type TagsEntries = {key : string, value : string}

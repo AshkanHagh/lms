@@ -7,6 +7,7 @@ export const insertHashCache = async <T>(hashKey : string, keyValue : TInsertCac
 }
 
 export const getAllHashCache = async <T>(hashKey : string) : Promise<T> => {
+    await redis.expire(hashKey, 604800);
     return await redis.hgetall(hashKey) as T;
 }
 
@@ -15,10 +16,12 @@ export const deleteHashCache = async (hashKey : string) : Promise<void> => {
 }
 
 export const getHashCache = async <T>(hashKey : string, hashIndex : string) : Promise<T> => {
+    await redis.expire(hashKey, 604800);
     return await redis.hget(hashKey, hashIndex) as T;
 }
 
 export const insertHashListCache = async <T>(hashKey : string, hashIndex : string, hashValue : T) : Promise<void> => {
+    await redis.expire(hashKey, 604800);
     await redis.hmset(hashKey, hashIndex, JSON.stringify(hashValue));
 }
 
