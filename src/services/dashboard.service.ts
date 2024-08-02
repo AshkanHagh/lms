@@ -1,5 +1,5 @@
 import { insertHashCache } from '../database/cache/index.cache';
-import { updateInformation } from '../database/queries/user.query';
+import { updateInformation } from '../database/queries/student.query';
 import ErrorHandler from '../libs/utils/errorHandler';
 import type { TErrorHandler, TSelectStudent, UpdateAccount } from '../types/index.type';
 

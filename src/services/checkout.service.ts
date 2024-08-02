@@ -31,7 +31,7 @@ export const createCheckoutSession = async (desiredCourse : TSelectCourse, curre
             }, unit_amount : desiredCourse.price! * 100}, quantity : 1
         }],
         mode : 'payment', payment_method_types : ['card'],
-        success_url : `${process.env.STRIPE_SUCCESS_URL}/verify?session_id={CHECKOUT_SESSION_ID}&course_id=${desiredCourse.id}&Student_id=${currentStudentId}`,
+        success_url : `${process.env.STRIPE_SUCCESS_URL}/verify?session_id={CHECKOUT_SESSION_ID}&course_id=${desiredCourse.id}&student_id=${currentStudentId}`,
         cancel_url : `${process.env.STRIPE_CANCEL_URL}/cancel`,
     });
     return checkoutSession.url;
@@ -53,7 +53,7 @@ export const verifyPaymentService = async (checkoutSessionId : string, courseId 
 
         const newPurchase : TSelectPurchases = await insertPurchase(purchaseDetail);
         await Promise.all([insertHashCache(`purchase_detail:${newPurchase.id}`, newPurchase),
-            insertHashCache(`Student_purchases:${currentStudentId}`, {[courseId] : newPurchase.id})
+            insertHashCache(`student_purchases:${currentStudentId}`, {[courseId] : newPurchase.id})
         ])
         return newPurchase;
         

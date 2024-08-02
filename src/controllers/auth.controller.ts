@@ -22,8 +22,8 @@ export const verifyAccount = <T extends 'login' | 'register'>(condition : T) => 
             const { activationCode, activationToken } = req.body as TVerifyAccount;
             const verifyResult : TSelectStudent = await verifyAccountService(activationToken, activationCode, condition);
     
-            const { accessToken, others : student } = await sendToken(verifyResult, res, 'login');
-            res.status(200).json({success : true, student, accessToken});
+            const { accessToken, sanitizedStudent } = await sendToken(verifyResult, res, 'login');
+            res.status(200).json({success : true, student : sanitizedStudent , accessToken});
             
         } catch (error : unknown) {
             return next(error);
@@ -74,8 +74,8 @@ export const socialAuth = CatchAsyncError(async (req : Request, res : Response, 
         const { name, email, image } = req.body as Pick<TModifiedStudent, 'name' | 'email' | 'image'>;
         const studentDetails = await socialAuthService(name!.toLowerCase(), email.toLowerCase(), image!);
 
-        const { accessToken, others : student } = await sendToken(studentDetails, res, 'login');
-        res.status(200).json({success : true, student, accessToken});
+        const { accessToken, sanitizedStudent  } = await sendToken(studentDetails, res, 'login');
+        res.status(200).json({success : true, student : sanitizedStudent , accessToken});
         
     } catch (error : unknown) {
         return next(error);

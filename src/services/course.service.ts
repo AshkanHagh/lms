@@ -1,9 +1,10 @@
 import { getAllHashCache, getHashCache, insertHashCache, insertHashListCache, removeFromHashListCache } from '../database/cache/index.cache';
-import { findSimilarTags, insertChapterAndVideos, insertCourse, insertCourseBenefit, insertNewTags, removeTags, 
+import { findCourseWithRelations, findSimilarTags, insertChapterAndVideos, insertCourse, insertCourseBenefit, insertNewTags, removeTags, 
     updateCourse, updateTags } from '../database/queries/course.query';
-import { ForbiddenError } from '../libs/utils';
+import { ForbiddenError, ResourceNotFoundError } from '../libs/utils';
 import ErrorHandler from '../libs/utils/errorHandler';
-import type { ChapterAndVideoDetails, courseBenefitAndDetails, CourseGeneric, InsectCourseDetailsBody, ModifiedChapterDetail, TagsEntries, TErrorHandler, TSelectCourse, TSelectCourseBenefit, TSelectTags, TSelectVideoDetails, uploadVideoDetailResponse, } from '../types/index.type';
+import type { ChapterAndVideoDetails, courseBenefitAndDetails, CourseGeneric, CourseRelations, FilteredChapters, InsectCourseDetailsBody, ModifiedChapterDetail, TagsEntries, TErrorHandler, TSelectCourse, TSelectCourseBenefit, TSelectTags, TSelectVideoDetails, 
+    uploadVideoDetailResponse, } from '../types/index.type';
 import { v2 as cloudinary, type UploadApiResponse } from 'cloudinary';
 import pLimit from 'p-limit';
 
@@ -110,7 +111,7 @@ export const courseBenefitService = async (benefits : Omit<TSelectCourseBenefit,
     }
 }
 
-export const createCourseChapterService = async (videoDetails : TSelectVideoDetails[], chapterDetail : ModifiedChapterDetail, 
+export const createCourseChapterService = async (videoDetails : Omit<TSelectVideoDetails, 'id'>[], chapterDetail : ModifiedChapterDetail, 
     courseId : string, currentStudentId : string) : Promise<ChapterAndVideoDetails> => {
     try {
         const uploadedResponse : uploadVideoDetailResponse[] = await uploadVideoDetails(videoDetails);
@@ -124,10 +125,8 @@ export const createCourseChapterService = async (videoDetails : TSelectVideoDeta
         const courseTeacherId : string = await getHashCache(`course:${courseId}`, 'teacherId');
         if(courseTeacherId !== currentStudentId) throw new ForbiddenError();
         
-        const { chapterDetails, videoDetail } = await insertChapterAndVideos({
-            ...chapterDetail, courseId : courseId
-        }, videoDetails);
-
+        const { chapterDetails, videoDetail } = await insertChapterAndVideos({...chapterDetail, courseId : courseId}, videoDetails);
+        
         await insertHashCache(`course:${courseId}:chapters:${chapterDetails.id}`, chapterDetails),
         await Promise.all(videoDetail.map(async video => {
             insertHashListCache(`chapter_videos:${chapterDetails.id}`, video.videoTitle, video);
@@ -140,8 +139,13 @@ export const createCourseChapterService = async (videoDetails : TSelectVideoDeta
         throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
     }
 }
-
-const uploadVideoDetails = async (videoDetails : TSelectVideoDetails[]) : Promise<uploadVideoDetailResponse[]> => {
+// 1. in upload a image or video for course we must delete the old image and upload new image to clodinary
+// Done for get the course we must check with chapter is draft and now show them
+// Done check for the course is publish or not
+// Done only send in response the free videos if use not purchase the course
+// 5. add role to routes
+// 6. add course details(chapter videos benefit) to cache
+const uploadVideoDetails = async (videoDetails : Omit<TSelectVideoDetails, 'id'>[]) : Promise<uploadVideoDetailResponse[]> => {
     const limit = pLimit(10);
     const uploadResponse : Promise<uploadVideoDetailResponse>[] = videoDetails.map(video => {
         return limit(async () => {
@@ -155,8 +159,17 @@ const uploadVideoDetails = async (videoDetails : TSelectVideoDetails[]) : Promis
     return uploadedResponse;
 }
 
-export const courseService = async (currentStudentId : string, courseId : string) => {
+export const courseService = async (currentStudentId : string, courseId : string) : Promise<CourseRelations> => {
     try {
+        const courseDetail : CourseRelations = await findCourseWithRelations(courseId);
+        if(courseDetail?.visibility !== 'publish') throw new ResourceNotFoundError();
+        const studentHasPurchased : boolean | undefined = courseDetail?.purchases?.some(student => student.studentId === currentStudentId);
+
+        const filteredChapters : FilteredChapters = courseDetail?.chapters?.filter(chapter => chapter.visibility !== 'draft')
+        .map(chapter => ({...chapter, videos : chapter.videos.filter(video => studentHasPurchased || video.state === 'free')}));
+
+        const modifiedCourse = {...courseDetail, chapters : filteredChapters} as CourseRelations;
+        return modifiedCourse;
         
     } catch (err : unknown) {
         const error = err as TErrorHandler;

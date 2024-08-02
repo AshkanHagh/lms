@@ -32,7 +32,7 @@ Omit<TSelectCourse, 'id' | 'createdAt' | 'updatedAt' | 'prerequisite'> & {prereq
 export type TSelectCourseBenefit = InferSelectModel<typeof courseBenefitTable>;
 
 export type TSelectChapter = InferSelectModel<typeof courseChaptersTable>;
-export type ModifiedChapterDetail = Omit<TSelectChapter, 'id' | 'visibility'>
+export type ModifiedChapterDetail = Omit<TSelectChapter, 'id'>
 
 export type TSelectVideoDetails = InferSelectModel<typeof chapterVideosTable>
 
@@ -51,7 +51,7 @@ export type TInsertCache<T> = {
 }
 
 export type TSendToken = {
-    accessToken : string; others : TStudentResultClient;
+    accessToken : string; sanitizedStudent : TStudentResultClient;
 }
 
 export type TokenResponse<T> = T extends 'refresh' ? {accessToken : string} : TSendToken;
@@ -68,7 +68,7 @@ export type UpdateAccount = {
 }
 
 export type insertChapterBody = {
-    videoDetails : TSelectVideoDetails[]; chapterDetails : ModifiedChapterDetail
+    videoDetails : Omit<TSelectVideoDetails, 'id'>[]; chapterDetails : ModifiedChapterDetail
 }
 
 export type ChapterAndVideoDetails = {
@@ -105,3 +105,10 @@ export type CompletePaymentQueries = {
 
 export type CheckPurchaseReturnValue = 'modified' | 'full';
 export type CheckPurchaseValue<T> = T extends 'modified' ? ModifiedPurchase : TSelectPurchases
+
+export type CourseRelations = TSelectCourse & {
+    benefits : TSelectCourseBenefit[] | null; chapters : (TSelectChapter & { videos : TSelectVideoDetails[] })[] | null;
+    tags : TSelectTags[]; teacher : TSelectStudent | null; purchases : {studentId : string | null}[] | null;
+} | undefined;
+
+export type FilteredChapters = (TSelectChapter & { videos : TSelectVideoDetails[] })[] | undefined

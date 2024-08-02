@@ -6,9 +6,9 @@ import type { CompletePaymentQueries } from '../types/index.type';
 export const checkout = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
     try {
         const { courseId } = req.params as {courseId : string};
-        const currentUserId : string = req.user!.id;
+        const currentStudentId : string = req.student!.id;
 
-        const paymentUrl : string | null = await checkoutService(currentUserId, courseId);
+        const paymentUrl : string | null = await checkoutService(currentStudentId, courseId);
         res.status(200).json({success : true, url : paymentUrl});
 
     } catch (error : unknown) {
@@ -18,8 +18,8 @@ export const checkout = CatchAsyncError(async (req : Request, res : Response, ne
 
 export const verifyPayment = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
     try {
-        const { session_id, course_id, user_id } = req.query as CompletePaymentQueries;
-        const verifiedPurchase = await verifyPaymentService(session_id, course_id, user_id);
+        const { session_id, course_id, student_id } = req.query as CompletePaymentQueries;
+        const verifiedPurchase = await verifyPaymentService(session_id, course_id, student_id);
 
         res.status(200).json({success : true, purchase : verifiedPurchase});
         

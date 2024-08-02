@@ -24,15 +24,15 @@ export const sendToken = async <T extends 'refresh' | 'login'>(student : TSelect
     const accessToken = jwt.sign(student, process.env.ACCESS_TOKEN, {expiresIn : `${accessTokenExpires}m`});
     const refreshToken = jwt.sign(student, process.env.REFRESH_TOKEN, {expiresIn : `${refreshTokenExpire}d`});
 
-    if(process.env.NODE_ENV === 'production') accessTokenOptions.secure = true;
-    await insertHashCache(`user:${student.id}`, student);
+    process.env.NODE_ENV === 'production' ? accessTokenOptions.secure = true : accessTokenOptions.secure = false;
+    await insertHashCache(`student:${student.id}`, student);
 
     res.cookie('access_token', accessToken, accessTokenOptions);
     res.cookie('refresh_token', refreshToken, refreshTokenOptions);
 
     if(tokenFor === 'refresh') return {accessToken} as TokenResponse<T>;
-    const {createdAt, customerId, updatedAt, ...others} = student;
-    return {accessToken, others} as TokenResponse<T>;
+    const {createdAt, customerId, updatedAt, ...sanitizedStudent } = student;
+    return {accessToken, sanitizedStudent } as TokenResponse<T>;
 };
 
 export const decodeRefreshToken = <T extends TSelectStudent | JwtPayload>(refreshToken : string) : T => {

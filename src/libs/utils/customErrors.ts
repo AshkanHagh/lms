@@ -120,8 +120,15 @@ class AlreadyPurchasedError extends ErrorHandler {
     }
 }
 
+class NeedToPurchaseThisCourseError extends ErrorHandler {
+    constructor() {
+        super('You need to purchase this course', 400);
+    }
+}
+
+
 export {BadRequestError, UnauthorizedError, ForbiddenError, ResourceNotFoundError, PasswordDoesNotMatch, UpdateFollowerInfoError,
     InvalidUserIdError, LoginRequiredError, InternalServerError, AccessTokenInvalidError, ValidationError, RoleForbiddenError,
     TokenRefreshError, RouteNowFoundError, InvalidEmailError, EmailAlreadyExists, InvalidVerifyCode, UserNotFoundError,
-    PasswordValidationError, AlreadyPurchasedError
+    PasswordValidationError, AlreadyPurchasedError, NeedToPurchaseThisCourseError
 };

@@ -103,14 +103,15 @@ export const courseBenefitTableRelations = relations(courseBenefitTable, ({one})
     })
 }));
 
-export const courseChaptersTableRelations = relations(courseChaptersTable, ({one}) => ({
+export const courseChaptersTableRelations = relations(courseChaptersTable, ({one, many}) => ({
     course : one(courseTable, {
         fields : [courseChaptersTable.courseId],
         references : [courseTable.id]
-    })
+    }),
+    videos : many(chapterVideosTable)
 }));
 
-export const chapterDetailsTableRelations = relations(chapterVideosTable, ({one}) => ({
+export const chapterVideosTableRelations = relations(chapterVideosTable, ({one}) => ({
     chapter : one(courseChaptersTable, {
         fields : [chapterVideosTable.chapterId],
         references : [courseChaptersTable.id]

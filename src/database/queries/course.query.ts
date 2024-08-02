@@ -1,5 +1,5 @@
 import { eq, inArray } from 'drizzle-orm';
-import type { ChapterAndVideoDetails, InsectCourseDetails, ModifiedChapterDetail, TSelectChapter, TSelectCourse, TSelectCourseBenefit, 
+import type { ChapterAndVideoDetails, CourseRelations, InsectCourseDetails, ModifiedChapterDetail, TSelectChapter, TSelectCourse, TSelectCourseBenefit, 
     TSelectTags, TSelectVideoDetails } from '../../types/index.type';
 import { db } from '..';
 import { chapterVideosTable, courseBenefitTable, courseChaptersTable, courseTable, courseTagsTable } from '../schema';
@@ -23,12 +23,12 @@ export const insertChapter = async (chapterDetail : ModifiedChapterDetail, trx =
     return newChapter;
 }
 
-export const insertChapterVideos = async (videosDetail : TSelectVideoDetails[], trx = db) : Promise<TSelectVideoDetails[]> => {
+export const insertChapterVideos = async (videosDetail : Omit<TSelectVideoDetails, 'id'>[], trx = db) : Promise<TSelectVideoDetails[]> => {
     const newVideos : TSelectVideoDetails[] = await trx.insert(chapterVideosTable).values(videosDetail).returning();
     return newVideos;
 }
 
-export const insertChapterAndVideos = async (chapterDetail : ModifiedChapterDetail, videosDetail : TSelectVideoDetails[]) : 
+export const insertChapterAndVideos = async (chapterDetail : ModifiedChapterDetail, videosDetail : Omit<TSelectVideoDetails, 'id'>[]) : 
 Promise<ChapterAndVideoDetails> => {
     const chapter_video_details = await db.transaction(async trx => {
         const newChapter : TSelectChapter = await insertChapter(chapterDetail, trx);
@@ -54,4 +54,12 @@ export const removeTags = async (tagsId : string[]) : Promise<void> => {
 
 export const updateTags = async (tagsId : string, newTags : string) : Promise<void> => {
     await db.update(courseTagsTable).set({tags : newTags}).where(eq(courseTagsTable.id, tagsId));
+}
+
+export const findCourseWithRelations = async (courseId : string) => {
+    const desiredCourse : CourseRelations = await db.query.courseTable.findFirst({
+        where : (table, funcs) => funcs.eq(table.id, courseId),
+        with : {benefits : true, chapters : {with : {videos : true}}, tags : true, teacher : true, purchases : {columns : {studentId : true}}}
+    });
+    return desiredCourse;
 }

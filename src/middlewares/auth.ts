@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { CatchAsyncError } from './catchAsyncError';
 import { AccessTokenInvalidError, LoginRequiredError, RoleForbiddenError } from '../libs/utils';
 import { decodeAccessToken } from '../libs/utils/jwt';
-import type { TErrorHandler, TSelectUser } from '../types/index.type';
+import type { TErrorHandler, TSelectStudent } from '../types/index.type';
 import { getAllHashCache } from '../database/cache/index.cache';
 import ErrorHandler from '../libs/utils/errorHandler';
 
@@ -14,13 +14,13 @@ export const isAuthenticated = CatchAsyncError(async (req : Request, res : Respo
         const accessToken : string | undefined = authHeader.split(' ')[1];
         if(!accessToken) return next(new AccessTokenInvalidError());
 
-        const decodedToken : TSelectUser = decodeAccessToken(accessToken);
+        const decodedToken : TSelectStudent = decodeAccessToken(accessToken);
         if(!decodedToken) return next(new AccessTokenInvalidError());
 
-        const user : TSelectUser = await getAllHashCache(`user:${decodedToken.id}`);
+        const user : TSelectStudent = await getAllHashCache(`student:${decodedToken.id}`);
         if(!user) return next(new LoginRequiredError());
 
-        req.user = user;
+        req.student = user;
         next();
         
     } catch (err : unknown) {
@@ -31,7 +31,7 @@ export const isAuthenticated = CatchAsyncError(async (req : Request, res : Respo
 
 export const authorizedRoles = (...role : string[]) => {
     return CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
-        if(!role.includes(req.user?.role || '')) return next(new RoleForbiddenError(req.user?.role || 'unknown'));
+        if(!role.includes(req.student?.role || '')) return next(new RoleForbiddenError(req.student?.role || 'unknown'));
         next();
     });
 }

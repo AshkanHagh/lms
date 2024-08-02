@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { isAuthenticated } from '../middlewares/auth';
-import { courseBenefit, createCourse, createCourseChapter, editCourseDetails } from '../controllers/course.controller';
+import { course, courseBenefit, createCourse, createCourseChapter, editCourseDetails } from '../controllers/course.controller';
 
 const router : Router = Router();
 
@@ -11,5 +11,7 @@ router.patch('/:courseId', isAuthenticated, editCourseDetails);
 router.post('/benefit/:courseId', isAuthenticated, courseBenefit);
 
 router.post('/chapter/:courseId', isAuthenticated, createCourseChapter);
+
+router.get('/:courseId', isAuthenticated, course);
 
 export default router;
