@@ -131,8 +131,11 @@ CREATE TABLE IF NOT EXISTS "purchase" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"course_id" uuid,
 	"user_id" uuid,
-	"discount" real DEFAULT 0,
-	"price" real NOT NULL,
+	"card" text,
+	"brand" text,
+	"exp_month" smallint,
+	"exp_year" smallint,
+	"payment_id" text,
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint

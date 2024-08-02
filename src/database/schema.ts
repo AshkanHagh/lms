@@ -99,8 +99,11 @@ export const purchaseCoursesTable = pgTable('purchase', {
     id : uuid('id').primaryKey().defaultRandom(),
     courseId : uuid('course_id').references(() => courseTable.id, {onDelete : 'cascade'}),
     userId : uuid('user_id').references(() => userTable.id, {onDelete : 'cascade'}),
-    discount : real('discount').default(0),
-    totalPrice : real('price').notNull(),
+    card : text('card'),
+    brand : text('brand'),
+    expMonth : smallint('exp_month'),
+    expYear : smallint('exp_year'),
+    paymentId : text('payment_id'),
     createdAt : timestamp('created_at').defaultNow(),
 }, table => ({
     courseIdIndex : index('courseId_index_purchase').on(table.courseId), 

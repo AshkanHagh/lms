@@ -1,5 +1,5 @@
 import type { InferSelectModel } from 'drizzle-orm';
-import type { chapterVideosTable, courseBenefitTable, courseChaptersTable, courseTable, courseTagsTable, userTable } from '../database/schema';
+import type { chapterVideosTable, courseBenefitTable, courseChaptersTable, courseTable, courseTagsTable, purchaseCoursesTable, userTable } from '../database/schema';
 import type { UploadApiResponse } from 'cloudinary';
 
 export type TErrorHandler = {
@@ -80,9 +80,24 @@ export type uploadVideoDetailResponse = {
 }
 
 export type TSelectTags = InferSelectModel<typeof courseTagsTable>;
+export type TagsEntries = {key : string, value : string}
 
 export type CourseParams = {courseId : string};
 
 export type CourseGeneric<T extends 'insert' | 'update'> = T
 
-export type TagsEntries = {key : string, value : string}
+export type TSelectPurchases = InferSelectModel<typeof purchaseCoursesTable>;
+export type ModifiedPurchase = Omit<TSelectPurchases, 'brand' | 'card' | 'expMonth' | 'expYear' | 'paymentId'>;
+
+export type PaymentIntent = {
+    payment_intent : {
+        payment_method : {
+            id : string;
+            card : {brand : string, last4 : string, exp_month : number, exp_year : number};
+        }
+    }
+}
+
+export type CompletePaymentQueries = {
+    session_id : string; course_id : string; user_id : string;
+}

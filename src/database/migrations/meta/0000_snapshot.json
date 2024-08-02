@@ -1,5 +1,5 @@
 {
-  "id": "11cf2d68-e2eb-4a25-9332-bfc400ce6323",
+  "id": "1bc5d5e6-1f1e-4bf9-ace0-ef62df8834bd",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -911,18 +911,35 @@
           "primaryKey": false,
           "notNull": false
         },
-        "discount": {
-          "name": "discount",
-          "type": "real",
+        "card": {
+          "name": "card",
+          "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "default": 0
+          "notNull": false
         },
-        "price": {
-          "name": "price",
-          "type": "real",
+        "brand": {
+          "name": "brand",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "exp_month": {
+          "name": "exp_month",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "exp_year": {
+          "name": "exp_year",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payment_id": {
+          "name": "payment_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",

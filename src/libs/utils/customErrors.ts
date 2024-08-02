@@ -114,8 +114,14 @@ class PasswordValidationError extends ErrorHandler {
     }
 }
 
+class AlreadyPurchasedError extends ErrorHandler {
+    constructor() {
+        super('You have already purchased this item', 400);
+    }
+}
+
 export {BadRequestError, UnauthorizedError, ForbiddenError, ResourceNotFoundError, PasswordDoesNotMatch, UpdateFollowerInfoError,
     InvalidUserIdError, LoginRequiredError, InternalServerError, AccessTokenInvalidError, ValidationError, RoleForbiddenError,
     TokenRefreshError, RouteNowFoundError, InvalidEmailError, EmailAlreadyExists, InvalidVerifyCode, UserNotFoundError,
-    PasswordValidationError
+    PasswordValidationError, AlreadyPurchasedError
 };

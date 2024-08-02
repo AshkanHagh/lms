@@ -5,6 +5,7 @@ import compression from 'compression';
 
 import authRoute from './routes/auth.route';
 import coursesRoute from './routes/course.route';
+import checkoutRoute from './routes/checkout.route';
 
 import { RouteNowFoundError } from './libs/utils';
 import { ErrorMiddleware } from './middlewares/error';
@@ -21,6 +22,7 @@ app.get('/', (req : Request, res : Response) => res.status(200).json({success : 
 
 app.use('/api/v1/auth', authRoute);
 app.use('/api/v1/courses', coursesRoute);
+app.use('/api/v1/payments', checkoutRoute);
 
 app.all('*', (req : Request, res : Response, next : NextFunction) => {
     next(new RouteNowFoundError(`Route : ${req.originalUrl} not found`));

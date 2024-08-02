@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { isAuthenticated } from '../middlewares/auth';
 import { courseBenefit, createCourse, createCourseChapter, editCourseDetails } from '../controllers/course.controller';
 
-const router = Router();
+const router : Router = Router();
 
 router.post('/', isAuthenticated, createCourse);
 

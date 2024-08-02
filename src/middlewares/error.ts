@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import type { TErrorHandler } from '../types/index.type';
 
-export const ErrorMiddleware = (error: TErrorHandler, req: Request, res: Response, next: NextFunction) => {
+export const ErrorMiddleware = (error: TErrorHandler, req: Request, res: Response, next: NextFunction) : void => {
     error.statusCode = error.statusCode || 500;
     error.message = error.message || 'Internal server error';
 
