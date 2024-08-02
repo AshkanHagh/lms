@@ -1,5 +1,6 @@
 import type { InferSelectModel } from 'drizzle-orm';
-import type { chapterVideosTable, courseBenefitTable, courseChaptersTable, courseTable, courseTagsTable, purchaseCoursesTable, userTable } from '../database/schema';
+import type { chapterVideosTable, courseBenefitTable, courseChaptersTable, courseTable, courseTagsTable, purchaseCoursesTable, 
+    studentTable } from '../database/schema';
 import type { UploadApiResponse } from 'cloudinary';
 
 export type TErrorHandler = {
@@ -11,15 +12,15 @@ export type TActivationToken = {
 }
 
 export type TVerifyActivationToken = {
-    user : TModifiedUser; activationCode : string;
+    student : TModifiedStudent; activationCode : string;
 }
 
 export type TVerifyAccount = {
     activationCode : string; activationToken : string;
 }
 
-export type TSelectUser = InferSelectModel<typeof userTable>;
-export type TModifiedUser = Omit<TSelectUser, 'customerId'>;
+export type TSelectStudent = InferSelectModel<typeof studentTable>;
+export type TModifiedStudent = Omit<TSelectStudent, 'customerId'>;
 
 export type TSelectCourse = InferSelectModel<typeof courseTable>;
 export type InsectCourseDetails = Pick<TSelectCourse, 'title' | 'description' | 'prerequisite' | 'price' | 'image' | 'teacherId'>;
@@ -39,7 +40,7 @@ export type courseBenefitAndDetails = {
     benefits : TSelectCourseBenefit[]; course : TSelectCourse
 }
 
-export type TUserResultClient = Omit<TSelectUser, 'updatedAt' | 'createdAt' | 'customerId'>;
+export type TStudentResultClient = Omit<TSelectStudent, 'updatedAt' | 'createdAt' | 'customerId'>;
 
 export type TCookieOptions = {
     expires : Date; maxAge : number, httpOnly : boolean; sameSite : 'lax' | 'strict' | 'none'; secure? : boolean;
@@ -50,15 +51,15 @@ export type TInsertCache<T> = {
 }
 
 export type TSendToken = {
-    accessToken : string; others : TUserResultClient;
+    accessToken : string; others : TStudentResultClient;
 }
 
 export type TokenResponse<T> = T extends 'refresh' ? {accessToken : string} : TSendToken;
-export type SelectCondition<T> = T extends 'emailOnly' ? Pick<TModifiedUser, 'email'> : TSelectUser
+export type SelectCondition<T> = T extends 'emailOnly' ? Pick<TModifiedStudent, 'email'> : TSelectStudent
 
 declare module 'express-serve-static-core' {
     interface Request {
-        user? : TSelectUser;
+        student? : TSelectStudent;
     }
 }
 
@@ -99,5 +100,8 @@ export type PaymentIntent = {
 }
 
 export type CompletePaymentQueries = {
-    session_id : string; course_id : string; user_id : string;
+    session_id : string; course_id : string; student_id : string;
 }
+
+export type CheckPurchaseReturnValue = 'modified' | 'full';
+export type CheckPurchaseValue<T> = T extends 'modified' ? ModifiedPurchase : TSelectPurchases

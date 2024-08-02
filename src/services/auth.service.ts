@@ -1,19 +1,19 @@
 import { getAllHashCache } from '../database/cache/index.cache';
-import { insertUserDetails, selectWithCondition } from '../database/queries/user.query';
+import { insertStudentDetails, selectWithCondition } from '../database/queries/student.query';
 import { emailEvent } from '../events/email.event';
 import { EmailAlreadyExists, InvalidEmailError, InvalidVerifyCode, LoginRequiredError, TokenRefreshError } from '../libs/utils';
 import { generateActivationToken, verifyActivationToken } from '../libs/utils/activation-token';
 import ErrorHandler from '../libs/utils/errorHandler';
 import { decodeRefreshToken } from '../libs/utils/jwt';
-import type { TErrorHandler, TModifiedUser, TSelectUser, TVerifyActivationToken } from '../types/index.type';
+import type { TErrorHandler, TModifiedStudent, TSelectStudent, TVerifyActivationToken } from '../types/index.type';
 
 export const registerService = async (email : string) : Promise<string> => {
     try {
-        const isEmailExists : Pick<TModifiedUser, 'email'> = await selectWithCondition(email, 'emailOnly');
+        const isEmailExists : Pick<TModifiedStudent, 'email'> = await selectWithCondition(email, 'emailOnly');
         if(isEmailExists) throw new EmailAlreadyExists();
 
-        const user : Partial<TModifiedUser> = {email};
-        const {activationCode, activationToken} = generateActivationToken(user);
+        const student : Partial<TModifiedStudent> = {email};
+        const {activationCode, activationToken} = generateActivationToken(student);
 
         emailEvent.emit('activation-email', email, activationCode);
         return activationToken;
@@ -25,20 +25,20 @@ export const registerService = async (email : string) : Promise<string> => {
 }
 
 export const verifyAccountService = async <T extends 'login' | 'register'>(activationToken : string, activationCode : string, service : T) :
- Promise<TSelectUser>=> {
+ Promise<TSelectStudent>=> {
     try {
-        const {activationCode : code, user} : TVerifyActivationToken = verifyActivationToken(activationToken);
+        const {activationCode : code, student} : TVerifyActivationToken = verifyActivationToken(activationToken);
         if(code !== activationCode) throw new InvalidVerifyCode();
 
-        const { email } = user;
-        const desiredUser : TSelectUser = await selectWithCondition(email, 'fullData');
+        const { email } = student;
+        const desiredStudent : TSelectStudent = await selectWithCondition(email, 'fullData');
 
         if(service === 'register') {
-            if(desiredUser) throw new EmailAlreadyExists();
-            const insertResult : TSelectUser = await insertUserDetails({email});
+            if(desiredStudent) throw new EmailAlreadyExists();
+            const insertResult : TSelectStudent = await insertStudentDetails({email});
             return insertResult
         }
-        return desiredUser;
+        return desiredStudent;
         
     } catch (err : unknown) {
         const error = err as TErrorHandler;
@@ -48,10 +48,10 @@ export const verifyAccountService = async <T extends 'login' | 'register'>(activ
 
 export const loginService = async (email : string) => {
     try {
-        const isUserExists : Pick<TModifiedUser, 'email'> = await selectWithCondition(email, 'emailOnly');
-        if(!isUserExists) throw new InvalidEmailError();
+        const isStudentExists : Pick<TModifiedStudent, 'email'> = await selectWithCondition(email, 'emailOnly');
+        if(!isStudentExists) throw new InvalidEmailError();
 
-        const {activationCode, activationToken} = generateActivationToken(isUserExists);
+        const {activationCode, activationToken} = generateActivationToken(isStudentExists);
         emailEvent.emit('activation-email', email, activationCode);
 
         return activationToken;
@@ -62,14 +62,14 @@ export const loginService = async (email : string) => {
     }
 }
 
-export const refreshTokenService = async (refreshToken : string) : Promise<TSelectUser> => {
+export const refreshTokenService = async (refreshToken : string) : Promise<TSelectStudent> => {
     try {
         const decodedToken = decodeRefreshToken(refreshToken);
         if(!decodeRefreshToken) throw new LoginRequiredError();
 
-        const userCache : TSelectUser = await getAllHashCache(`user:${decodedToken.id}`);
-        if(!userCache || Object.keys(userCache).length == 0) throw new TokenRefreshError();
-        return userCache
+        const studentCache : TSelectStudent = await getAllHashCache(`student:${decodedToken.id}`);
+        if(!studentCache || Object.keys(studentCache).length == 0) throw new TokenRefreshError();
+        return studentCache
         
     } catch (err : unknown) {
         const error = err as TErrorHandler;
@@ -77,13 +77,13 @@ export const refreshTokenService = async (refreshToken : string) : Promise<TSele
     }
 }
 
-export const socialAuthService = async (name : string, email : string, image : string) : Promise<TSelectUser> => {
+export const socialAuthService = async (name : string, email : string, image : string) : Promise<TSelectStudent> => {
     try {
-        const desiredUser : TSelectUser = await selectWithCondition(email, 'fullData');
-        if(desiredUser) return desiredUser;
+        const desiredStudent : TSelectStudent = await selectWithCondition(email, 'fullData');
+        if(desiredStudent) return desiredStudent;
 
-        const userDetails : TSelectUser = await insertUserDetails({name, email, image});
-        return userDetails
+        const studentDetails : TSelectStudent = await insertStudentDetails({name, email, image});
+        return studentDetails
         
     } catch (err : unknown) {
         const error = err as TErrorHandler;

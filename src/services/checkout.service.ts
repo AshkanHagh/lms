@@ -6,15 +6,15 @@ import { AlreadyPurchasedError, BadRequestError, ResourceNotFoundError } from '.
 import ErrorHandler from '../libs/utils/errorHandler';
 import type { TErrorHandler, ModifiedPurchase, TSelectCourse, TSelectPurchases, PaymentIntent } from '../types/index.type';
 
-export const checkoutService = async (currentUserId : string, courseId : string) : Promise<string | null> => {
+export const checkoutService = async (currentStudentId : string, courseId : string) : Promise<string | null> => {
     try {
-        const isAlreadyPurchase : ModifiedPurchase | undefined = await findPurchase(courseId, currentUserId);
+        const isAlreadyPurchase : ModifiedPurchase | undefined = await findPurchase(courseId, currentStudentId, 'modified');
         if(isAlreadyPurchase) throw new AlreadyPurchasedError();
 
         const desiredCourse : TSelectCourse = await getAllHashCache(`course:${courseId}`);
         if(!desiredCourse) throw new ResourceNotFoundError();
 
-        const paymentUrl : string | null = await createCheckoutSession(desiredCourse, currentUserId);
+        const paymentUrl : string | null = await createCheckoutSession(desiredCourse, currentStudentId);
         return paymentUrl;
         
     } catch (err : unknown) {
@@ -23,7 +23,7 @@ export const checkoutService = async (currentUserId : string, courseId : string)
     }
 }
 
-export const createCheckoutSession = async (desiredCourse : TSelectCourse, currentUserId : string) : Promise<string | null> => {
+export const createCheckoutSession = async (desiredCourse : TSelectCourse, currentStudentId : string) : Promise<string | null> => {
     const checkoutSession : Stripe.Response<Stripe.Checkout.Session> = await stripe.checkout.sessions.create({
         line_items : [{
             price_data : {currency : 'usd', product_data : {
@@ -31,28 +31,30 @@ export const createCheckoutSession = async (desiredCourse : TSelectCourse, curre
             }, unit_amount : desiredCourse.price! * 100}, quantity : 1
         }],
         mode : 'payment', payment_method_types : ['card'],
-        success_url : `${process.env.STRIPE_SUCCESS_URL}/verify?session_id={CHECKOUT_SESSION_ID}&course_id=${desiredCourse.id}&user_id=${currentUserId}`,
+        success_url : `${process.env.STRIPE_SUCCESS_URL}/verify?session_id={CHECKOUT_SESSION_ID}&course_id=${desiredCourse.id}&Student_id=${currentStudentId}`,
         cancel_url : `${process.env.STRIPE_CANCEL_URL}/cancel`,
     });
     return checkoutSession.url;
 }
 
-export const verifyPaymentService = async (checkoutSessionId : string, courseId : string, currentUserId : string) : Promise<TSelectPurchases> => {
+export const verifyPaymentService = async (checkoutSessionId : string, courseId : string, currentStudentId : string) : Promise<TSelectPurchases> => {
     try {
         const verifySessionId : unknown = await stripe.checkout.sessions.retrieve(checkoutSessionId, 
             {expand : ['payment_intent.payment_method']}
         );
         const session : PaymentIntent = verifySessionId as PaymentIntent;
-        if(!verifySessionId || !checkoutSessionId || !courseId || !currentUserId) throw new BadRequestError();
+        if(!verifySessionId || !checkoutSessionId || !courseId || !currentStudentId) throw new BadRequestError();
 
         const { brand, last4, exp_month, exp_year } = session.payment_intent?.payment_method.card ?? {};
         const { id } = session.payment_intent?.payment_method ?? {}
         const purchaseDetail = <Omit<TSelectPurchases, 'id'>>{brand, card : last4, expMonth : exp_month, expYear : exp_year, 
-            courseId, userId : currentUserId, paymentId : id
+            courseId, studentId : currentStudentId, paymentId : id
         }
 
         const newPurchase : TSelectPurchases = await insertPurchase(purchaseDetail);
-        await insertHashCache(`purchase_detail:${newPurchase.id}`, newPurchase);
+        await Promise.all([insertHashCache(`purchase_detail:${newPurchase.id}`, newPurchase),
+            insertHashCache(`Student_purchases:${currentStudentId}`, {[courseId] : newPurchase.id})
+        ])
         return newPurchase;
         
     } catch (err : unknown) {

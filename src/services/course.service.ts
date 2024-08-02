@@ -20,13 +20,13 @@ export const createCourseService = async <T extends CourseGeneric<'insert'>>(cou
 };
 
 export const editCourseDetailsService = async <B extends CourseGeneric<'update'>>(courseDetail : Partial<InsectCourseDetailsBody<B>>, 
-    courseId : string, currentUserId : string, tags : string[]) : Promise<TSelectCourse> => {
+    courseId : string, currentStudentId : string, tags : string[]) : Promise<TSelectCourse> => {
     try {
         let currentTags : TSelectTags[];
         const [courseCache, currentTagsData] : [TSelectCourse, Record<string, string>] = await Promise.all([
             getAllHashCache<TSelectCourse>(`course:${courseId}`), getAllHashCache<Record<string, string>>(`course_tags:${courseId}`)
         ]);
-        if(courseCache.teacherId !== currentUserId) throw new ForbiddenError();
+        if(courseCache.teacherId !== currentStudentId) throw new ForbiddenError();
 
         const newTagsSet : Set<string> = new Set(tags);
 
@@ -91,11 +91,11 @@ const handleImageUpload = async (newImage : string | null, currentImage : string
     return uploadedResponse ? uploadedResponse.secure_url : undefined;
 }
 
-export const courseBenefitService = async (benefits : Omit<TSelectCourseBenefit, 'id'>[], courseId : string, currentUserId : string) : 
+export const courseBenefitService = async (benefits : Omit<TSelectCourseBenefit, 'id'>[], courseId : string, currentStudentId : string) : 
  Promise<courseBenefitAndDetails> => {
     try {
         const course : TSelectCourse = await getAllHashCache(`course:${courseId}`);
-        if(course.teacherId !== currentUserId) throw new ForbiddenError();
+        if(course.teacherId !== currentStudentId) throw new ForbiddenError();
 
         const benefitResult : TSelectCourseBenefit[] = await insertCourseBenefit(benefits);
         await Promise.all(benefitResult.map<void>(async benefit => {
@@ -111,7 +111,7 @@ export const courseBenefitService = async (benefits : Omit<TSelectCourseBenefit,
 }
 
 export const createCourseChapterService = async (videoDetails : TSelectVideoDetails[], chapterDetail : ModifiedChapterDetail, 
-    courseId : string, currentUserId : string) : Promise<ChapterAndVideoDetails> => {
+    courseId : string, currentStudentId : string) : Promise<ChapterAndVideoDetails> => {
     try {
         const uploadedResponse : uploadVideoDetailResponse[] = await uploadVideoDetails(videoDetails);
         const responseMap : Map<string, uploadVideoDetailResponse> = new Map(uploadedResponse.map(upload => [upload.videoTitle, upload]));
@@ -122,7 +122,7 @@ export const createCourseChapterService = async (videoDetails : TSelectVideoDeta
         });
 
         const courseTeacherId : string = await getHashCache(`course:${courseId}`, 'teacherId');
-        if(courseTeacherId !== currentUserId) throw new ForbiddenError();
+        if(courseTeacherId !== currentStudentId) throw new ForbiddenError();
         
         const { chapterDetails, videoDetail } = await insertChapterAndVideos({
             ...chapterDetail, courseId : courseId
@@ -153,4 +153,13 @@ const uploadVideoDetails = async (videoDetails : TSelectVideoDetails[]) : Promis
     });
     const uploadedResponse : uploadVideoDetailResponse[] = await Promise.all(uploadResponse);
     return uploadedResponse;
+}
+
+export const courseService = async (currentStudentId : string, courseId : string) => {
+    try {
+        
+    } catch (err : unknown) {
+        const error = err as TErrorHandler;
+        throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
+    }
 }
