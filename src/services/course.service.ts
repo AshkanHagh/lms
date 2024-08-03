@@ -157,6 +157,7 @@ chapterDetails : Partial<ModifiedChapterDetail>) : Promise<TSelectChapter> => {
         const changedValue = new Map<keyof Partial<ModifiedChapterDetail>, string | null>();
         Object.keys(chapterDetails).forEach(key => {
             const detailKey = key as keyof Partial<ModifiedChapterDetail>;
+            console.log(key);
             if(chapterDetails[detailKey] !== undefined) {
                 const newValue : string | null = chapterDetails[detailKey] ?? null;
                 const oldValue : string | null = existingChapterDetail ? existingChapterDetail[detailKey] : null;
@@ -202,14 +203,9 @@ videoDetail : InsertVideoDetails) : Promise<TSelectVideoDetails> => {
         throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
     }
 }
-// 1. in upload a image or video for course we must delete the old image and upload new image to clodinary
-// Done for get the course we must check with chapter is draft and now show them
-// Done check for the course is publish or not
-// Done only send in response the free videos if use not purchase the course
-// 5. add role to routes
-// 6. add course details(chapter videos benefit) to cache
-export const handleOldVideo = async (videoUrl : string | null) : Promise<void> => {
-    if(videoUrl) await cloudinary.uploader.destroy(videoUrl.split('/').pop()!.split('.')[0]);
+
+export const handleOldVideo = async (videoUrl : string) : Promise<void> => {
+    await cloudinary.uploader.destroy(videoUrl.split('/').pop()!.split('.')[0], {resource_type : 'video'});
 }
 
 const uploadVideoDetails = async <T extends InsertVideoDetails>(videoDetails : T[]) : Promise<uploadVideoDetailResponse[]> => {
@@ -225,7 +221,7 @@ const uploadVideoDetails = async <T extends InsertVideoDetails>(videoDetails : T
     const uploadedResponse : uploadVideoDetailResponse[] = await Promise.all(uploadResponse);
     return uploadedResponse;
 }
-// 1. Add the tacher and admin have the course for free
+// 1. Add the teacher and admin have the course for free
 export const courseService = async (currentStudentId : string, courseId : string) : Promise<CourseRelations> => {
     try {
         const courseDetail : CourseRelations = await findCourseWithRelations(courseId);
