@@ -1,5 +1,5 @@
 import { eq, inArray } from 'drizzle-orm';
-import type { ChapterAndVideoDetails, CourseRelations, InsectCourseDetails, ModifiedChapterDetail, TSelectChapter, TSelectCourse, TSelectCourseBenefit, 
+import type { ChapterAndVideoDetails, CourseRelations, InsectCourseDetails, InsertVideoDetails, ModifiedChapterDetail, TSelectChapter, TSelectCourse, TSelectCourseBenefit, 
     TSelectTags, TSelectVideoDetails } from '../../types/index.type';
 import { db } from '..';
 import { chapterVideosTable, courseBenefitTable, courseChaptersTable, courseTable, courseTagsTable } from '../schema';
@@ -26,6 +26,12 @@ export const insertChapter = async (chapterDetail : ModifiedChapterDetail, trx =
 export const insertChapterVideos = async (videosDetail : Omit<TSelectVideoDetails, 'id'>[], trx = db) : Promise<TSelectVideoDetails[]> => {
     const newVideos : TSelectVideoDetails[] = await trx.insert(chapterVideosTable).values(videosDetail).returning();
     return newVideos;
+}
+
+export const updateChapterVideos = async (videoDetail : InsertVideoDetails, videoId : string) : Promise<TSelectVideoDetails> => {
+    const [updatedVideo] : TSelectVideoDetails[] = await db.update(chapterVideosTable).set(videoDetail)
+    .where(eq(chapterVideosTable.id, videoId)).returning();
+    return updatedVideo
 }
 
 export const insertChapterAndVideos = async (chapterDetail : ModifiedChapterDetail, videosDetail : Omit<TSelectVideoDetails, 'id'>[]) : 
@@ -56,10 +62,16 @@ export const updateTags = async (tagsId : string, newTags : string) : Promise<vo
     await db.update(courseTagsTable).set({tags : newTags}).where(eq(courseTagsTable.id, tagsId));
 }
 
-export const findCourseWithRelations = async (courseId : string) => {
+export const findCourseWithRelations = async (courseId : string) : Promise<CourseRelations> => {
     const desiredCourse : CourseRelations = await db.query.courseTable.findFirst({
         where : (table, funcs) => funcs.eq(table.id, courseId),
         with : {benefits : true, chapters : {with : {videos : true}}, tags : true, teacher : true, purchases : {columns : {studentId : true}}}
     });
     return desiredCourse;
+}
+
+export const patchCourseChapter = async (chapterId : string, chapterDetails : Partial<ModifiedChapterDetail>) : Promise<TSelectChapter> => {
+    const [updatedChapter] : TSelectChapter[] = await db.update(courseChaptersTable).set(chapterDetails)
+    .where(eq(courseChaptersTable.id, chapterId)).returning();
+    return updatedChapter
 }

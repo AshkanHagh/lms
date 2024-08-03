@@ -1,12 +1,14 @@
+import { findAllCourseChapter } from '../database/cache/course.chache';
 import { getAllHashCache, getHashCache, insertHashCache, insertHashListCache, removeFromHashListCache } from '../database/cache/index.cache';
-import { findCourseWithRelations, findSimilarTags, insertChapterAndVideos, insertCourse, insertCourseBenefit, insertNewTags, removeTags, 
-    updateCourse, updateTags } from '../database/queries/course.query';
+import { findCourseWithRelations, findSimilarTags, insertChapterAndVideos, insertCourse, insertCourseBenefit, insertNewTags, patchCourseChapter, removeTags, updateChapterVideos, updateCourse, updateTags } from '../database/queries/course.query';
 import { ForbiddenError, ResourceNotFoundError } from '../libs/utils';
 import ErrorHandler from '../libs/utils/errorHandler';
-import type { ChapterAndVideoDetails, courseBenefitAndDetails, CourseGeneric, CourseRelations, FilteredChapters, InsectCourseDetailsBody, ModifiedChapterDetail, TagsEntries, TErrorHandler, TSelectCourse, TSelectCourseBenefit, TSelectTags, TSelectVideoDetails, 
-    uploadVideoDetailResponse, } from '../types/index.type';
+import type { ChapterAndVideoDetails, courseBenefitAndDetails, CourseGeneric, CourseRelations, FilteredChapters, InsectCourseDetailsBody, ModifiedChapterDetail, Entries, TErrorHandler, TSelectCourse, TSelectCourseBenefit, TSelectTags, TSelectVideoDetails, 
+    uploadVideoDetailResponse, TSelectChapter,
+    InsertVideoDetails, } from '../types/index.type';
 import { v2 as cloudinary, type UploadApiResponse } from 'cloudinary';
 import pLimit from 'p-limit';
+import crypto from 'crypto';
 
 export const createCourseService = async <T extends CourseGeneric<'insert'>>(courseDetail : InsectCourseDetailsBody<T>) : Promise<TSelectCourse> => {
     try {
@@ -31,17 +33,17 @@ export const editCourseDetailsService = async <B extends CourseGeneric<'update'>
 
         const newTagsSet : Set<string> = new Set(tags);
 
-        const entries : TagsEntries[] = Object.entries(currentTagsData).map(([key, value]) => ({key, value}));
+        const entries : Entries[] = Object.entries(currentTagsData).map(([key, value]) => ({key, value}));
         currentTags = entries.map(entry => JSON.parse(entry.value)) as TSelectTags[];
         if(Object.keys(currentTagsData).length === 0) currentTags = await findSimilarTags(courseId) as TSelectTags[];
 
-        const existingTagsSet : Set<string> = new Set(currentTags.map(tag => tag.tags));
+        const existingTagsSet : Set<string | never[]> = new Set(currentTags.map(tag => tag.tags));
         const tagsToAdd : string[] = tags.filter(tag => !existingTagsSet.has(tag));
         const removedTags : TSelectTags[] = currentTags.filter(tagObj => !newTagsSet.has(tagObj.tags))
         const updatedTags : TSelectTags[] = currentTags.filter(tagObj => newTagsSet.has(tagObj.tags) && !tags.includes(tagObj.tags));
 
         await handleTags(tagsToAdd, removedTags, updatedTags, courseId);
-        const uploadedImageUrl : string | undefined = await handleImageUpload(courseDetail.image!, courseCache.image);
+        const uploadedImageUrl : string | undefined = await handleImageUpload(courseDetail.image ?? undefined, courseCache.image ?? null);
 
         const updatedDetails : TSelectCourse = await updateCourse({
             ...courseDetail, image : uploadedImageUrl, prerequisite : courseDetail.prerequisite?.join(' ')
@@ -70,7 +72,7 @@ Promise<void> => {
 }
 
 export const insertNewTagsIfNeeded = async (tagsToAdd : string[], courseId : string) : Promise<void> => {
-    if(tagsToAdd.length > 0) {
+    if(tagsToAdd && tagsToAdd.length > 0) {
         const newTags : TSelectTags[] = await insertNewTags(combineTagAndCourseId(tagsToAdd, courseId));
         newTags.map(async tag => await insertHashListCache(`course_tags:${courseId}`, tag.id, tag))
     }
@@ -82,14 +84,14 @@ const removeTagsIfNeeded = async (removedTags : TSelectTags[], courseId : string
         removedTags.map(async tag => await removeFromHashListCache(`course_tags:${courseId}`, tag.id));
     }
 }
-const handleImageUpload = async (newImage : string | null, currentImage : string | null) : Promise<string | undefined> => {
-    if(currentImage && currentImage.length > 0) {
+const handleImageUpload = async (newImage : string | undefined, currentImage : string | null) : Promise<string | undefined> => {
+    if(currentImage?.length && newImage?.length) {
         await cloudinary.uploader.destroy(currentImage.split('/').pop()!.split('.')[0]);
-        const uploadResponse = await cloudinary.uploader.upload(newImage!);
-        return uploadResponse.secure_url;
+        const uploadResponse : UploadApiResponse | undefined = newImage ? await cloudinary.uploader.upload(newImage) : undefined
+        return uploadResponse?.secure_url || undefined;
     }
     const uploadedResponse : UploadApiResponse | undefined = newImage ? await cloudinary.uploader.upload(newImage) : undefined
-    return uploadedResponse ? uploadedResponse.secure_url : undefined;
+    return uploadedResponse?.secure_url || undefined;
 }
 
 export const courseBenefitService = async (benefits : Omit<TSelectCourseBenefit, 'id'>[], courseId : string, currentStudentId : string) : 
@@ -129,10 +131,71 @@ export const createCourseChapterService = async (videoDetails : Omit<TSelectVide
         
         await insertHashCache(`course:${courseId}:chapters:${chapterDetails.id}`, chapterDetails),
         await Promise.all(videoDetail.map(async video => {
-            insertHashListCache(`chapter_videos:${chapterDetails.id}`, video.videoTitle, video);
+            insertHashListCache(`course_videos:${video.chapterId}`, video.id, video);
         }));
 
         return { chapterDetails : chapterDetails, videoDetail } as ChapterAndVideoDetails;
+        
+    } catch (err : unknown) {
+        const error = err as TErrorHandler;
+        throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
+    }
+}
+
+const generateHash = (input : string) : string => {
+    return crypto.createHash('sha256').update(input).digest('hex');
+}
+
+export const updateCourseChapterService = async (chapterId : string, courseId : string, currentTeacherId : string, 
+chapterDetails : Partial<ModifiedChapterDetail>) : Promise<TSelectChapter> => {
+    try {
+        const [desiredCourse, existingChapterDetail] : [TSelectCourse, TSelectChapter | null] = await Promise.all([
+            getAllHashCache<TSelectCourse>(`course:${courseId}`), findAllCourseChapter(courseId, chapterId)
+        ])
+        if(desiredCourse.teacherId !== currentTeacherId) throw new ForbiddenError();
+
+        const changedValue = new Map<keyof Partial<ModifiedChapterDetail>, string | null>();
+        Object.keys(chapterDetails).forEach(key => {
+            const detailKey = key as keyof Partial<ModifiedChapterDetail>;
+            if(chapterDetails[detailKey] !== undefined) {
+                const newValue : string | null = chapterDetails[detailKey] ?? null;
+                const oldValue : string | null = existingChapterDetail ? existingChapterDetail[detailKey] : null;
+
+                const newHash : string | null = newValue ? generateHash(newValue) : null;
+                const oldHash : string | null = oldValue ? generateHash(oldValue) : null;
+
+                if(newHash !== oldHash) changedValue.set(detailKey, newValue);
+            }
+        });
+        const valuesToAdd : Partial<ModifiedChapterDetail> = Object.fromEntries(changedValue);
+
+        if(Object.keys(valuesToAdd).length) {
+            const updatedChapterDetail : TSelectChapter = await patchCourseChapter(chapterId, valuesToAdd);
+            await insertHashCache(`course:${courseId}:chapters:${chapterId}`, updatedChapterDetail);
+            return updatedChapterDetail;
+        }
+
+        return existingChapterDetail!;
+        
+    } catch (err : unknown) {
+        const error = err as TErrorHandler;
+        throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
+    }
+}
+// fix the all functions when the course not found send a error that course not found
+export const updateChapterVideoDetailService = async (chapterId : string, videoId : string, currentTeacherId : string, 
+videoDetail : InsertVideoDetails) : Promise<TSelectVideoDetails> => {
+    try {
+        const videoCache : TSelectVideoDetails = JSON.parse(await getHashCache(`course_videos:${chapterId}`, videoId));
+        await handleOldVideo(videoCache.videoUrl);
+
+        const videoUploadResponse : uploadVideoDetailResponse[] = await uploadVideoDetails([videoDetail]);
+        const updatedVideoDetail : TSelectVideoDetails = await updateChapterVideos({
+            ...videoDetail, videoUrl : videoUploadResponse[0].videoUploadResponse.secure_url
+        }, videoId);
+        await insertHashListCache(`course_videos:${chapterId}`, videoId, updatedVideoDetail);
+
+        return updatedVideoDetail;
         
     } catch (err : unknown) {
         const error = err as TErrorHandler;
@@ -145,7 +208,11 @@ export const createCourseChapterService = async (videoDetails : Omit<TSelectVide
 // Done only send in response the free videos if use not purchase the course
 // 5. add role to routes
 // 6. add course details(chapter videos benefit) to cache
-const uploadVideoDetails = async (videoDetails : Omit<TSelectVideoDetails, 'id'>[]) : Promise<uploadVideoDetailResponse[]> => {
+export const handleOldVideo = async (videoUrl : string | null) : Promise<void> => {
+    if(videoUrl) await cloudinary.uploader.destroy(videoUrl.split('/').pop()!.split('.')[0]);
+}
+
+const uploadVideoDetails = async <T extends InsertVideoDetails>(videoDetails : T[]) : Promise<uploadVideoDetailResponse[]> => {
     const limit = pLimit(10);
     const uploadResponse : Promise<uploadVideoDetailResponse>[] = videoDetails.map(video => {
         return limit(async () => {
@@ -158,7 +225,7 @@ const uploadVideoDetails = async (videoDetails : Omit<TSelectVideoDetails, 'id'>
     const uploadedResponse : uploadVideoDetailResponse[] = await Promise.all(uploadResponse);
     return uploadedResponse;
 }
-
+// 1. Add the tacher and admin have the course for free
 export const courseService = async (currentStudentId : string, courseId : string) : Promise<CourseRelations> => {
     try {
         const courseDetail : CourseRelations = await findCourseWithRelations(courseId);
@@ -168,7 +235,7 @@ export const courseService = async (currentStudentId : string, courseId : string
         const filteredChapters : FilteredChapters = courseDetail?.chapters?.filter(chapter => chapter.visibility !== 'draft')
         .map(chapter => ({...chapter, videos : chapter.videos.filter(video => studentHasPurchased || video.state === 'free')}));
 
-        const modifiedCourse = {...courseDetail, chapters : filteredChapters} as CourseRelations;
+        const modifiedCourse : CourseRelations = {...courseDetail, chapters : filteredChapters} as CourseRelations;
         return modifiedCourse;
         
     } catch (err : unknown) {

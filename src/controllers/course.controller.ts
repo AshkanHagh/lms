@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { CatchAsyncError } from '../middlewares/catchAsyncError';
-import type { ChapterAndVideoDetails, courseBenefitAndDetails, CourseGeneric, CourseParams, CourseRelations, InsectCourseDetailsBody, insertChapterBody, TSelectCourse, TSelectCourseBenefit } from '../types/index.type';
-import { courseBenefitService, courseService, createCourseChapterService, createCourseService, editCourseDetailsService } from '../services/course.service';
+import type { ChapterAndVideoDetails, courseBenefitAndDetails, CourseGeneric, CourseParams, CourseRelations, InsectCourseDetailsBody, insertChapterBody, InsertVideoDetails, ModifiedChapterDetail, TSelectCourse, TSelectCourseBenefit, TSelectVideoDetails } from '../types/index.type';
+import { courseBenefitService, courseService, createCourseChapterService, createCourseService, editCourseDetailsService, updateChapterVideoDetailService, updateCourseChapterService } from '../services/course.service';
 
 export const createCourse = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
     try {
@@ -19,14 +19,14 @@ export const createCourse = CatchAsyncError(async (req : Request, res : Response
 export const editCourseDetails = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
     try {
         const { courseId } = req.params as CourseParams;
-        const { title, description, price, image, prerequisite, tags 
+        const { title, description, price, image, prerequisite, tags, visibility
         } = req.body as InsectCourseDetailsBody<CourseGeneric<'update'>> & {tags : string[]};
         
         const currentStudentId : string = req.student!.id;
 
         const updatedDetails : TSelectCourse = await editCourseDetailsService({
-            title, description, price, image, teacherId : currentStudentId, prerequisite
-        }, courseId, currentStudentId, tags);
+            title, description, price, image, teacherId : currentStudentId, prerequisite, visibility
+        }, courseId, currentStudentId, tags ?? []);
         res.status(200).json({success : true, course : updatedDetails});
         
     } catch (error : unknown) {
@@ -67,6 +67,38 @@ export const createCourseChapter =  CatchAsyncError(async (req :  Request, res :
         return next(error);
     }
 });
+
+export const updateCourseChapter = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
+    try {
+        const { visibility, description, title } = req.body as Partial<ModifiedChapterDetail>
+        const { courseId, chapterId } = req.params as {courseId : string, chapterId : string};
+        const currentTeacherId = req.student!.id;
+
+        const chapterDetail = await updateCourseChapterService(chapterId, courseId, currentTeacherId, {
+            visibility, description, title, courseId : courseId
+        });
+        res.status(200).json({success : true, chapterDetail});
+        
+    } catch (error : unknown) {
+        return next(error);
+    }
+});
+
+export const updateChapterVideoDetail = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
+    try {
+        const { chapterId, videoId } = req.params as {chapterId : string, videoId : string};
+        const { state, videoTitle, videoUrl } = req.body as InsertVideoDetails;
+        const currentTeacherId : string = req.student!.id;
+
+        const videoDetails : TSelectVideoDetails = await updateChapterVideoDetailService(chapterId, videoId, currentTeacherId, {
+            state, videoTitle, videoUrl
+        });
+        res.status(200).json({status : true, videoDetails});
+        
+    } catch (error : unknown) {
+        return next(error);
+    }
+})
 
 export const course = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
     try {

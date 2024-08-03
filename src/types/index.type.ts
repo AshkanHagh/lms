@@ -23,11 +23,11 @@ export type TSelectStudent = InferSelectModel<typeof studentTable>;
 export type TModifiedStudent = Omit<TSelectStudent, 'customerId'>;
 
 export type TSelectCourse = InferSelectModel<typeof courseTable>;
-export type InsectCourseDetails = Pick<TSelectCourse, 'title' | 'description' | 'prerequisite' | 'price' | 'image' | 'teacherId'>;
+export type InsectCourseDetails = Omit<TSelectCourse, 'id' | 'updatedAt' | 'createdAt'>;
 
 export type InsectCourseDetailsBody<T> = 
 T extends 'insert' ? Pick<TSelectCourse, 'title' | 'teacherId'> : 
-Omit<TSelectCourse, 'id' | 'createdAt' | 'updatedAt' | 'prerequisite'> & {prerequisite : string[]};
+Omit<TSelectCourse, 'id' | 'createdAt' | 'updatedAt' | 'prerequisite'> & {prerequisite : string[] | null};
 
 export type TSelectCourseBenefit = InferSelectModel<typeof courseBenefitTable>;
 
@@ -80,8 +80,10 @@ export type uploadVideoDetailResponse = {
     videoUploadResponse : UploadApiResponse;
 }
 
+export type InsertVideoDetails = Pick<TSelectVideoDetails, 'state' | 'videoTitle' | 'videoUrl'>;
+
 export type TSelectTags = InferSelectModel<typeof courseTagsTable>;
-export type TagsEntries = {key : string, value : string}
+export type Entries = {key : string, value : string}
 
 export type CourseParams = {courseId : string};
 
