@@ -1,10 +1,8 @@
 import Joi, { type ObjectSchema } from 'joi';
 import { ValidationError } from '../libs/utils/customErrors';
 
-// const validator = (schema : ObjectSchema) => (payload : ObjectSchema) => schema.validate(payload, {abortEarly : false});
-
-export const validate = <T>(schema: ObjectSchema, data: T) => {
-    const {error, value} = schema.validate(data, {stripUnknown: true});
+export const validate = <T>(schema : ObjectSchema, data : T) => {
+    const {error, value} = schema.validate(data, {stripUnknown : true});
     if (error) throw new ValidationError(error.message);
     return value;
 };
@@ -24,10 +22,53 @@ export const socialAuthValidation = Joi.object({
     image : Joi.string().required().trim()
 });
 
-// export const courseValidation = Joi.object({
-//     title : Joi.string().max(500).required().trim(),
-//     details : Joi.string().max(500).required().trim(),
-//     prerequisite : Joi.array().required(),
-//     image : Joi.string().required().trim(),
-//     price : Joi.number().required()
-// });
+export const createCourseSchema: ObjectSchema = Joi.object({
+    title : Joi.string().max(255).required().trim()
+});
+
+export const editCourseDetailsSchema : ObjectSchema = Joi.object({
+    title : Joi.string().max(255).optional().trim(),
+    description : Joi.string().optional().trim(),
+    price : Joi.number().optional(),
+    image : Joi.string().optional().trim(),
+    prerequisite : Joi.array().items(Joi.string()).optional().allow(null),
+    tags : Joi.array().items(Joi.string()).optional(),
+    visibility : Joi.string().valid('publish', 'unpublish').optional().allow(null)
+});
+
+export const courseBenefitSchema : ObjectSchema = Joi.object({
+    benefits : Joi.array().items(Joi.object({
+        title : Joi.string().max(255).required().trim(),
+        details : Joi.string().required().trim()
+    })).required()
+});
+
+export const insertChapterBodySchema : ObjectSchema = Joi.object({
+    chapterDetails : Joi.object({
+        title : Joi.string().max(255).required().trim(),
+        description : Joi.string().optional().trim(),
+        visibility : Joi.string().valid('publish', 'draft').optional().allow(null),
+        courseId : Joi.string().optional().allow(null)
+    }).required(),
+    videoDetails : Joi.array().items(Joi.object({
+        videoTitle : Joi.string().max(255).required().trim(),
+        videoUrl : Joi.string().uri().required().trim(),
+        state : Joi.string().valid('free', 'premium').optional().allow(null)
+    })).required()
+});
+
+export const updateCourseChapterSchema : ObjectSchema = Joi.object({
+    title : Joi.string().max(255).optional().trim(),
+    description : Joi.string().optional().trim(),
+    visibility : Joi.string().valid('publish', 'draft').optional().allow(null)
+});
+
+export const updateChapterVideoDetailSchema : ObjectSchema = Joi.object({
+    videoTitle : Joi.string().max(255).required().trim(),
+    videoUrl : Joi.string().uri().required().trim(),
+    state : Joi.string().valid('free', 'premium').required()
+});
+
+export const querySchema = Joi.object({
+    plan : Joi.string().valid('monthly', 'yearly').required()
+});

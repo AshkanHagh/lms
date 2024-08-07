@@ -12,6 +12,7 @@ import { ErrorMiddleware } from './middlewares/error';
 
 const app : Express = express();
 
+app.use('/api/v1/payments', checkoutRoute); // stripe use express.row
 app.use(express.json({limit : '10mb'}));
 app.use(express.urlencoded({extended : true}));
 app.use(cookieParser());
@@ -22,7 +23,6 @@ app.get('/', (req : Request, res : Response) => res.status(200).json({success : 
 
 app.use('/api/v1/auth', authRoute);
 app.use('/api/v1/courses', coursesRoute);
-app.use('/api/v1/payments', checkoutRoute);
 
 app.all('*', (req : Request, res : Response, next : NextFunction) => {
     next(new RouteNowFoundError(`Route : ${req.originalUrl} not found`));

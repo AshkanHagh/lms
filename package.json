@@ -3,13 +3,11 @@
   "module": "src/server.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun --watch src/server.ts",
     "start": "bun src/server.ts",
+    "dev": "bun --watch src/server.ts",
     "db:generate": "bunx drizzle-kit generate",
     "db:migrate": "bun src/database/migrate.ts",
-    "db:studio": "bunx drizzle-kit studio",
-    "db:seed": "bun src/database/seed.ts",
-    "eslint": "bunx eslint ."
+    "db:studio": "bunx drizzle-kit studio"
   },
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",
@@ -29,7 +27,6 @@
     "typescript": "^latest"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^0.9.4",
     "@upstash/vector": "^1.1.4",
     "cloudinary": "^2.3.0",
     "compression": "^1.7.4",
@@ -43,6 +40,7 @@
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.9.14",
     "p-limit": "^6.1.0",
+    "postgres": "^3.4.4",
     "stripe": "^16.2.0"
   }
 }

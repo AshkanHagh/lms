@@ -23,10 +23,11 @@ export const editCourseDetails = CatchAsyncError(async (req : Request, res : Res
         } = req.body as InsectCourseDetailsBody<CourseGeneric<'update'>> & {tags : string[]};
         
         const currentStudentId : string = req.student!.id;
+        const courseCache : TSelectCourse = req.course;
 
         const updatedDetails : TSelectCourse = await editCourseDetailsService({
             title, description, price, image, teacherId : currentStudentId, prerequisite, visibility
-        }, courseId, currentStudentId, tags ?? []);
+        }, courseId, currentStudentId, tags ?? [], courseCache);
         res.status(200).json({success : true, course : updatedDetails});
         
     } catch (error : unknown) {
@@ -38,13 +39,15 @@ export const courseBenefit = CatchAsyncError(async (req : Request, res : Respons
     try {
         const { courseId } = req.params as CourseParams;
         const { benefits } = req.body as Pick<courseBenefitAndDetails, 'benefits'>;
+
         const currentStudentId : string = req.student!.id;
+        const courseCache : TSelectCourse = req.course;
 
         const benefitWithCourseId : Omit<TSelectCourseBenefit, 'id'>[] = benefits.map<Omit<TSelectCourseBenefit, 'id'>>(benefit => 
             ({title : benefit.title, details : benefit.details, courseId})
         )
 
-        const {course, benefits : courseBenefit} = await courseBenefitService(benefitWithCourseId, courseId, currentStudentId);
+        const {course, benefits : courseBenefit} = await courseBenefitService(benefitWithCourseId, courseId, currentStudentId, courseCache);
         res.status(200).json({success : true, course, benefits : courseBenefit});
         
     } catch (error : unknown) {
@@ -56,10 +59,9 @@ export const createCourseChapter =  CatchAsyncError(async (req :  Request, res :
     try {
         const { courseId } = req.params as CourseParams;
         const { chapterDetails, videoDetails } = req.body as insertChapterBody;
-        const currentStudentId : string = req.student!.id;
 
         const chapterAndVideoDetails : ChapterAndVideoDetails = await createCourseChapterService(
-            videoDetails, chapterDetails, courseId, currentStudentId
+            videoDetails, chapterDetails, courseId
         );
         res.status(200).json({success : true, ...chapterAndVideoDetails});
         

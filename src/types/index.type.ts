@@ -1,6 +1,7 @@
-import type { InferSelectModel } from 'drizzle-orm';
+import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import type { chapterVideosTable, courseBenefitTable, courseChaptersTable, courseTable, courseTagsTable, purchaseCoursesTable, 
-    studentTable } from '../database/schema';
+    studentTable, 
+    subscriptionTable} from '../database/schema';
 import type { UploadApiResponse } from 'cloudinary';
 
 export type TErrorHandler = {
@@ -21,6 +22,7 @@ export type TVerifyAccount = {
 
 export type TSelectStudent = InferSelectModel<typeof studentTable>;
 export type TModifiedStudent = Omit<TSelectStudent, 'customerId'>;
+export type Teacher = Pick<TSelectStudent, 'email' | 'id' | 'name' | 'image'>
 
 export type TSelectCourse = InferSelectModel<typeof courseTable>;
 export type InsectCourseDetails = Omit<TSelectCourse, 'id' | 'updatedAt' | 'createdAt'>;
@@ -60,6 +62,7 @@ export type SelectCondition<T> = T extends 'emailOnly' ? Pick<TModifiedStudent, 
 declare module 'express-serve-static-core' {
     interface Request {
         student? : TSelectStudent;
+        course : TSelectCourse;
     }
 }
 
@@ -110,7 +113,10 @@ export type CheckPurchaseValue<T> = T extends 'modified' ? ModifiedPurchase : TS
 
 export type CourseRelations = TSelectCourse & {
     benefits : TSelectCourseBenefit[] | null; chapters : (TSelectChapter & { videos : TSelectVideoDetails[] })[] | null;
-    tags : TSelectTags[]; teacher : TSelectStudent | null; purchases : {studentId : string | null}[] | null;
+    tags : TSelectTags[]; teacher : Teacher | null; purchases : {studentId : string | null}[] | null;
 } | undefined;
 
 export type FilteredChapters = (TSelectChapter & { videos : TSelectVideoDetails[] })[] | undefined
+
+export type TSelectSubscription = InferSelectModel<typeof subscriptionTable>;
+export type TInsertSubscription = InferInsertModel<typeof subscriptionTable>;

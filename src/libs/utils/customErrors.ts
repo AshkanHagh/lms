@@ -1,3 +1,4 @@
+import type Stripe from 'stripe';
 import ErrorHandler from './errorHandler';
 
 class ValidationError extends ErrorHandler {
@@ -36,6 +37,18 @@ class ResourceNotFoundError extends ErrorHandler {
     }
 }
 
+class CustomerIdNotFoundError extends ErrorHandler {
+    constructor(message : string = 'CustomerId not found. you must subscribe to a plan to access this recourse') {
+        super(message, 404);
+    }
+}
+
+class SubscriptionNotFoundError extends ErrorHandler {
+    constructor(message : string = 'Subscription not found. you must subscribe to a plan to access this recourse') {
+        super(message, 404);
+    }
+}
+
 class InvalidUserIdError extends ErrorHandler {
     constructor(message : string = 'Invalid id - User not found') {
         super(message, 400);
@@ -66,13 +79,7 @@ class InternalServerError extends ErrorHandler {
     }
 }
 
-class PasswordDoesNotMatch extends ErrorHandler {
-    constructor(message : string = 'Password dose not match') {
-        super(message, 400)
-    }
-}
-
-class UserNotFoundError extends ErrorHandler {
+class StudentNotFoundError extends ErrorHandler {
     constructor(message : string = 'User not found') {
         super(message, 404);
     }
@@ -102,18 +109,6 @@ class RoleForbiddenError extends ErrorHandler {
     }
 }
 
-class UpdateFollowerInfoError extends ErrorHandler {
-    constructor(message: string) {
-        super(`Failed to update follower info: ${message}`, 500);
-    }
-}
-
-class PasswordValidationError extends ErrorHandler {
-    constructor() {
-        super('The new password cannot be the same as the old password. Please enter a new password.', 400);
-    }
-}
-
 class AlreadyPurchasedError extends ErrorHandler {
     constructor() {
         super('You have already purchased this item', 400);
@@ -126,9 +121,33 @@ class NeedToPurchaseThisCourseError extends ErrorHandler {
     }
 }
 
+class EventHandlingError extends ErrorHandler {
+    constructor() {
+        super('Error handling event', 400);
+    }
+}
 
-export {BadRequestError, UnauthorizedError, ForbiddenError, ResourceNotFoundError, PasswordDoesNotMatch, UpdateFollowerInfoError,
-    InvalidUserIdError, LoginRequiredError, InternalServerError, AccessTokenInvalidError, ValidationError, RoleForbiddenError,
-    TokenRefreshError, RouteNowFoundError, InvalidEmailError, EmailAlreadyExists, InvalidVerifyCode, UserNotFoundError,
-    PasswordValidationError, AlreadyPurchasedError, NeedToPurchaseThisCourseError
+class PaymentFailedError extends ErrorHandler {
+    constructor(invoiceId : string, failure_message : string | Stripe.PaymentIntent | null) {
+        super(`Payment failed for invoice ${invoiceId}: ${failure_message || 'Unknown reason'}. Please check the payment method and try again.`, 400);
+    }
+}
+
+class CheckoutError extends ErrorHandler {
+    constructor() {
+        super('Could not create checkout session', 500);
+    }
+}
+
+class RequestTimedOutError extends ErrorHandler {
+    constructor() {
+        super('Request timed out', 400);
+    }
+}
+
+
+export {BadRequestError, UnauthorizedError, ForbiddenError, ResourceNotFoundError, InvalidUserIdError, LoginRequiredError, 
+    InternalServerError, AccessTokenInvalidError, ValidationError, RoleForbiddenError, TokenRefreshError, RouteNowFoundError, 
+    InvalidEmailError, EmailAlreadyExists, InvalidVerifyCode, StudentNotFoundError, AlreadyPurchasedError, NeedToPurchaseThisCourseError, 
+    EventHandlingError, PaymentFailedError, CheckoutError, RequestTimedOutError, CustomerIdNotFoundError, SubscriptionNotFoundError
 };

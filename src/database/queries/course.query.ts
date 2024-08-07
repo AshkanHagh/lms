@@ -65,7 +65,9 @@ export const updateTags = async (tagsId : string, newTags : string) : Promise<vo
 export const findCourseWithRelations = async (courseId : string) : Promise<CourseRelations> => {
     const desiredCourse : CourseRelations = await db.query.courseTable.findFirst({
         where : (table, funcs) => funcs.eq(table.id, courseId),
-        with : {benefits : true, chapters : {with : {videos : true}}, tags : true, teacher : true, purchases : {columns : {studentId : true}}}
+        with : {benefits : true, chapters : {with : {videos : true}}, tags : true, purchases : {columns : {studentId : true}},
+        teacher : {columns : {email : true, id : true, image : true, name : true}}
+    }
     });
     return desiredCourse;
 }

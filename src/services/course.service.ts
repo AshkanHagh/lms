@@ -1,11 +1,12 @@
 import { findAllCourseChapter } from '../database/cache/course.chache';
 import { getAllHashCache, getHashCache, insertHashCache, insertHashListCache, removeFromHashListCache } from '../database/cache/index.cache';
-import { findCourseWithRelations, findSimilarTags, insertChapterAndVideos, insertCourse, insertCourseBenefit, insertNewTags, patchCourseChapter, removeTags, updateChapterVideos, updateCourse, updateTags } from '../database/queries/course.query';
-import { ForbiddenError, ResourceNotFoundError } from '../libs/utils';
+import { findCourseWithRelations, findSimilarTags, insertChapterAndVideos, insertCourse, insertCourseBenefit, insertNewTags, patchCourseChapter, removeTags, updateChapterVideos, updateCourse, updateTags
+} from '../database/queries/course.query';
+import { ResourceNotFoundError } from '../libs/utils';
 import ErrorHandler from '../libs/utils/errorHandler';
 import type { ChapterAndVideoDetails, courseBenefitAndDetails, CourseGeneric, CourseRelations, FilteredChapters, InsectCourseDetailsBody, ModifiedChapterDetail, Entries, TErrorHandler, TSelectCourse, TSelectCourseBenefit, TSelectTags, TSelectVideoDetails, 
-    uploadVideoDetailResponse, TSelectChapter,
-    InsertVideoDetails, } from '../types/index.type';
+    uploadVideoDetailResponse, TSelectChapter, InsertVideoDetails, 
+} from '../types/index.type';
 import { v2 as cloudinary, type UploadApiResponse } from 'cloudinary';
 import pLimit from 'p-limit';
 import crypto from 'crypto';
@@ -23,14 +24,10 @@ export const createCourseService = async <T extends CourseGeneric<'insert'>>(cou
 };
 
 export const editCourseDetailsService = async <B extends CourseGeneric<'update'>>(courseDetail : Partial<InsectCourseDetailsBody<B>>, 
-    courseId : string, currentStudentId : string, tags : string[]) : Promise<TSelectCourse> => {
+    courseId : string, currentStudentId : string, tags : string[], courseCache : TSelectCourse) : Promise<TSelectCourse> => {
     try {
         let currentTags : TSelectTags[];
-        const [courseCache, currentTagsData] : [TSelectCourse, Record<string, string>] = await Promise.all([
-            getAllHashCache<TSelectCourse>(`course:${courseId}`), getAllHashCache<Record<string, string>>(`course_tags:${courseId}`)
-        ]);
-        if(courseCache.teacherId !== currentStudentId) throw new ForbiddenError();
-
+        const currentTagsData : Record<string, string> = await getAllHashCache<Record<string, string>>(`course_tags:${courseId}`);
         const newTagsSet : Set<string> = new Set(tags);
 
         const entries : Entries[] = Object.entries(currentTagsData).map(([key, value]) => ({key, value}));
@@ -74,7 +71,7 @@ Promise<void> => {
 export const insertNewTagsIfNeeded = async (tagsToAdd : string[], courseId : string) : Promise<void> => {
     if(tagsToAdd && tagsToAdd.length > 0) {
         const newTags : TSelectTags[] = await insertNewTags(combineTagAndCourseId(tagsToAdd, courseId));
-        newTags.map(async tag => await insertHashListCache(`course_tags:${courseId}`, tag.id, tag))
+        newTags.map(async tag => await insertHashListCache(`course_tags:${courseId}`, tag.id, tag));
     }
 }
 
@@ -94,12 +91,9 @@ const handleImageUpload = async (newImage : string | undefined, currentImage : s
     return uploadedResponse?.secure_url || undefined;
 }
 
-export const courseBenefitService = async (benefits : Omit<TSelectCourseBenefit, 'id'>[], courseId : string, currentStudentId : string) : 
- Promise<courseBenefitAndDetails> => {
+export const courseBenefitService = async (benefits : Omit<TSelectCourseBenefit, 'id'>[], courseId : string, currentStudentId : string, 
+    course : TSelectCourse) : Promise<courseBenefitAndDetails> => {
     try {
-        const course : TSelectCourse = await getAllHashCache(`course:${courseId}`);
-        if(course.teacherId !== currentStudentId) throw new ForbiddenError();
-
         const benefitResult : TSelectCourseBenefit[] = await insertCourseBenefit(benefits);
         await Promise.all(benefitResult.map<void>(async benefit => {
             insertHashCache(`course_benefits:${benefit.id}`, benefit)
@@ -114,7 +108,7 @@ export const courseBenefitService = async (benefits : Omit<TSelectCourseBenefit,
 }
 
 export const createCourseChapterService = async (videoDetails : Omit<TSelectVideoDetails, 'id'>[], chapterDetail : ModifiedChapterDetail, 
-    courseId : string, currentStudentId : string) : Promise<ChapterAndVideoDetails> => {
+    courseId : string) : Promise<ChapterAndVideoDetails> => {
     try {
         const uploadedResponse : uploadVideoDetailResponse[] = await uploadVideoDetails(videoDetails);
         const responseMap : Map<string, uploadVideoDetailResponse> = new Map(uploadedResponse.map(upload => [upload.videoTitle, upload]));
@@ -123,9 +117,6 @@ export const createCourseChapterService = async (videoDetails : Omit<TSelectVide
             const upload : uploadVideoDetailResponse | undefined = responseMap.get(video.videoTitle);
             if(upload) video.videoUrl = upload.videoUploadResponse.secure_url;
         });
-
-        const courseTeacherId : string = await getHashCache(`course:${courseId}`, 'teacherId');
-        if(courseTeacherId !== currentStudentId) throw new ForbiddenError();
         
         const { chapterDetails, videoDetail } = await insertChapterAndVideos({...chapterDetail, courseId : courseId}, videoDetails);
         
@@ -145,19 +136,15 @@ export const createCourseChapterService = async (videoDetails : Omit<TSelectVide
 const generateHash = (input : string) : string => {
     return crypto.createHash('sha256').update(input).digest('hex');
 }
-
+// 1. Check whay we need to search like `course:${courseId}:chapter:*` and now `course:${courseId}:chapter:${chapterId}`
 export const updateCourseChapterService = async (chapterId : string, courseId : string, currentTeacherId : string, 
 chapterDetails : Partial<ModifiedChapterDetail>) : Promise<TSelectChapter> => {
     try {
-        const [desiredCourse, existingChapterDetail] : [TSelectCourse, TSelectChapter | null] = await Promise.all([
-            getAllHashCache<TSelectCourse>(`course:${courseId}`), findAllCourseChapter(courseId, chapterId)
-        ])
-        if(desiredCourse.teacherId !== currentTeacherId) throw new ForbiddenError();
-
+        const existingChapterDetail : TSelectChapter | null = await findAllCourseChapter(`course:${courseId}:chapters:*`, chapterId);  
         const changedValue = new Map<keyof Partial<ModifiedChapterDetail>, string | null>();
+
         Object.keys(chapterDetails).forEach(key => {
             const detailKey = key as keyof Partial<ModifiedChapterDetail>;
-            console.log(key);
             if(chapterDetails[detailKey] !== undefined) {
                 const newValue : string | null = chapterDetails[detailKey] ?? null;
                 const oldValue : string | null = existingChapterDetail ? existingChapterDetail[detailKey] : null;
@@ -183,11 +170,12 @@ chapterDetails : Partial<ModifiedChapterDetail>) : Promise<TSelectChapter> => {
         throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
     }
 }
-// fix the all functions when the course not found send a error that course not found
+
 export const updateChapterVideoDetailService = async (chapterId : string, videoId : string, currentTeacherId : string, 
 videoDetail : InsertVideoDetails) : Promise<TSelectVideoDetails> => {
     try {
         const videoCache : TSelectVideoDetails = JSON.parse(await getHashCache(`course_videos:${chapterId}`, videoId));
+        if(!videoCache || Object.keys(videoCache).length === 0) throw new ResourceNotFoundError();
         await handleOldVideo(videoCache.videoUrl);
 
         const videoUploadResponse : uploadVideoDetailResponse[] = await uploadVideoDetails([videoDetail]);
@@ -222,6 +210,8 @@ const uploadVideoDetails = async <T extends InsertVideoDetails>(videoDetails : T
     return uploadedResponse;
 }
 // 1. Add the teacher and admin have the course for free
+// 2. Make sure to add visibility options to joi validation
+// 3 remove the purchase onj in courseService
 export const courseService = async (currentStudentId : string, courseId : string) : Promise<CourseRelations> => {
     try {
         const courseDetail : CourseRelations = await findCourseWithRelations(courseId);
@@ -231,7 +221,8 @@ export const courseService = async (currentStudentId : string, courseId : string
         const filteredChapters : FilteredChapters = courseDetail?.chapters?.filter(chapter => chapter.visibility !== 'draft')
         .map(chapter => ({...chapter, videos : chapter.videos.filter(video => studentHasPurchased || video.state === 'free')}));
 
-        const modifiedCourse : CourseRelations = {...courseDetail, chapters : filteredChapters} as CourseRelations;
+        const { purchases, ...courseDetails } = courseDetail;
+        const modifiedCourse : CourseRelations = {...courseDetails, chapters : filteredChapters} as CourseRelations;
         return modifiedCourse;
         
     } catch (err : unknown) {

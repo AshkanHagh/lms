@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { login, logout, refreshToken, register, socialAuth, verifyAccount } from '../controllers/auth.controller';
-import validationMiddleware from '../middlewares/validation';
+import { validationMiddleware } from '../middlewares/validation';
 import { authValidation, socialAuthValidation, verifyAccountValidation } from '../validations/Joi';
 import { isAuthenticated } from '../middlewares/auth';
 

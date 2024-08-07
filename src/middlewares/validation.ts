@@ -4,7 +4,7 @@ import { ValidationError } from '../libs/utils';
 import { validate } from '../validations/Joi';
 import type { TErrorHandler } from '../types/index.type';
 
-const validationMiddleware = (schema : ObjectSchema) => {
+export const validationMiddleware = (schema : ObjectSchema) => {
     return (req : Request, res : Response, next : NextFunction) => {
         try {
             req.body = validate(schema, req.body);
@@ -15,4 +15,16 @@ const validationMiddleware = (schema : ObjectSchema) => {
         }
     }
 }
-export default validationMiddleware;
+
+export const validateQuery = (schema : ObjectSchema) => {
+    return (req : Request, res : Response, next : NextFunction) => {
+        try {
+            req.query = validate(schema, req.query);
+            next();
+
+        } catch (err) {
+            const error = err as TErrorHandler
+            return next(new ValidationError(error.message));
+        }
+    }
+}

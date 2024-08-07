@@ -1,14 +1,15 @@
 import type { Request, Response, NextFunction } from 'express';
 import { CatchAsyncError } from '../middlewares/catchAsyncError';
-import { checkoutService, verifyPaymentService } from '../services/checkout.service';
-import type { CompletePaymentQueries } from '../types/index.type';
+import { checkoutService, subscriptionCheckoutService, subscriptionPortalService, verifyPaymentService, 
+    webhookListeningService } from '../services/checkout.service';
+import type { CompletePaymentQueries, TSelectPurchases, TSelectStudent } from '../types/index.type';
 
 export const checkout = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
     try {
         const { courseId } = req.params as {courseId : string};
-        const currentStudentId : string = req.student!.id;
+        const currentStudent : TSelectStudent = req.student!
 
-        const paymentUrl : string | null = await checkoutService(currentStudentId, courseId);
+        const paymentUrl : string | null = await checkoutService(currentStudent, courseId);
         res.status(200).json({success : true, url : paymentUrl});
 
     } catch (error : unknown) {
@@ -19,8 +20,7 @@ export const checkout = CatchAsyncError(async (req : Request, res : Response, ne
 export const verifyPayment = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
     try {
         const { session_id, course_id, student_id } = req.query as CompletePaymentQueries;
-        const verifiedPurchase = await verifyPaymentService(session_id, course_id, student_id);
-
+        const verifiedPurchase : TSelectPurchases = await verifyPaymentService(session_id, course_id, student_id);
         res.status(200).json({success : true, purchase : verifiedPurchase});
         
     } catch (error : unknown) {
@@ -36,3 +36,40 @@ export const cancelPayment = CatchAsyncError(async (req : Request, res : Respons
         return next(error);
     }
 });
+
+export const webhookListening = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
+    try {
+        const signature : string | undefined = req.headers['stripe-signature'] as string | undefined;
+        const body : string = req.body;
+
+        const webhookResult : string = await webhookListeningService(signature, body);
+        res.status(200).json({success : true, message : webhookResult});
+
+    } catch (error : unknown) {
+        return next(error);
+    }
+});
+
+export const subscriptionCheckout = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
+    try {
+        const { plan } = req.query as {plan : 'monthly' | 'yearly'};
+        const currentStudent : TSelectStudent = req.student!;
+        
+        const checkoutUrl : string | null = await subscriptionCheckoutService(plan, currentStudent);
+        res.status(200).json({success : true, checkoutUrl});
+        
+    } catch (error : unknown) {
+        return next(error);
+    }
+});
+
+export const subscriptionPortal = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
+    try {
+        const customerId : string | undefined = req.student?.customerId ?? undefined
+        const portalUrl : string | null = await subscriptionPortalService(customerId);
+        res.status(200).json({success : true, portalUrl});
+        
+    } catch (error : unknown) {
+        return next(error);
+    }
+})
