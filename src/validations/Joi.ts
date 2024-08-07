@@ -72,3 +72,23 @@ export const updateChapterVideoDetailSchema : ObjectSchema = Joi.object({
 export const querySchema = Joi.object({
     plan : Joi.string().valid('monthly', 'yearly').required()
 });
+
+export const courseParamsSchema: ObjectSchema = Joi.object({
+    courseId : Joi.string().required(),
+});
+
+export const courseAndChapterIdSchema : ObjectSchema = Joi.object({
+    courseId : Joi.string().required(),
+    chapterId : Joi.string().required(),
+});
+
+export const chapterAndVideoIdSchema : ObjectSchema = Joi.object({
+    chapterId : Joi.string().required(),
+    videoId : Joi.string().required(),
+});
+
+export const CheckoutVerifyQuerySchema : ObjectSchema = Joi.object({
+    session_id : Joi.string().required(),
+    course_id : Joi.string().required(), 
+    student_id : Joi.string().required()
+})

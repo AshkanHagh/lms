@@ -28,3 +28,16 @@ export const validateQuery = (schema : ObjectSchema) => {
         }
     }
 }
+
+export const validateParams = (schema : ObjectSchema) => {
+    return (req : Request, res : Response, next : NextFunction) => {
+        try {
+            req.query = validate(schema, req.params);
+            next();
+
+        } catch (err) {
+            const error = err as TErrorHandler
+            return next(new ValidationError(error.message));
+        }
+    }
+}

@@ -1,4 +1,4 @@
-import { getAllHashCache, insertHashCache } from '../database/cache/index.cache';
+import { getAllHashCache, insertHashCache, insertHashListCache, insertSetListCache } from '../database/cache/index.cache';
 import { findPurchase, insertPurchase } from '../database/queries/checkout.query';
 import { stripe } from '../configs/stripe.config';
 import { AlreadyPurchasedError, BadRequestError, CheckoutError, CustomerIdNotFoundError, PaymentFailedError, ResourceNotFoundError, SubscriptionNotFoundError, StudentNotFoundError } from '../libs/utils';
@@ -69,8 +69,9 @@ export const verifyPaymentService = async (checkoutSessionId : string, courseId 
         }
 
         const newPurchase : TSelectPurchases = await insertPurchase(purchaseDetail);
-        await Promise.all([insertHashCache(`purchase_detail:${newPurchase.id}`, newPurchase),
-            insertHashCache(`student_purchases:${currentStudentId}`, {[courseId] : newPurchase.id})
+        await Promise.all([insertHashListCache(`purchase_detail:${newPurchase.id}`, courseId, newPurchase),
+            insertHashCache(`student_purchases:${currentStudentId}`, {[courseId] : newPurchase.id}),
+            insertSetListCache(`course_purchases:${courseId}`, currentStudentId)
         ])
         return newPurchase;
         
@@ -119,11 +120,6 @@ export const webhookListeningService = async (signature : string | undefined, bo
         throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
     }
 }
-
-// Done. add refound and cancel subscription
-// Done handel the update subscription event
-// 4. improve performance with cache
-// 5 . check when we purchase a course what event sended to webhook
 
 const handleSubscriptionMode = async (sessionMode : Stripe.Checkout.Session.Mode, sessionId : string, STRIPE_YEARLY_PRICE_ID : string) : 
 Promise<void> => {

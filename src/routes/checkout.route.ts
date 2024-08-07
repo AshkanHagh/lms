@@ -3,15 +3,15 @@ import { cancelPayment, checkout, subscriptionCheckout, subscriptionPortal, veri
     webhookListening } from '../controllers/checkout.controller';
 import { isAuthenticated } from '../middlewares/auth';
 import { isCourseExists } from '../middlewares/checkItemExists';
-import { validateQuery } from '../middlewares/validation';
+import { validateParams, validateQuery } from '../middlewares/validation';
 import express from 'express';
-import { querySchema } from '../validations/Joi';
+import { CheckoutVerifyQuerySchema, courseParamsSchema, querySchema } from '../validations/Joi';
 
 const router : Router = Router();
 
-router.post('/checkout/:courseId', [isAuthenticated, isCourseExists('normal')], checkout);
+router.post('/checkout/:courseId', [validateParams(courseParamsSchema), isAuthenticated, isCourseExists('normal')], checkout);
 
-router.get('/verify', verifyPayment);
+router.get('/verify', validateQuery(CheckoutVerifyQuerySchema), verifyPayment);
 
 router.get('/cancel', cancelPayment);
 

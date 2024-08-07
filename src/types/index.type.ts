@@ -116,7 +116,27 @@ export type CourseRelations = TSelectCourse & {
     tags : TSelectTags[]; teacher : Teacher | null; purchases : {studentId : string | null}[] | null;
 } | undefined;
 
+export type ModifiedCourseRelations = TSelectCourse & {
+    benefits : TSelectCourseBenefit[] | null; chapters : (TSelectChapter & { videos : TSelectVideoDetails[] })[] | null;
+    tags : TSelectTags[]; teacher : Teacher | null; purchases : number | null;
+} | undefined;
+
 export type FilteredChapters = (TSelectChapter & { videos : TSelectVideoDetails[] })[] | undefined
 
 export type TSelectSubscription = InferSelectModel<typeof subscriptionTable>;
 export type TInsertSubscription = InferInsertModel<typeof subscriptionTable>;
+
+export type ChapterDetails = TSelectChapter & {videos : TSelectVideoDetails[]};
+export type CoursePurchase = {purchases : TSelectPurchases[]}
+
+export type CourseRelationsPurchases = {
+    studentId : string | null
+}
+
+export type CourseAndChapterId = {
+    courseId : string; chapterId : string
+}
+
+export type ChapterAndVideoId = {
+    videoId : string; chapterId : string
+}

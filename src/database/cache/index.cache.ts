@@ -28,3 +28,15 @@ export const insertHashListCache = async <T>(hashKey : string, hashIndex : strin
 export const removeFromHashListCache = async (hashKey : string, hashIndex : string) : Promise<void> => {
     await redis.hdel(hashKey, hashIndex);
 }
+
+export const insertSetListCache = async (setKey : string, setValue : string) : Promise<void> => {
+    await redis.sadd(setKey, setValue);
+}
+
+export const getSetListCache = async (setKey : string, setIndex : string) => {
+    return await redis.sismember(setKey, setIndex);
+}
+
+export const getAllSetListCache = async (setKey : string) : Promise<string[]> => {
+    return await redis.smembers(setKey);
+}

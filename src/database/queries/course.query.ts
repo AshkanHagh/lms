@@ -1,8 +1,9 @@
 import { eq, inArray } from 'drizzle-orm';
-import type { ChapterAndVideoDetails, CourseRelations, InsectCourseDetails, InsertVideoDetails, ModifiedChapterDetail, TSelectChapter, TSelectCourse, TSelectCourseBenefit, 
+import type { ChapterAndVideoDetails, ChapterDetails, CoursePurchase, CourseRelations, InsectCourseDetails, InsertVideoDetails, ModifiedChapterDetail, TSelectChapter, TSelectCourse, TSelectCourseBenefit, 
     TSelectTags, TSelectVideoDetails } from '../../types/index.type';
 import { db } from '..';
 import { chapterVideosTable, courseBenefitTable, courseChaptersTable, courseTable, courseTagsTable } from '../schema';
+import { ResourceNotFoundError } from '../../libs/utils';
 
 export const insertCourse = async (details : Pick<InsectCourseDetails, 'title' | 'teacherId'>) : Promise<TSelectCourse> => {
     const [courseDetail] = await db.insert(courseTable).values(details).returning();
@@ -76,4 +77,24 @@ export const patchCourseChapter = async (chapterId : string, chapterDetails : Pa
     const [updatedChapter] : TSelectChapter[] = await db.update(courseChaptersTable).set(chapterDetails)
     .where(eq(courseChaptersTable.id, chapterId)).returning();
     return updatedChapter
+}
+
+export const findChapterDetail = async (chapterId : string) : Promise<ChapterDetails | undefined> => {
+    return await db.query.courseChaptersTable.findFirst({
+        where : (table, funcs) => funcs.eq(table.id, chapterId), with : {videos : true}
+    })
+}
+
+export const findCoursePurchases = async (courseId : string) : Promise<CoursePurchase | undefined> => {
+    return await db.query.courseTable.findFirst({
+        where : (table, funcs) => funcs.eq(table.id, courseId), with : {purchases : true}, columns : {}
+    });
+}
+
+export const findVideoDetails = async (videoId : string) : Promise<TSelectVideoDetails> => {
+    const videoDetail : TSelectVideoDetails | undefined = await db.query.chapterVideosTable.findFirst({
+        where : (table, funcs) => funcs.eq(table.id, videoId)
+    });
+    if(!videoDetail) throw new ResourceNotFoundError();
+    return videoDetail;
 }

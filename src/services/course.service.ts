@@ -1,15 +1,18 @@
-import { findAllCourseChapter } from '../database/cache/course.chache';
-import { getAllHashCache, getHashCache, insertHashCache, insertHashListCache, removeFromHashListCache } from '../database/cache/index.cache';
-import { findCourseWithRelations, findSimilarTags, insertChapterAndVideos, insertCourse, insertCourseBenefit, insertNewTags, patchCourseChapter, removeTags, updateChapterVideos, updateCourse, updateTags
+import { findAllCourseChapter, findCourseWithChapterId } from '../database/cache/course.chache';
+import { getAllHashCache, getHashCache, getSetListCache, insertHashCache, insertHashListCache, insertSetListCache, 
+    removeFromHashListCache } from '../database/cache/index.cache';
+import { findChapterDetail, findCoursePurchases, findCourseWithRelations, findSimilarTags, findVideoDetails, updateTags, insertCourseBenefit,
+    insertNewTags, patchCourseChapter, removeTags, updateChapterVideos, updateCourse, insertCourse, insertChapterAndVideos 
 } from '../database/queries/course.query';
-import { ResourceNotFoundError } from '../libs/utils';
+import { ForbiddenError, ResourceNotFoundError } from '../libs/utils';
 import ErrorHandler from '../libs/utils/errorHandler';
-import type { ChapterAndVideoDetails, courseBenefitAndDetails, CourseGeneric, CourseRelations, FilteredChapters, InsectCourseDetailsBody, ModifiedChapterDetail, Entries, TErrorHandler, TSelectCourse, TSelectCourseBenefit, TSelectTags, TSelectVideoDetails, 
-    uploadVideoDetailResponse, TSelectChapter, InsertVideoDetails, 
-} from '../types/index.type';
+import type { ChapterAndVideoDetails, courseBenefitAndDetails, CourseGeneric, CourseRelations, FilteredChapters, InsectCourseDetailsBody, ModifiedChapterDetail, Entries, TErrorHandler, TSelectCourse, TSelectCourseBenefit, TSelectTags, TSelectVideoDetails, uploadVideoDetailResponse, 
+    TSelectChapter, InsertVideoDetails, TSelectStudent, ChapterDetails, CoursePurchase, 
+    ModifiedPurchase} from '../types/index.type';
 import { v2 as cloudinary, type UploadApiResponse } from 'cloudinary';
 import pLimit from 'p-limit';
 import crypto from 'crypto';
+import { findPurchase } from '../database/queries/checkout.query';
 
 export const createCourseService = async <T extends CourseGeneric<'insert'>>(courseDetail : InsectCourseDetailsBody<T>) : Promise<TSelectCourse> => {
     try {
@@ -24,7 +27,7 @@ export const createCourseService = async <T extends CourseGeneric<'insert'>>(cou
 };
 
 export const editCourseDetailsService = async <B extends CourseGeneric<'update'>>(courseDetail : Partial<InsectCourseDetailsBody<B>>, 
-    courseId : string, currentStudentId : string, tags : string[], courseCache : TSelectCourse) : Promise<TSelectCourse> => {
+    courseId : string, tags : string[], courseCache : TSelectCourse) : Promise<TSelectCourse> => {
     try {
         let currentTags : TSelectTags[];
         const currentTagsData : Record<string, string> = await getAllHashCache<Record<string, string>>(`course_tags:${courseId}`);
@@ -91,15 +94,14 @@ const handleImageUpload = async (newImage : string | undefined, currentImage : s
     return uploadedResponse?.secure_url || undefined;
 }
 
-export const courseBenefitService = async (benefits : Omit<TSelectCourseBenefit, 'id'>[], courseId : string, currentStudentId : string, 
-    course : TSelectCourse) : Promise<courseBenefitAndDetails> => {
+export const courseBenefitService = async (benefits : Omit<TSelectCourseBenefit, 'id'>[], courseDetail : TSelectCourse) : 
+Promise<courseBenefitAndDetails> => {
     try {
         const benefitResult : TSelectCourseBenefit[] = await insertCourseBenefit(benefits);
         await Promise.all(benefitResult.map<void>(async benefit => {
-            insertHashCache(`course_benefits:${benefit.id}`, benefit)
+            insertSetListCache(`course_benefits:${courseDetail.id}`, JSON.stringify(benefit))
         }));
-
-        return {course, benefits : benefitResult};
+        return {course : courseDetail, benefits : benefitResult};
         
     } catch (err : unknown) {
         const error = err as TErrorHandler;
@@ -119,12 +121,8 @@ export const createCourseChapterService = async (videoDetails : Omit<TSelectVide
         });
         
         const { chapterDetails, videoDetail } = await insertChapterAndVideos({...chapterDetail, courseId : courseId}, videoDetails);
-        
         await insertHashCache(`course:${courseId}:chapters:${chapterDetails.id}`, chapterDetails),
-        await Promise.all(videoDetail.map(async video => {
-            insertHashListCache(`course_videos:${video.chapterId}`, video.id, video);
-        }));
-
+        await Promise.all(videoDetail.map(async video => {insertHashListCache(`course_videos:${video.chapterId}`, video.id, video)}));
         return { chapterDetails : chapterDetails, videoDetail } as ChapterAndVideoDetails;
         
     } catch (err : unknown) {
@@ -136,9 +134,9 @@ export const createCourseChapterService = async (videoDetails : Omit<TSelectVide
 const generateHash = (input : string) : string => {
     return crypto.createHash('sha256').update(input).digest('hex');
 }
-// 1. Check whay we need to search like `course:${courseId}:chapter:*` and now `course:${courseId}:chapter:${chapterId}`
-export const updateCourseChapterService = async (chapterId : string, courseId : string, currentTeacherId : string, 
-chapterDetails : Partial<ModifiedChapterDetail>) : Promise<TSelectChapter> => {
+// 1. Check way we need to search like `course:${courseId}:chapter:*` and now `course:${courseId}:chapter:${chapterId}`
+export const updateCourseChapterService = async (chapterId : string, courseId : string, chapterDetails : Partial<ModifiedChapterDetail>) :
+Promise<TSelectChapter> => {
     try {
         const existingChapterDetail : TSelectChapter | null = await findAllCourseChapter(`course:${courseId}:chapters:*`, chapterId);  
         const changedValue = new Map<keyof Partial<ModifiedChapterDetail>, string | null>();
@@ -151,7 +149,6 @@ chapterDetails : Partial<ModifiedChapterDetail>) : Promise<TSelectChapter> => {
 
                 const newHash : string | null = newValue ? generateHash(newValue) : null;
                 const oldHash : string | null = oldValue ? generateHash(oldValue) : null;
-
                 if(newHash !== oldHash) changedValue.set(detailKey, newValue);
             }
         });
@@ -162,7 +159,6 @@ chapterDetails : Partial<ModifiedChapterDetail>) : Promise<TSelectChapter> => {
             await insertHashCache(`course:${courseId}:chapters:${chapterId}`, updatedChapterDetail);
             return updatedChapterDetail;
         }
-
         return existingChapterDetail!;
         
     } catch (err : unknown) {
@@ -209,17 +205,21 @@ const uploadVideoDetails = async <T extends InsertVideoDetails>(videoDetails : T
     const uploadedResponse : uploadVideoDetailResponse[] = await Promise.all(uploadResponse);
     return uploadedResponse;
 }
-// 1. Add the teacher and admin have the course for free
-// 2. Make sure to add visibility options to joi validation
-// 3 remove the purchase onj in courseService
-export const courseService = async (currentStudentId : string, courseId : string) : Promise<CourseRelations> => {
+
+export const courseService = async (currentStudent : TSelectStudent, courseId : string) : Promise<CourseRelations> => {
     try {
         const courseDetail : CourseRelations = await findCourseWithRelations(courseId);
         if(courseDetail?.visibility !== 'publish') throw new ResourceNotFoundError();
-        const studentHasPurchased : boolean | undefined = courseDetail?.purchases?.some(student => student.studentId === currentStudentId);
+
+        const studentHasPurchased : boolean | undefined = courseDetail?.purchases?.some(student => student.studentId === currentStudent.id);
+        const studentHasSubscribed : boolean | undefined = currentStudent.plan?.includes('premium');
+        const studentRole : boolean | undefined = currentStudent.role?.includes('admin') || currentStudent.role?.includes('teacher');
+
+        const canAccessVideo = (video : TSelectVideoDetails) : boolean => studentRole || studentHasPurchased || studentHasSubscribed 
+        || video.state === 'free'
 
         const filteredChapters : FilteredChapters = courseDetail?.chapters?.filter(chapter => chapter.visibility !== 'draft')
-        .map(chapter => ({...chapter, videos : chapter.videos.filter(video => studentHasPurchased || video.state === 'free')}));
+        .map(chapter => ({...chapter, videos : chapter.videos.filter(canAccessVideo)}));
 
         const { purchases, ...courseDetails } = courseDetail;
         const modifiedCourse : CourseRelations = {...courseDetails, chapters : filteredChapters} as CourseRelations;
@@ -227,6 +227,55 @@ export const courseService = async (currentStudentId : string, courseId : string
         
     } catch (err : unknown) {
         const error = err as TErrorHandler;
+        throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
+    }
+}
+
+export const courseChapterDetailsService = async (courseId : string, chapterId : string, currentStudent : Pick<TSelectStudent, 'plan' | 'id'>) : 
+Promise<ChapterDetails> => {
+    try {
+        const purchaseDetail : number = await getSetListCache(`course_purchases:${courseId}`, currentStudent.id);
+        const [chapterDetailsCache, videoDetailsCache] : [ChapterDetails, Record<string, string>] = await Promise.all([
+            getAllHashCache<ChapterDetails>(`course:${courseId}:chapters:${chapterId}`), 
+            getAllHashCache<Record<string, string>>(`course_videos:${chapterId}`)
+        ]);
+        const videoDetails : TSelectVideoDetails[] = Object.values(videoDetailsCache).map(videos => JSON.parse(videos)) as TSelectVideoDetails[];
+
+        let coursePurchase : CoursePurchase | undefined;
+        if(!purchaseDetail) coursePurchase = await findCoursePurchases(courseId) as CoursePurchase | undefined;
+
+        const studentHasPurchased : number = coursePurchase ? 
+            (coursePurchase.purchases.some(student => student.studentId === currentStudent.id) ? 1 : 0) : purchaseDetail
+
+        const chapterDetails : ChapterDetails | undefined = Object.keys(chapterDetailsCache).length && videoDetails.length ? 
+        {...chapterDetailsCache, videos : videoDetails} : await findChapterDetail(chapterId);
+        if(!chapterDetails) throw new ResourceNotFoundError();
+
+        const studentSubscription : boolean | undefined = currentStudent.plan?.includes('premium');
+        const accessibleVideos : TSelectVideoDetails[] = studentHasPurchased || studentSubscription ? chapterDetails.videos 
+            : chapterDetails.videos.filter(video => video.state === 'free');
+
+        return {...chapterDetails, videos : accessibleVideos}
+        
+    } catch (err : unknown) {
+        const error = err as TErrorHandler;
+        throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
+    }
+}
+
+export const courseVideosDetailService = async (videoId : string, chapterId : string, currentStudentId : string) : 
+Promise<TSelectVideoDetails> => {
+    try {
+        const courseDetail : TSelectCourse | undefined = await findCourseWithChapterId(chapterId);
+        const studentPurchaseDetail : ModifiedPurchase = await findPurchase(courseDetail!.id, currentStudentId, 'modified');
+        if(!studentPurchaseDetail) throw new ForbiddenError();
+
+        const videoDetail : TSelectVideoDetails = await findVideoDetails(videoId);
+        return videoDetail;
+        
+    } catch (err : unknown) {
+        const error = err as TErrorHandler;
+        console.log(error);
         throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
     }
 }
