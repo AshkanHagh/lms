@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { CatchAsyncError } from '../middlewares/catchAsyncError';
-import type { ChapterAndVideoDetails, ChapterAndVideoId, ChapterDetails, CourseAndChapterId, courseBenefitAndDetails, CourseGeneric, CourseParams, CourseRelations, InsectCourseDetailsBody, insertChapterBody, InsertVideoDetails, ModifiedChapterDetail, TSelectChapter, TSelectCourse, TSelectCourseBenefit, TSelectStudent, TSelectVideoDetails } from '../types/index.type';
-import { courseBenefitService, courseChapterDetailsService, courseService, courseVideosDetailService, createCourseChapterService, createCourseService, editCourseDetailsService, updateChapterVideoDetailService, updateCourseChapterService } from '../services/course.service';
+import type { ChapterAndVideoDetails, ChapterAndVideoId, ChapterDetails, CourseAndChapterId, CourseAndVideoId, courseBenefitAndDetails, CourseGeneric, CourseParams, CourseRelations, CourseStateResult, InsectCourseDetailsBody, insertChapterBody, InsertVideoDetails, ModifiedChapterDetail, SelectVideoCompletion, TSelectChapter, TSelectCourse, TSelectCourseBenefit, TSelectStudent, TSelectTags, TSelectVideoDetails } from '../types/index.type';
+import { courseBenefitService, courseChapterDetailsService, courseService, coursesService, courseStateDetailService, courseVideosDetailService, createCourseChapterService, createCourseService, editCourseDetailsService, markAsCompletedService, mostUsedTagsService, updateChapterVideoDetailService, updateCourseChapterService } from '../services/course.service';
 
 export const createCourse = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
     try {
@@ -130,6 +130,54 @@ export const courseVideosDetail = CatchAsyncError(async (req : Request, res : Re
 
         const videoDetail : TSelectVideoDetails = await courseVideosDetailService(videoId, chapterId, currentStudentId);
         res.status(200).json({success : true, videoDetail});
+        
+    } catch (error : unknown) {
+        return next(error);
+    }
+});
+
+export const markAsCompleted = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
+    try {
+        const { courseId, videoId } = req.params as CourseAndVideoId;
+        const { state } = req.body as {state : boolean};
+        const currentStudentId : string = req.student!.id;
+
+        const videoCompleteStateDetail : SelectVideoCompletion = await markAsCompletedService(videoId, courseId, currentStudentId, state);
+        res.status(200).json({success : true, videoCompleteStateDetail});
+        
+    } catch (error : unknown) {
+        return next(error);
+    }
+});
+
+export const courseStateDetail = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
+    try {
+        const { courseId } = req.params as CourseParams;
+        const { plan, id } = req.student!;
+
+        const courseStateDetail : CourseStateResult = await courseStateDetailService(courseId, {plan, id});
+        res.status(200).json({success : true, ...courseStateDetail});
+        
+    } catch (error : unknown) {
+        return next(error);
+    }
+});
+
+export const courses = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
+    try {
+        const { startIndex, limit } = req.query as {startIndex : string, limit : string};
+        const courses : TSelectCourse[] = await coursesService(+limit, +startIndex);
+        res.status(200).json({success : true, courses});
+        
+    } catch (error : unknown) {
+        return next(error);
+    }
+});
+
+export const mostUsedTags = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
+    try {
+        const tags : TSelectTags[] = await mostUsedTagsService();
+        res.status(200).json({success : true, tags});
         
     } catch (error : unknown) {
         return next(error);

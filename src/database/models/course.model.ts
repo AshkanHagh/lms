@@ -1,4 +1,4 @@
-import { pgTable, varchar, timestamp, index, text, smallint, real, uuid } from 'drizzle-orm/pg-core';
+import { pgTable, varchar, timestamp, index, text, real, uuid, boolean } from 'drizzle-orm/pg-core';
 import { studentTable } from './student.model';
 import { chapterEnum, chapterVisibilityEnum, visibilityEnum } from './enums.model';
 import { relations } from 'drizzle-orm';
@@ -60,8 +60,8 @@ export const completeState = pgTable('complete_state', {
     id : uuid('id').primaryKey().defaultRandom(),
     studentId : uuid('user_id').references(() => studentTable.id),
     courseId : uuid('course_id').references(() => courseTable.id),
-    chapterId : uuid('chapter_id').references(() => courseChaptersTable.id),
-    percent : smallint('percent').default(0),
+    videoId : uuid('video_id').references(() => chapterVideosTable.id),
+    completed : boolean('completed').default(false)
 }, table => ({
     studentIdIndex : index('complete_studentId_index').on(table.studentId), courseIdIndex : index('complete_course_id').on(table.courseId)
 }));
@@ -90,9 +90,9 @@ export const completeStateRelations = relations(completeState, ({one}) => ({
         fields : [completeState.studentId],
         references : [studentTable.id]
     }),
-    chapter : one(courseChaptersTable, {
-        fields : [completeState.chapterId],
-        references : [courseChaptersTable.id]
+    video : one(chapterVideosTable, {
+        fields : [completeState.videoId],
+        references : [chapterVideosTable.id]
     })
 }));
 

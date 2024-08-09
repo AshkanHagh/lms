@@ -1,5 +1,5 @@
 {
-  "id": "2eaab9df-7c06-4470-b327-3683874e4beb",
+  "id": "e400be21-20f5-4cad-a660-0bbeab39992c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -682,18 +682,18 @@
           "primaryKey": false,
           "notNull": false
         },
-        "chapter_id": {
-          "name": "chapter_id",
+        "video_id": {
+          "name": "video_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
-        "percent": {
-          "name": "percent",
-          "type": "smallint",
+        "completed": {
+          "name": "completed",
+          "type": "boolean",
           "primaryKey": false,
           "notNull": false,
-          "default": 0
+          "default": false
         }
       },
       "indexes": {
@@ -755,12 +755,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "complete_state_chapter_id_chapters_id_fk": {
-          "name": "complete_state_chapter_id_chapters_id_fk",
+        "complete_state_video_id_videos_id_fk": {
+          "name": "complete_state_video_id_videos_id_fk",
           "tableFrom": "complete_state",
-          "tableTo": "chapters",
+          "tableTo": "videos",
           "columnsFrom": [
-            "chapter_id"
+            "video_id"
           ],
           "columnsTo": [
             "id"

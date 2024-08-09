@@ -87,8 +87,17 @@ export const chapterAndVideoIdSchema : ObjectSchema = Joi.object({
     videoId : Joi.string().required(),
 });
 
+export const courseAndVideoIdSchema : ObjectSchema = Joi.object({
+    courseId : Joi.string().required(),
+    videoId : Joi.string().required(),
+});
+
 export const CheckoutVerifyQuerySchema : ObjectSchema = Joi.object({
     session_id : Joi.string().required(),
     course_id : Joi.string().required(), 
     student_id : Joi.string().required()
-})
+});
+
+export const markAsCompletedSchema : ObjectSchema = Joi.object({
+    state : Joi.boolean().required()
+});

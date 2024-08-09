@@ -124,7 +124,6 @@ export const webhookListeningService = async (signature : string | undefined, bo
 const handleSubscriptionMode = async (sessionMode : Stripe.Checkout.Session.Mode, sessionId : string, STRIPE_YEARLY_PRICE_ID : string) : 
 Promise<void> => {
     if(sessionMode === 'subscription') {
-        console.log('subscription');
         const { customer, customer_details, line_items } = await retrieveSessionDetails(sessionId);
         await handleSubscriptionCheckoutSession(customer as string, 
             (customer_details as Stripe.Checkout.Session.CustomerDetails).email!, line_items?.data || [], STRIPE_YEARLY_PRICE_ID

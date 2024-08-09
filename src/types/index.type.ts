@@ -1,5 +1,5 @@
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
-import type { chapterVideosTable, courseBenefitTable, courseChaptersTable, courseTable, courseTagsTable, purchaseCoursesTable, 
+import type { chapterVideosTable, completeState, courseBenefitTable, courseChaptersTable, courseTable, courseTagsTable, purchaseCoursesTable, 
     studentTable, 
     subscriptionTable} from '../database/schema';
 import type { UploadApiResponse } from 'cloudinary';
@@ -136,7 +136,18 @@ export type CourseRelationsPurchases = {
 export type CourseAndChapterId = {
     courseId : string; chapterId : string
 }
-
 export type ChapterAndVideoId = {
     videoId : string; chapterId : string
 }
+export type CourseAndVideoId = {
+    videoId : string; courseId : string
+}
+
+export type SelectVideoCompletion = InferSelectModel<typeof completeState>;
+export type InsertVideoCompletion = InferInsertModel<typeof completeState>;
+
+export type CourseStateResult = {
+    remainingVideos : TSelectVideoDetails[]; progressPercentage : number;
+}
+
+export type MostUsedTagsMap = {tag : TSelectTags, count : number}

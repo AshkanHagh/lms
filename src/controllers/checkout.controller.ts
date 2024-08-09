@@ -3,13 +3,17 @@ import { CatchAsyncError } from '../middlewares/catchAsyncError';
 import { checkoutService, subscriptionCheckoutService, subscriptionPortalService, verifyPaymentService, 
     webhookListeningService } from '../services/checkout.service';
 import type { CompletePaymentQueries, TSelectPurchases, TSelectStudent } from '../types/index.type';
+import { RequestTimedOutError } from '../libs/utils';
 
 export const checkout = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
     try {
         const { courseId } = req.params as {courseId : string};
-        const currentStudent : TSelectStudent = req.student!
+        const currentStudent : TSelectStudent = req.student!;
+        const timeout = new Promise<string>((_, reject) => {
+            setTimeout(() => reject(Promise.reject(new RequestTimedOutError()).catch(next)), 3000);
+        });
 
-        const paymentUrl : string | null = await checkoutService(currentStudent, courseId);
+        const paymentUrl : string | null = await Promise.race([checkoutService(currentStudent, courseId), timeout]);
         res.status(200).json({success : true, url : paymentUrl});
 
     } catch (error : unknown) {
@@ -54,8 +58,11 @@ export const subscriptionCheckout = CatchAsyncError(async (req : Request, res : 
     try {
         const { plan } = req.query as {plan : 'monthly' | 'yearly'};
         const currentStudent : TSelectStudent = req.student!;
+        const timeout = new Promise<string>((_, reject) => {
+            setTimeout(() => reject(Promise.reject(new RequestTimedOutError()).catch(next)), 3000);
+        });
         
-        const checkoutUrl : string | null = await subscriptionCheckoutService(plan, currentStudent);
+        const checkoutUrl : string | null = await Promise.race([subscriptionCheckoutService(plan, currentStudent), timeout]);
         res.status(200).json({success : true, checkoutUrl});
         
     } catch (error : unknown) {

@@ -111,8 +111,8 @@ CREATE TABLE IF NOT EXISTS "complete_state" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid,
 	"course_id" uuid,
-	"chapter_id" uuid,
-	"percent" smallint DEFAULT 0
+	"video_id" uuid,
+	"completed" boolean DEFAULT false
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "benefit" (
@@ -265,7 +265,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "complete_state" ADD CONSTRAINT "complete_state_chapter_id_chapters_id_fk" FOREIGN KEY ("chapter_id") REFERENCES "public"."chapters"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "complete_state" ADD CONSTRAINT "complete_state_video_id_videos_id_fk" FOREIGN KEY ("video_id") REFERENCES "public"."videos"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

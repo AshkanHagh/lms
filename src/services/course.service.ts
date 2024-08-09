@@ -1,14 +1,14 @@
-import { findAllCourseChapter, findCourseWithChapterId } from '../database/cache/course.chache';
+import { findManyCache, findAllCourseChapter, findCourseWithChapterId } from '../database/cache/course.cache';
 import { getAllHashCache, getHashCache, getSetListCache, insertHashCache, insertHashListCache, insertSetListCache, 
     removeFromHashListCache } from '../database/cache/index.cache';
 import { findChapterDetail, findCoursePurchases, findCourseWithRelations, findSimilarTags, findVideoDetails, updateTags, insertCourseBenefit,
-    insertNewTags, patchCourseChapter, removeTags, updateChapterVideos, updateCourse, insertCourse, insertChapterAndVideos 
-} from '../database/queries/course.query';
-import { ForbiddenError, ResourceNotFoundError } from '../libs/utils';
+    insertNewTags, patchCourseChapter, removeTags, updateChapterVideos, updateCourse, insertCourse, insertChapterAndVideos, 
+    handelVideoCompletion, findCourseState, findAllVideosDetail, findManyCourse} from '../database/queries/course.query';
+import { NeedToPurchaseThisCourseError, ResourceNotFoundError } from '../libs/utils';
 import ErrorHandler from '../libs/utils/errorHandler';
 import type { ChapterAndVideoDetails, courseBenefitAndDetails, CourseGeneric, CourseRelations, FilteredChapters, InsectCourseDetailsBody, ModifiedChapterDetail, Entries, TErrorHandler, TSelectCourse, TSelectCourseBenefit, TSelectTags, TSelectVideoDetails, uploadVideoDetailResponse, 
-    TSelectChapter, InsertVideoDetails, TSelectStudent, ChapterDetails, CoursePurchase, 
-    ModifiedPurchase} from '../types/index.type';
+    TSelectChapter, InsertVideoDetails, TSelectStudent, ChapterDetails, CoursePurchase, ModifiedPurchase, SelectVideoCompletion, 
+    CourseStateResult, MostUsedTagsMap } from '../types/index.type';
 import { v2 as cloudinary, type UploadApiResponse } from 'cloudinary';
 import pLimit from 'p-limit';
 import crypto from 'crypto';
@@ -138,7 +138,7 @@ const generateHash = (input : string) : string => {
 export const updateCourseChapterService = async (chapterId : string, courseId : string, chapterDetails : Partial<ModifiedChapterDetail>) :
 Promise<TSelectChapter> => {
     try {
-        const existingChapterDetail : TSelectChapter | null = await findAllCourseChapter(`course:${courseId}:chapters:*`, chapterId);  
+        const existingChapterDetail : TSelectChapter | null = await findAllCourseChapter(`course:${courseId}:chapters:*`, chapterId);
         const changedValue = new Map<keyof Partial<ModifiedChapterDetail>, string | null>();
 
         Object.keys(chapterDetails).forEach(key => {
@@ -268,14 +268,90 @@ Promise<TSelectVideoDetails> => {
     try {
         const courseDetail : TSelectCourse | undefined = await findCourseWithChapterId(chapterId);
         const studentPurchaseDetail : ModifiedPurchase = await findPurchase(courseDetail!.id, currentStudentId, 'modified');
-        if(!studentPurchaseDetail) throw new ForbiddenError();
+        if(!studentPurchaseDetail) throw new NeedToPurchaseThisCourseError();
 
         const videoDetail : TSelectVideoDetails = await findVideoDetails(videoId);
         return videoDetail;
         
     } catch (err : unknown) {
         const error = err as TErrorHandler;
-        console.log(error);
+        throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
+    }
+}
+
+export const markAsCompletedService = async (videoId : string, courseId : string, currentStudentId : string, state : boolean) : 
+Promise<SelectVideoCompletion> => {
+    try {
+        const videoCompleteStateDetail : SelectVideoCompletion = await handelVideoCompletion(courseId, videoId, currentStudentId, state);
+        await insertHashListCache(`student_state:${currentStudentId}:course:${courseId}`, videoId, videoCompleteStateDetail);
+        return videoCompleteStateDetail;
+        
+    } catch (err : unknown) {
+        const error = err as TErrorHandler;
+        throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
+    }
+}
+
+export const courseStateDetailService = async (courseId : string, currentStudent : Pick<TSelectStudent, 'id' | 'plan'>) : 
+Promise<CourseStateResult> => {
+    try {
+        const videosStateRecord : Record<string, string> = await getAllHashCache(`student_state:${currentStudent.id}:course:${courseId}`);
+        const videosStateDetail : SelectVideoCompletion[] = videosStateRecord ?  
+            Object.values(videosStateRecord).map(video => JSON.parse(video)) as SelectVideoCompletion[] : 
+                await findCourseState(courseId, currentStudent.id);
+        
+        const [coursePurchase, chapters] : [ModifiedPurchase, TSelectChapter[]] = await Promise.all([
+            findPurchase(courseId, currentStudent.id, 'modified'), findManyCache<TSelectChapter>(`course:${courseId}:chapters:*`)
+        ]);
+        const videos : TSelectVideoDetails[] = await findAllVideosDetail(chapters.map(chapter => chapter.id));
+        
+        const currentStudentPlan : boolean | undefined = currentStudent.plan?.includes('premium');
+        if(!coursePurchase && !currentStudentPlan) throw new NeedToPurchaseThisCourseError();
+
+        const completedVideos : Set<string | null> = new Set(videosStateDetail.filter(video => video.completed).map(video => video.videoId));
+        const remainingVideos : TSelectVideoDetails[] = videos.filter(video => !completedVideos.has(video.id));
+
+        const totalVideos : number = videos.length;
+        const completedVideosCount : number = completedVideos.size;
+        return {remainingVideos, progressPercentage : Math.round((completedVideosCount / totalVideos) * 100)};
+        
+    } catch (err : unknown) {
+        const error = err as TErrorHandler;
+        throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
+    }
+}
+// 1. add pipeline to all cache queries
+export const coursesService = async (limit : number, startIndex : number) : Promise<TSelectCourse[]> => {
+    try {
+        const coursesCache : TSelectCourse[] = await findManyCache<TSelectCourse>('course:*');
+        if (coursesCache.length > 0) {
+            return coursesCache.filter(course => 
+                course.id && course.teacherId && course.title && course.description && course.prerequisite && course.price && 
+                course.image && course.visibility && course.createdAt && course.updatedAt
+            ).sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+        }
+        const courses : TSelectCourse[] = Object.keys(coursesCache).length ? coursesCache : await findManyCourse(limit, startIndex);
+        return courses;
+        
+    } catch (err : unknown) {
+        const error = err as TErrorHandler;
+        throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
+    }
+}
+
+export const mostUsedTagsService = async () : Promise<TSelectTags[]> => {
+    try {
+        const tagsRecord : Record<string, string>[] = await findManyCache('course_tags:*');
+        const existingTags : TSelectTags[] = tagsRecord.map(tag => Object.values(tag).map(tag => JSON.parse(tag))).flat();
+        const tagsMap : Map<string, MostUsedTagsMap> = new Map<string, MostUsedTagsMap>();
+        existingTags.forEach(tag => {
+            tagsMap.has(tag.tags) ? tagsMap.get(tag.tags)!.count += 1 : tagsMap.set(tag.tags, {tag, count : 1});
+        });
+        const mostUsedTags : MostUsedTagsMap[] = Array.from(tagsMap.values()).sort((a, b) => b.count - a.count).slice(0, 10);
+        return mostUsedTags.map(tag => tag.tag);
+        
+    } catch (err : unknown) {
+        const error = err as TErrorHandler;
         throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
     }
 }

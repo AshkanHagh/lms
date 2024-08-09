@@ -1,12 +1,16 @@
 import { Router } from 'express';
 import { authorizedRoles, isAuthenticated } from '../middlewares/auth';
 import { courseDetails, courseBenefit, courseChapterDetails, createCourse, createCourseChapter, editCourseDetails, updateChapterVideoDetail, 
-updateCourseChapter, courseVideosDetail} from '../controllers/course.controller';
+updateCourseChapter, courseVideosDetail, markAsCompleted, courseStateDetail,
+courses,
+mostUsedTags} from '../controllers/course.controller';
 import { isCourseExists } from '../middlewares/checkItemExists';
 import { validateParams, validationMiddleware } from '../middlewares/validation';
-import { createCourseSchema, editCourseDetailsSchema, courseBenefitSchema, insertChapterBodySchema, updateCourseChapterSchema, updateChapterVideoDetailSchema, courseParamsSchema, courseAndChapterIdSchema, chapterAndVideoIdSchema } from '../validations/Joi';
+import { createCourseSchema, editCourseDetailsSchema, courseBenefitSchema, insertChapterBodySchema, updateCourseChapterSchema, updateChapterVideoDetailSchema, courseParamsSchema, courseAndChapterIdSchema, chapterAndVideoIdSchema, markAsCompletedSchema, courseAndVideoIdSchema } from '../validations/Joi';
 
 const router : Router = Router();
+
+router.get('/tags', mostUsedTags);
 
 router.post('/', [validationMiddleware(createCourseSchema), isAuthenticated, authorizedRoles('admin', 'teacher')], createCourse);
 
@@ -32,5 +36,12 @@ router.get('/chapter/:courseId/:chapterId', [validateParams(courseAndChapterIdSc
     courseChapterDetails);
 
 router.get('/chapter/video/:videoId/:chapterId', [validateParams(chapterAndVideoIdSchema), isAuthenticated], courseVideosDetail);
+
+router.post('/state/:courseId/:videoId', [validationMiddleware(markAsCompletedSchema), validateParams(courseAndVideoIdSchema), 
+    isAuthenticated, isCourseExists('normal')], markAsCompleted);
+
+router.get('/state/:courseId', [validateParams(courseParamsSchema), isAuthenticated], courseStateDetail);
+
+router.get('/', courses);
 
 export default router;

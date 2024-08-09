@@ -1,9 +1,10 @@
-import { eq, inArray } from 'drizzle-orm';
-import type { ChapterAndVideoDetails, ChapterDetails, CoursePurchase, CourseRelations, InsectCourseDetails, InsertVideoDetails, ModifiedChapterDetail, TSelectChapter, TSelectCourse, TSelectCourseBenefit, 
+import { and, eq, inArray } from 'drizzle-orm';
+import type { ChapterAndVideoDetails, ChapterDetails, CoursePurchase, CourseRelations, InsectCourseDetails, InsertVideoDetails, ModifiedChapterDetail, SelectVideoCompletion, TSelectChapter, TSelectCourse, TSelectCourseBenefit, 
     TSelectTags, TSelectVideoDetails } from '../../types/index.type';
 import { db } from '..';
-import { chapterVideosTable, courseBenefitTable, courseChaptersTable, courseTable, courseTagsTable } from '../schema';
+import { chapterVideosTable, completeState, courseBenefitTable, courseChaptersTable, courseTable, courseTagsTable } from '../schema';
 import { ResourceNotFoundError } from '../../libs/utils';
+import { getHashCache } from '../cache/index.cache';
 
 export const insertCourse = async (details : Pick<InsectCourseDetails, 'title' | 'teacherId'>) : Promise<TSelectCourse> => {
     const [courseDetail] = await db.insert(courseTable).values(details).returning();
@@ -97,4 +98,43 @@ export const findVideoDetails = async (videoId : string) : Promise<TSelectVideoD
     });
     if(!videoDetail) throw new ResourceNotFoundError();
     return videoDetail;
+}
+
+export const findAllVideosDetail = async (chapterIds : string[]) : Promise<TSelectVideoDetails[]> => {
+    const videoDetail : TSelectVideoDetails[] = await db.query.chapterVideosTable.findMany({
+        where : (table, funcs) => funcs.inArray(table.chapterId, chapterIds)
+    });
+    return videoDetail;
+}
+
+export const handelVideoCompletion = async (courseId : string, videoId : string, currentStudentId : string, state : boolean) : 
+Promise<SelectVideoCompletion> => {
+    const currentStudentVideoState : string = await getHashCache<string>(`student_state:${currentStudentId}:course:${courseId}`, videoId);
+    const insertNewCompletionDetail = async (courseId : string, videoId : string, currentStudentId : string) : Promise<SelectVideoCompletion> => {
+        const [completionDetail] : SelectVideoCompletion[] = await db.insert(completeState).values({
+            videoId, courseId, studentId : currentStudentId, completed : true
+        }).returning();
+        return completionDetail;
+    }
+    const updateCompletionState = async (videoId : string, currentStudentId : string, state : boolean) : Promise<SelectVideoCompletion> => {
+        const [updatedState] : SelectVideoCompletion[] = await db.update(completeState).set({completed : state}).where(
+            and(eq(completeState.studentId, currentStudentId), eq(completeState.videoId, videoId))
+        ).returning();
+        return updatedState;
+    }
+
+    if(!currentStudentVideoState || currentStudentVideoState.length === 0) {
+        return await insertNewCompletionDetail(courseId, videoId, currentStudentId);
+    }
+    return await updateCompletionState(videoId, currentStudentId, state);
+}
+
+export const findCourseState = async (courseId : string, currentStudentId : string) : Promise<SelectVideoCompletion[]> => {
+    return await db.query.completeState.findMany({
+        where : (table, {eq, and}) => and(eq(table.studentId, currentStudentId), eq(table.courseId, courseId))
+    });
+}
+
+export const findManyCourse = async (limit : number, startIndex : number) : Promise<TSelectCourse[]> => {
+    return await db.query.courseTable.findMany({limit, offset : startIndex});
 }
