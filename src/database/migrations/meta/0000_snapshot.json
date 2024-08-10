@@ -1,5 +1,5 @@
 {
-  "id": "e400be21-20f5-4cad-a660-0bbeab39992c",
+  "id": "c0850171-93c6-4bfe-9401-49ab46e56587",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -670,8 +670,8 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "user_id": {
-          "name": "user_id",
+        "student_id": {
+          "name": "student_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -701,7 +701,7 @@
           "name": "complete_studentId_index",
           "columns": [
             {
-              "expression": "user_id",
+              "expression": "student_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -729,12 +729,12 @@
         }
       },
       "foreignKeys": {
-        "complete_state_user_id_users_id_fk": {
-          "name": "complete_state_user_id_users_id_fk",
+        "complete_state_student_id_users_id_fk": {
+          "name": "complete_state_student_id_users_id_fk",
           "tableFrom": "complete_state",
           "tableTo": "users",
           "columnsFrom": [
-            "user_id"
+            "student_id"
           ],
           "columnsTo": [
             "id"

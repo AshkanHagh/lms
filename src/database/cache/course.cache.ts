@@ -1,5 +1,5 @@
 import type { ChainableCommander } from 'ioredis';
-import type { TSelectChapter, TSelectCourse } from '../../types/index.type';
+import type { TSelectChapter, TSelectCourse, TSelectTags } from '../../types/index.type';
 import { redis } from './redis.config';
 import { ResourceNotFoundError } from '../../libs/utils';
 // 1. add pipeline
@@ -62,4 +62,33 @@ export const findManyCache = async <T>(key : string) : Promise<T[]> => {
         cursor = newCursor;
     } while (cursor !== '0');
     return caches;
+}
+
+export const filterCourseByTagsCache = async (tags : string[]) => {
+    let cursor : string = '0';
+    const similarTags : Map<string, TSelectTags> = new Map<string, TSelectTags>();
+    const similarCourse : Map<string, TSelectCourse> = new Map<string, TSelectCourse>();
+
+    do {
+        const [newCursor, keys] : [string, string[]] = await redis.scan(cursor, 'MATCH', 'course_tags:*', 'COUNT', 100);
+        const pipeline : ChainableCommander = redis.pipeline();
+        keys.forEach(key => pipeline.hgetall(key));
+
+        const existingTags : TSelectTags[] = (await pipeline.exec())!.map(tagRecord => {
+            const tagsStringify : string[] = Object.values(tagRecord[1] as string[]);
+            return tagsStringify.map(tag => JSON.parse(tag)) as TSelectTags[];
+        }).flat();
+
+        existingTags.forEach(tag => {
+            if(tags.includes(tag.tags)) similarTags.set(tag.id, tag);
+        });
+
+        const coursePipeline = redis.pipeline();
+        Array.from(similarTags.values()).forEach(tag => coursePipeline.hgetall(`course:${tag.courseId}`));
+        const modifiedCourse : TSelectCourse[] = (await coursePipeline.exec())!.flat().filter(Boolean) as TSelectCourse[];
+        modifiedCourse.forEach(course => similarCourse.set(course.id, course));
+
+        cursor = newCursor;
+    } while (cursor !== '0');
+    return Array.from(similarCourse.values()).flat();
 }

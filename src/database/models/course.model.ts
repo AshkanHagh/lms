@@ -58,7 +58,7 @@ export const courseTagsTable = pgTable('tags', {
 
 export const completeState = pgTable('complete_state', {
     id : uuid('id').primaryKey().defaultRandom(),
-    studentId : uuid('user_id').references(() => studentTable.id),
+    studentId : uuid('student_id').references(() => studentTable.id),
     courseId : uuid('course_id').references(() => courseTable.id),
     videoId : uuid('video_id').references(() => chapterVideosTable.id),
     completed : boolean('completed').default(false)
@@ -86,7 +86,7 @@ export const completeStateRelations = relations(completeState, ({one}) => ({
         fields : [completeState.courseId],
         references : [courseTable.id]
     }),
-    user : one(studentTable, {
+    student : one(studentTable, {
         fields : [completeState.studentId],
         references : [studentTable.id]
     }),

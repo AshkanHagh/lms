@@ -1,4 +1,4 @@
-import { findManyCache, findAllCourseChapter, findCourseWithChapterId } from '../database/cache/course.cache';
+import { findManyCache, findAllCourseChapter, findCourseWithChapterId, filterCourseByTagsCache } from '../database/cache/course.cache';
 import { getAllHashCache, getHashCache, getSetListCache, insertHashCache, insertHashListCache, insertSetListCache, 
     removeFromHashListCache } from '../database/cache/index.cache';
 import { findChapterDetail, findCoursePurchases, findCourseWithRelations, findSimilarTags, findVideoDetails, updateTags, insertCourseBenefit,
@@ -8,11 +8,17 @@ import { NeedToPurchaseThisCourseError, ResourceNotFoundError } from '../libs/ut
 import ErrorHandler from '../libs/utils/errorHandler';
 import type { ChapterAndVideoDetails, courseBenefitAndDetails, CourseGeneric, CourseRelations, FilteredChapters, InsectCourseDetailsBody, ModifiedChapterDetail, Entries, TErrorHandler, TSelectCourse, TSelectCourseBenefit, TSelectTags, TSelectVideoDetails, uploadVideoDetailResponse, 
     TSelectChapter, InsertVideoDetails, TSelectStudent, ChapterDetails, CoursePurchase, ModifiedPurchase, SelectVideoCompletion, 
-    CourseStateResult, MostUsedTagsMap } from '../types/index.type';
+    CourseStateResult, MostUsedTagsMap, VectorSeed,VectorResult } from '../types/index.type';
 import { v2 as cloudinary, type UploadApiResponse } from 'cloudinary';
 import pLimit from 'p-limit';
 import crypto from 'crypto';
 import { findPurchase } from '../database/queries/checkout.query';
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import type { Document } from 'langchain/document';
+import { vectorRedis } from '../database/cache/redis.config';
+import { courseEvent } from '../events/course.event';
+
+const semanticSplitter : RecursiveCharacterTextSplitter = new RecursiveCharacterTextSplitter({chunkSize : 25, separators : [' '], chunkOverlap : 8});
 
 export const createCourseService = async <T extends CourseGeneric<'insert'>>(courseDetail : InsectCourseDetailsBody<T>) : Promise<TSelectCourse> => {
     try {
@@ -49,6 +55,7 @@ export const editCourseDetailsService = async <B extends CourseGeneric<'update'>
             ...courseDetail, image : uploadedImageUrl, prerequisite : courseDetail.prerequisite?.join(' ')
         }, courseId);
         await insertHashCache(`course:${courseId}`, updatedDetails);
+        courseEvent.emit('seed_vector_one', courseId);
         return updatedDetails;
 
     } catch (err : unknown) {
@@ -320,7 +327,7 @@ Promise<CourseStateResult> => {
         throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
     }
 }
-// 1. add pipeline to all cache queries
+
 export const coursesService = async (limit : number, startIndex : number) : Promise<TSelectCourse[]> => {
     try {
         const coursesCache : TSelectCourse[] = await findManyCache<TSelectCourse>('course:*');
@@ -328,7 +335,7 @@ export const coursesService = async (limit : number, startIndex : number) : Prom
             return coursesCache.filter(course => 
                 course.id && course.teacherId && course.title && course.description && course.prerequisite && course.price && 
                 course.image && course.visibility && course.createdAt && course.updatedAt
-            ).sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+            ).sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()).splice(startIndex, limit);
         }
         const courses : TSelectCourse[] = Object.keys(coursesCache).length ? coursesCache : await findManyCourse(limit, startIndex);
         return courses;
@@ -353,5 +360,57 @@ export const mostUsedTagsService = async () : Promise<TSelectTags[]> => {
     } catch (err : unknown) {
         const error = err as TErrorHandler;
         throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
+    }
+}
+
+export const filterCourseByTagsService = async (tags : string[]) : Promise<TSelectCourse[]> => {
+    try {
+        return await filterCourseByTagsCache(tags);
+
+    } catch (err : unknown) {
+        const error = err as TErrorHandler
+        throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
+    }
+}
+
+const splitTextIntoWords = (text : string) : string[] => {
+    return text.split(/\s/);
+}
+
+const splitTextIntoSemantic = async (text : string) : Promise<string[]> => {
+    if(text.split(/\s/).length === 0) return [];
+    const documents : Document<Record<string, string>>[] = await semanticSplitter.createDocuments([text]);
+    return documents.map(chunk => chunk.pageContent);
+}
+
+export const vectorSearchService = async (query : string) : Promise<Omit<VectorSeed, 'visibility'>[]> => {
+    try {
+        const [semanticChunks, wordChunks] : string[][] = await Promise.all([
+            splitTextIntoSemantic(query), splitTextIntoWords(query)
+        ]);
+
+        const flaggedFor : VectorResult[] = [];
+        await Promise.all([
+            ...wordChunks.map(async wordChunk => {
+                const vectors = await vectorRedis.query({topK : 24, data : wordChunk, includeMetadata : true});
+                vectors.forEach(vector => {
+                    if (vector && vector.score > 0.70) flaggedFor.push({score : vector.score, course : vector.metadata as VectorSeed})
+                });
+            }),
+            ...semanticChunks.map(async semanticChunk => {
+                const vectors = await vectorRedis.query({topK : 24, data : semanticChunk, includeMetadata : true});
+                vectors.forEach(vector => {
+                    if (vector && vector.score > 0.70) flaggedFor.push({score : vector.score, course : vector.metadata as VectorSeed});
+                });
+            })
+        ]);
+
+        const uniqueVectorRes : VectorResult[] = Array.from(new Map(flaggedFor.map(obj => [obj.course.id, obj])).values());
+        const sortedVectorRes : VectorResult[] = uniqueVectorRes.sort((a, b) => b!.score - a!.score).slice(0, 8);
+        return sortedVectorRes.map(obj => obj.course);
+
+    } catch (err: unknown) {
+        const error = err as TErrorHandler;
+        throw new ErrorHandler(`An error occurred: ${error.message}`, error.statusCode);
     }
 }

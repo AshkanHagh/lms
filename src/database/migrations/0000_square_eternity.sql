@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS "videos" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "complete_state" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" uuid,
+	"student_id" uuid,
 	"course_id" uuid,
 	"video_id" uuid,
 	"completed" boolean DEFAULT false
@@ -253,7 +253,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "complete_state" ADD CONSTRAINT "complete_state_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "complete_state" ADD CONSTRAINT "complete_state_student_id_users_id_fk" FOREIGN KEY ("student_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -332,7 +332,7 @@ CREATE INDEX IF NOT EXISTS "commentId_index_replies" ON "replies" USING btree ("
 CREATE INDEX IF NOT EXISTS "courseId_index_review" ON "reviews" USING btree ("course_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "authorId_index_review" ON "reviews" USING btree ("author_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "courseId_index_chapterDetails" ON "videos" USING btree ("chapter_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "complete_studentId_index" ON "complete_state" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "complete_studentId_index" ON "complete_state" USING btree ("student_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "complete_course_id" ON "complete_state" USING btree ("course_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "benefit_courseId_index" ON "benefit" USING btree ("course_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "courseId_index_chapter" ON "chapters" USING btree ("course_id");--> statement-breakpoint

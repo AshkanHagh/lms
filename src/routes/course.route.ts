@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { authorizedRoles, isAuthenticated } from '../middlewares/auth';
 import { courseDetails, courseBenefit, courseChapterDetails, createCourse, createCourseChapter, editCourseDetails, updateChapterVideoDetail, 
-updateCourseChapter, courseVideosDetail, markAsCompleted, courseStateDetail,
-courses,
-mostUsedTags} from '../controllers/course.controller';
+updateCourseChapter, courseVideosDetail, markAsCompleted, courseStateDetail, courses, mostUsedTags, 
+filterCourseByTags,
+vectorSearch} from '../controllers/course.controller';
 import { isCourseExists } from '../middlewares/checkItemExists';
 import { validateParams, validationMiddleware } from '../middlewares/validation';
 import { createCourseSchema, editCourseDetailsSchema, courseBenefitSchema, insertChapterBodySchema, updateCourseChapterSchema, updateChapterVideoDetailSchema, courseParamsSchema, courseAndChapterIdSchema, chapterAndVideoIdSchema, markAsCompletedSchema, courseAndVideoIdSchema } from '../validations/Joi';
@@ -11,6 +11,10 @@ import { createCourseSchema, editCourseDetailsSchema, courseBenefitSchema, inser
 const router : Router = Router();
 
 router.get('/tags', mostUsedTags);
+
+router.post('/filter/tag', filterCourseByTags);
+
+router.get('/vector/search', vectorSearch);
 
 router.post('/', [validationMiddleware(createCourseSchema), isAuthenticated, authorizedRoles('admin', 'teacher')], createCourse);
 

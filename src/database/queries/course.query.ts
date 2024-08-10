@@ -1,6 +1,7 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import type { ChapterAndVideoDetails, ChapterDetails, CoursePurchase, CourseRelations, InsectCourseDetails, InsertVideoDetails, ModifiedChapterDetail, SelectVideoCompletion, TSelectChapter, TSelectCourse, TSelectCourseBenefit, 
-    TSelectTags, TSelectVideoDetails } from '../../types/index.type';
+    TSelectTags, TSelectVideoDetails, 
+    VectorSeed} from '../../types/index.type';
 import { db } from '..';
 import { chapterVideosTable, completeState, courseBenefitTable, courseChaptersTable, courseTable, courseTagsTable } from '../schema';
 import { ResourceNotFoundError } from '../../libs/utils';
@@ -138,3 +139,11 @@ export const findCourseState = async (courseId : string, currentStudentId : stri
 export const findManyCourse = async (limit : number, startIndex : number) : Promise<TSelectCourse[]> => {
     return await db.query.courseTable.findMany({limit, offset : startIndex});
 }
+
+export const findModifiedCourse = async (courseId : string) : Promise<VectorSeed | undefined> => {
+    return await db.query.courseTable.findFirst({
+        where : (table, { eq }) => eq(table.id, courseId), columns : {
+            visibility : true, title : true, description : true, id : true, image : true, price : true
+        }
+    });
+};

@@ -6,9 +6,9 @@ import { updatePersonalInformationService } from '../services/dashboard.service'
 export const updatePersonalInformation = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
     try {
         const { firstName, lastName } = req.body as UpdateAccount;
-        const {firstName : updatedFirstName, lastName : updatedLastName 
-        } = await updatePersonalInformationService(req.student! as TSelectStudent, {firstName, lastName});
+        const student : TSelectStudent = req.student!
 
+        const {firstName : updatedFirstName, lastName : updatedLastName } = await updatePersonalInformationService(student, {firstName, lastName});
         res.status(200).json({success : true, firstName : updatedFirstName, lastName : updatedLastName});
         
     } catch (error : unknown) {

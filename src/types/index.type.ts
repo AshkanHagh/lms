@@ -151,3 +151,6 @@ export type CourseStateResult = {
 }
 
 export type MostUsedTagsMap = {tag : TSelectTags, count : number}
+
+export type VectorSeed = Pick<TSelectCourse, 'id' | 'description' | 'title' | 'visibility' | 'image' | 'price'>;
+export type VectorResult = {score : number, course : VectorSeed}
