@@ -69,8 +69,7 @@ export const verifyPaymentService = async (checkoutSessionId : string, courseId 
         }
 
         const newPurchase : TSelectPurchases = await insertPurchase(purchaseDetail);
-        await Promise.all([insertHashListCache(`purchase_detail:${currentStudentId}`, courseId, newPurchase),
-            insertHashCache(`student_purchases:${currentStudentId}`, {[courseId] : newPurchase.id}),
+        await Promise.all([insertHashListCache(`student_purchases:${currentStudentId}`, courseId, newPurchase),
             insertSetListCache(`course_purchases:${courseId}`, currentStudentId)
         ])
         return newPurchase;

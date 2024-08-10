@@ -137,7 +137,7 @@ export const findCourseState = async (courseId : string, currentStudentId : stri
 }
 
 export const findManyCourse = async (limit : number, startIndex : number) : Promise<TSelectCourse[]> => {
-    return await db.query.courseTable.findMany({limit, offset : startIndex});
+    return await db.query.courseTable.findMany({limit, offset : startIndex, orderBy : (table, funcs) => funcs.desc(table.createdAt)});
 }
 
 export const findModifiedCourse = async (courseId : string) : Promise<VectorSeed | undefined> => {

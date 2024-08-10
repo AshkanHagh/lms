@@ -10,7 +10,7 @@ export const checkout = CatchAsyncError(async (req : Request, res : Response, ne
         const { courseId } = req.params as {courseId : string};
         const currentStudent : TSelectStudent = req.student!;
         const timeout = new Promise<string>((_, reject) => {
-            setTimeout(() => reject(Promise.reject(new RequestTimedOutError()).catch(next)), 3000);
+            setTimeout(() => reject(new RequestTimedOutError()), 3000);
         });
 
         const paymentUrl : string | null = await Promise.race([checkoutService(currentStudent, courseId), timeout]);
@@ -59,7 +59,7 @@ export const subscriptionCheckout = CatchAsyncError(async (req : Request, res : 
         const { plan } = req.query as {plan : 'monthly' | 'yearly'};
         const currentStudent : TSelectStudent = req.student!;
         const timeout = new Promise<string>((_, reject) => {
-            setTimeout(() => reject(Promise.reject(new RequestTimedOutError()).catch(next)), 3000);
+            setTimeout(() => reject(new RequestTimedOutError()), 3000);
         });
         
         const checkoutUrl : string | null = await Promise.race([subscriptionCheckoutService(plan, currentStudent), timeout]);

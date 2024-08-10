@@ -332,10 +332,15 @@ export const coursesService = async (limit : number, startIndex : number) : Prom
     try {
         const coursesCache : TSelectCourse[] = await findManyCache<TSelectCourse>('course:*');
         if (coursesCache.length > 0) {
-            return coursesCache.filter(course => 
-                course.id && course.teacherId && course.title && course.description && course.prerequisite && course.price && 
-                course.image && course.visibility && course.createdAt && course.updatedAt
-            ).sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()).splice(startIndex, limit);
+            const filteredAndSortedCourses = coursesCache.reduce((acc, course) => {
+                if (course.id && course.teacherId && course.title && course.description && course.prerequisite && 
+                    course.price && course.image && course.visibility && course.createdAt && course.updatedAt) {
+                    acc.push(course);
+                }
+                return acc;
+            }, [] as TSelectCourse[]).sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+
+            return filteredAndSortedCourses.splice(startIndex, limit);
         }
         const courses : TSelectCourse[] = Object.keys(coursesCache).length ? coursesCache : await findManyCourse(limit, startIndex);
         return courses;

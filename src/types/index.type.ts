@@ -128,6 +128,7 @@ export type TInsertSubscription = InferInsertModel<typeof subscriptionTable>;
 
 export type ChapterDetails = TSelectChapter & {videos : TSelectVideoDetails[]};
 export type CoursePurchase = {purchases : TSelectPurchases[]}
+export type PurchaseDetailRes = Omit<TSelectPurchases, 'courseId'> & {course : Pick<TSelectCourse, 'title' | 'price' | 'id'>};
 
 export type CourseRelationsPurchases = {
     studentId : string | null
@@ -153,4 +154,8 @@ export type CourseStateResult = {
 export type MostUsedTagsMap = {tag : TSelectTags, count : number}
 
 export type VectorSeed = Pick<TSelectCourse, 'id' | 'description' | 'title' | 'visibility' | 'image' | 'price'>;
-export type VectorResult = {score : number, course : VectorSeed}
+export type VectorResult = {score : number, course : VectorSeed};
+
+export type TransactionResult = {
+    modifiedPurchase : PurchaseDetailRes[]; subscriptionDetail : TSelectSubscription;
+}
