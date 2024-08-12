@@ -153,3 +153,9 @@ export const findModifiedCourse = async (courseId : string) : Promise<VectorSeed
         }
     });
 };
+
+export const findTeacherCourses = async (currentTeacherId : string) : Promise<Pick<TSelectCourse, 'id' | 'title' | 'price' | 'visibility'>[]> => {
+    return await db.select({
+        id : courseTable.id, title : courseTable.title, price : courseTable.price, visibility : courseTable.visibility
+    }).from(courseTable).where(eq(courseTable.teacherId, currentTeacherId));
+}

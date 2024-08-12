@@ -182,3 +182,10 @@ export type ModifiedRelationsCourse = TSelectCourse & {
 }
 
 export type CoursesProgress = Omit<ModifiedRelationsCourse, 'chapters'> & {progress : number};
+
+export type CourseWithPurchase = {
+    courseId : string; courseTitle : string; coursePrice : number | null; purchaseCount : number;
+}
+export type AnalyticsPurchase = {
+    courseId : string; courseTitle : string; totalRevenue : number, purchaseCount : number
+}

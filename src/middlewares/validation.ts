@@ -1,43 +1,25 @@
 import type { NextFunction, Request, Response } from 'express';
 import type { ObjectSchema } from 'joi';
-import { ValidationError } from '../libs/utils';
 import { validate } from '../validations/Joi';
-import type { TErrorHandler } from '../types/index.type';
+import { CatchAsyncError } from './catchAsyncError';
 
 export const validationMiddleware = (schema : ObjectSchema) => {
-    return (req : Request, res : Response, next : NextFunction) => {
-        try {
-            req.body = validate(schema, req.body);
-            next()
-        } catch (err) {
-            const error = err as TErrorHandler
-            return next(new ValidationError(error.message));
-        }
-    }
+    return CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
+        req.body = validate(schema, req.body);
+        next()
+    })
 }
 
 export const validateQuery = (schema : ObjectSchema) => {
-    return (req : Request, res : Response, next : NextFunction) => {
-        try {
-            req.query = validate(schema, req.query);
-            next();
-
-        } catch (err) {
-            const error = err as TErrorHandler
-            return next(new ValidationError(error.message));
-        }
-    }
+    return CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
+        req.query = validate(schema, req.query);
+        next();
+    })
 }
 
 export const validateParams = (schema : ObjectSchema) => {
-    return (req : Request, res : Response, next : NextFunction) => {
-        try {
-            req.query = validate(schema, req.params);
-            next();
-
-        } catch (err) {
-            const error = err as TErrorHandler
-            return next(new ValidationError(error.message));
-        }
-    }
+    return CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
+        req.query = validate(schema, req.params);
+        next();
+    })
 }

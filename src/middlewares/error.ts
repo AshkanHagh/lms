@@ -6,6 +6,6 @@ export const ErrorMiddleware = (error: TErrorHandler, req: Request, res: Respons
     error.statusCode = error.statusCode || 500;
     error.message = error.message || 'Internal server error';
 
-    Sentry.captureException(error);
+    Sentry.captureException(error.message);
     res.status(Number(error.statusCode)).json({success : false, message : error.message});
 }

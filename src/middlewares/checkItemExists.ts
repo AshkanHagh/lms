@@ -1,7 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { CatchAsyncError } from './catchAsyncError';
-import type { TErrorHandler, TSelectCourse } from '../types/index.type';
-import ErrorHandler from '../libs/utils/errorHandler';
+import type { TSelectCourse } from '../types/index.type';
 import { getAllHashCache } from '../database/cache/index.cache';
 import { ForbiddenError, ResourceNotFoundError } from '../libs/utils';
 
@@ -9,22 +8,16 @@ type ConditionType = 'teacher_mode' | 'normal';
 
 export const isCourseExists = <T extends ConditionType>(condition : T) => {
     return CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
-        try {
-            const { courseId } = req.params as {courseId : string};
-            const desiredCourse : TSelectCourse = await getAllHashCache(`course:${courseId}`);
+        const { courseId } = req.params as {courseId : string};
+        const desiredCourse : TSelectCourse = await getAllHashCache(`course:${courseId}`);
 
-            const conditionHandlers : Record<ConditionType, (desiredCorse : TSelectCourse, req : Request) => void> = {
-                normal : normalCondition,
-                teacher_mode : teacherModeCondition
-            }
-
-            conditionHandlers[condition](desiredCourse, req);
-            next();
-            
-        } catch (err : unknown) {
-            const error = err as TErrorHandler;
-            return next(new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode));
+        const conditionHandlers : Record<ConditionType, (desiredCorse : TSelectCourse, req : Request) => void> = {
+            normal : normalCondition,
+            teacher_mode : teacherModeCondition
         }
+
+        conditionHandlers[condition](desiredCourse, req);
+        next();
     })
 };
 

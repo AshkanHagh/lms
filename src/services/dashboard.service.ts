@@ -1,9 +1,9 @@
 import { getAllHashCache, insertHashCache } from '../database/cache/index.cache';
 import { findStudentStates } from '../database/cache/student.cache';
-import { findPurchasedCourse } from '../database/queries/course.query';
-import { updateInformation } from '../database/queries/student.query';
+import { findPurchasedCourse, findTeacherCourses } from '../database/queries/course.query';
+import { countCoursePurchases, updateInformation } from '../database/queries/student.query';
 import ErrorHandler from '../libs/utils/errorHandler';
-import type { CoursesProgress, ModifiedRelationsCourse, PurchasedCoursesWithRelations, PurchaseDetailRes, SelectVideoCompletion, TErrorHandler, TransactionResult, TSelectCourse, TSelectPurchases, TSelectStudent, TSelectSubscription, TSelectVideoDetails, UpdateAccount
+import type { AnalyticsPurchase, CoursesProgress, ModifiedRelationsCourse, PurchasedCoursesWithRelations, PurchaseDetailRes, SelectVideoCompletion, TErrorHandler, TransactionResult, TSelectCourse, TSelectPurchases, TSelectStudent, TSelectSubscription, TSelectVideoDetails, UpdateAccount
 } from '../types/index.type';
 
 export const updatePersonalInformationService = async (currentUser : TSelectStudent, names : UpdateAccount) => {
@@ -77,3 +77,26 @@ export const browseCoursesService = async (currentStudentId : string) : Promise<
         throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
     }
 }
+
+export const courseAnalysisService = async (currentTeacherId : string) : Promise<AnalyticsPurchase[]> => {
+    try {
+        return await countCoursePurchases(currentTeacherId);
+
+    } catch (err : unknown) {
+        const error = err as TErrorHandler;
+        throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
+    }
+};
+// 1. I think it's best not to use cache here, cache response time was 1003ms and database hit 301.
+export const teacherCoursesService = async (currentTeacherId : string) : Promise<Pick<TSelectCourse, 'id' | 'title' | 'price' | 'visibility'>[]> => {
+    try {
+        // const teacherCoursesCache : Pick<TSelectCourse, 'id' | 'title' | 'price' | 'visibility'>[] = 
+        // await findTeacherCoursesCache(currentTeacherId);
+        // return teacherCoursesCache.length > 0 ? teacherCoursesCache : await findTeacherCourses(currentTeacherId)
+        return await findTeacherCourses(currentTeacherId)
+        
+    } catch (err : unknown) {
+        const error = err as TErrorHandler;
+        throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
+    }
+};

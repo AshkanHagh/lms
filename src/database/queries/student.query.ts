@@ -1,7 +1,8 @@
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { db } from '..';
-import { studentTable, subscriptionTable } from '../schema';
-import type { SelectCondition, TInsertSubscription, TModifiedStudent, TSelectStudent, TSelectSubscription } from '../../types/index.type';
+import { courseTable, purchaseCoursesTable, studentTable, subscriptionTable } from '../schema';
+import type { AnalyticsPurchase, CourseWithPurchase, SelectCondition, TInsertSubscription, TModifiedStudent, TSelectStudent, 
+    TSelectSubscription } from '../../types/index.type';
 import { deleteHashCache, getAllHashCache, insertHashCache } from '../cache/index.cache';
 
 export const selectWithCondition = async <T extends 'emailOnly' | 'fullData'>(email : string, service : T) : 
@@ -67,4 +68,17 @@ export const deleteSubscription = async (studentId : string) : Promise<void> => 
 
 export const subscriptionDetail = async (studentId : string) : Promise<TSelectSubscription | undefined> => {
     return await db.query.subscriptionTable.findFirst({where : (table, funcs) => funcs.eq(table.studentId, studentId)});
+}
+
+export const countCoursePurchases = async (currentTeacherId : string) : Promise<AnalyticsPurchase[]> => {
+    const coursePurchaseDetail : CourseWithPurchase[] = await db.select({
+        courseId : courseTable.id, courseTitle : courseTable.title, coursePrice : courseTable.price,
+        purchaseCount : sql<number>`COUNT(${purchaseCoursesTable.courseId})`
+    }).from(courseTable)
+    .leftJoin(purchaseCoursesTable, eq(courseTable.id, purchaseCoursesTable.courseId))
+    .where(eq(courseTable.teacherId, currentTeacherId)).groupBy(courseTable.id);
+
+    return coursePurchaseDetail.map(({courseTitle, purchaseCount, courseId, coursePrice}) => ({
+        courseId, courseTitle, totalRevenue : +coursePrice! * +purchaseCount, purchaseCount : +purchaseCount
+    }));
 }
