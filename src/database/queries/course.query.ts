@@ -1,7 +1,6 @@
 import { and, eq, inArray } from 'drizzle-orm';
-import type { ChapterAndVideoDetails, ChapterDetails, CoursePurchase, CourseRelations, InsectCourseDetails, InsertVideoDetails, ModifiedChapterDetail, SelectVideoCompletion, TSelectChapter, TSelectCourse, TSelectCourseBenefit, 
-    TSelectTags, TSelectVideoDetails, 
-    VectorSeed} from '../../types/index.type';
+import type { ChapterAndVideoDetails, ChapterDetails, CoursePurchase, CourseRelations, InsectCourseDetails, InsertVideoDetails, ModifiedChapterDetail, PurchasedCoursesWithRelations, SelectVideoCompletion, TSelectChapter, TSelectCourse, TSelectCourseBenefit, 
+    TSelectTags, TSelectVideoDetails, VectorSeed } from '../../types/index.type';
 import { db } from '..';
 import { chapterVideosTable, completeState, courseBenefitTable, courseChaptersTable, courseTable, courseTagsTable } from '../schema';
 import { ResourceNotFoundError } from '../../libs/utils';
@@ -91,6 +90,13 @@ export const findCoursePurchases = async (courseId : string) : Promise<CoursePur
     return await db.query.courseTable.findFirst({
         where : (table, funcs) => funcs.eq(table.id, courseId), with : {purchases : true}, columns : {}
     });
+}
+
+export const findPurchasedCourse = async (currentStudentId : string) : Promise<PurchasedCoursesWithRelations[]> => {
+    return await db.query.purchaseCoursesTable.findMany({
+        where : (table, funcs) => funcs.eq(table.studentId, currentStudentId), columns : {},
+        with : {course : {with : {chapters : {with : {videos : true}, columns : {}}}}}
+    })
 }
 
 export const findVideoDetails = async (videoId : string) : Promise<TSelectVideoDetails> => {

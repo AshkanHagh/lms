@@ -1,7 +1,10 @@
-import { insertHashCache } from '../database/cache/index.cache';
+import { getAllHashCache, insertHashCache } from '../database/cache/index.cache';
+import { findStudentStates } from '../database/cache/student.cache';
+import { findPurchasedCourse } from '../database/queries/course.query';
 import { updateInformation } from '../database/queries/student.query';
 import ErrorHandler from '../libs/utils/errorHandler';
-import type { TErrorHandler, TSelectStudent, UpdateAccount } from '../types/index.type';
+import type { CoursesProgress, ModifiedRelationsCourse, PurchasedCoursesWithRelations, PurchaseDetailRes, SelectVideoCompletion, TErrorHandler, TransactionResult, TSelectCourse, TSelectPurchases, TSelectStudent, TSelectSubscription, TSelectVideoDetails, UpdateAccount
+} from '../types/index.type';
 
 export const updatePersonalInformationService = async (currentUser : TSelectStudent, names : UpdateAccount) => {
     try {
@@ -12,6 +15,62 @@ export const updatePersonalInformationService = async (currentUser : TSelectStud
         const updatedName = await updateInformation(fullName, currentUser.id);
         await insertHashCache(`user:${currentUser.id}`, updatedName);
         return {firstName : updatedName.name?.split(' ')[0], lastName : updatedName.name?.split(' ')[1]}
+        
+    } catch (err : unknown) {
+        const error = err as TErrorHandler;
+        throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
+    }
+}
+
+export const transactionsListService = async (currentStudentId : string) : Promise<TransactionResult> => {
+    try {
+        const purchaseList : Record<string, string> = await getAllHashCache(`student_purchases:${currentStudentId}`);
+        const purchaseDetail : TSelectPurchases[] = Object.values(purchaseList).map(purchase => JSON.parse(purchase)) as TSelectPurchases[];
+        const subscriptionDetail : TSelectSubscription = await getAllHashCache(`student_subscription:${currentStudentId}`);
+
+        const modifiedPurchase : PurchaseDetailRes[] = await Promise.all(purchaseDetail.map(async purchase => {
+            const { price, title, id } : TSelectCourse = await getAllHashCache(`course:${purchase.courseId}`);
+            const { courseId, ...modifiedPurchase } = purchase
+            return {...modifiedPurchase, course : {price, title, id}};
+        }));
+
+        return {modifiedPurchase, subscriptionDetail};
+        
+    } catch (err : unknown) {
+        const error = err as TErrorHandler;
+        throw new ErrorHandler(`An error occurred : ${error.message}`, error.statusCode);
+    }
+}
+
+export const browseCoursesService = async (currentStudentId : string) : Promise<CoursesProgress[]> => {
+    try {
+        const purchasedCourses : PurchasedCoursesWithRelations[] = await findPurchasedCourse(currentStudentId);
+        const modifiedCourse : ModifiedRelationsCourse[] = purchasedCourses.map(obj => ({
+            ...obj.course, chapters : obj.course!.chapters.map(video => video.videos).flat()
+        })) as ModifiedRelationsCourse[];
+
+        const studentStateCache : Record<string, string>[] = await findStudentStates(currentStudentId, 
+            modifiedCourse.map(course => course?.id || '')
+        );
+        const studentStateDetail : SelectVideoCompletion[] = studentStateCache.map(state => 
+            Object.values(state).map(state => JSON.parse(state))
+        ).flat();
+
+        const coursesProgress : CoursesProgress[] = modifiedCourse.map(course => {
+            const courseVideos : TSelectVideoDetails[] = course.chapters || [];
+            const totalVideos : number = courseVideos.length;
+
+            const completedVideos : TSelectVideoDetails[] = courseVideos.filter(video => 
+                studentStateDetail.some(state => state.videoId === video.id && state.completed)
+            )
+
+            const completedVideosCount : number = completedVideos.length;
+            const progressPercentage : number = totalVideos > 0 ? Math.round((completedVideosCount / totalVideos) * 100) : 0;
+            const { chapters, ...rest } = course;
+            return {...rest, progress : progressPercentage};
+        });
+
+        return coursesProgress;
         
     } catch (err : unknown) {
         const error = err as TErrorHandler;

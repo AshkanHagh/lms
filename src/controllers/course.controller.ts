@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { CatchAsyncError } from '../middlewares/catchAsyncError';
-import type { ChapterAndVideoDetails, ChapterAndVideoId, ChapterDetails, CourseAndChapterId, CourseAndVideoId, courseBenefitAndDetails, CourseGeneric, CourseParams, CourseRelations, CourseStateResult, InsectCourseDetailsBody, insertChapterBody, InsertVideoDetails, ModifiedChapterDetail, SelectVideoCompletion, TSelectChapter, TSelectCourse, TSelectCourseBenefit, TSelectStudent, TSelectTags, TSelectVideoDetails, VectorSeed } from '../types/index.type';
+import type { ChapterAndVideoDetails, ChapterAndVideoId, ChapterDetails, CourseAndChapterId, CourseAndVideoId, courseBenefitAndDetails, CourseGeneric, CourseParams, CourseRelations, CourseStateResult, InsectCourseDetailsBody, insertChapterBody, InsertVideoDetails, ModifiedChapterDetail, PaginationQuery, SelectVideoCompletion, TSelectChapter, TSelectCourse, TSelectCourseBenefit, TSelectStudent, TSelectTags, TSelectVideoDetails, VectorSeed } from '../types/index.type';
 import { courseBenefitService, courseChapterDetailsService, courseService, coursesService, courseStateDetailService, courseVideosDetailService, createCourseChapterService, createCourseService, editCourseDetailsService, filterCourseByTagsService, markAsCompletedService, mostUsedTagsService, updateChapterVideoDetailService, updateCourseChapterService, vectorSearchService } from '../services/course.service';
 
 export const createCourse = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
@@ -165,7 +165,7 @@ export const courseStateDetail = CatchAsyncError(async (req : Request, res : Res
 
 export const courses = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
     try {
-        const { startIndex, limit } = req.query as {startIndex : string, limit : string};
+        const { startIndex, limit } = req.query as PaginationQuery;
         const courses : TSelectCourse[] = await coursesService(+limit, +startIndex);
         res.status(200).json({success : true, courses});
         
@@ -197,8 +197,8 @@ export const filterCourseByTags = CatchAsyncError(async (req : Request, res : Re
 
 export const vectorSearch = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
     try {
-        const { search } = req.query as {search : string};
-        const similarCourse : Omit<VectorSeed, 'visibility'>[] = await vectorSearchService(search);
+        const { query } = req.body as {query : string};
+        const similarCourse : Omit<VectorSeed, 'visibility'>[] = await vectorSearchService(query);
         res.status(200).json({success : true, similarCourse});
         
     } catch (error : unknown) {

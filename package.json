@@ -12,37 +12,36 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",
-    "@types/bun": "latest",
+    "@types/bun": "^1.1.6",
     "@types/compression": "^1.7.5",
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/nodemailer": "^6.4.15",
-    "drizzle-kit": "^0.23.0",
-    "eslint": "9.x",
-    "globals": "^15.5.0",
-    "typescript-eslint": "^7.13.0"
-  },
-  "peerDependencies": {
-    "typescript": "^latest"
+    "drizzle-kit": "^0.24.0",
+    "eslint": "^9.9.0",
+    "globals": "^15.9.0",
+    "tsc": "^2.0.4",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.0.1"
   },
   "dependencies": {
-    "@upstash/vector": "^1.1.4",
-    "cloudinary": "^2.3.0",
+    "@upstash/vector": "^1.1.5",
+    "cloudinary": "^2.4.0",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "drizzle-orm": "^0.32.0",
+    "drizzle-orm": "^0.33.0",
     "express": "^4.19.2",
     "helmet": "^7.1.0",
     "ioredis": "^5.4.1",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
-    "langchain": "^0.2.13",
+    "langchain": "^0.2.15",
     "nodemailer": "^6.9.14",
     "p-limit": "^6.1.0",
     "postgres": "^3.4.4",
-    "stripe": "^16.2.0"
+    "stripe": "^16.7.0"
   }
 }

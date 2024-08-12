@@ -159,3 +159,26 @@ export type VectorResult = {score : number, course : VectorSeed};
 export type TransactionResult = {
     modifiedPurchase : PurchaseDetailRes[]; subscriptionDetail : TSelectSubscription;
 }
+
+export type PaginationQuery = {
+    limit : string; startIndex : string;
+}
+export type Pagination = {
+    limit : number; startIndex : number;
+}
+
+export type CoursesWithPurchaseDetail = TSelectCourse & {purchases : Pick<TSelectPurchases, 'studentId'>[]}
+
+export type PurchasedCoursesWithRelations = {
+    course: TSelectCourse & {
+        chapters: {
+            videos: TSelectVideoDetails[];
+        }[];
+    } | null;
+};
+
+export type ModifiedRelationsCourse = TSelectCourse & {
+    chapters : TSelectVideoDetails[]
+}
+
+export type CoursesProgress = Omit<ModifiedRelationsCourse, 'chapters'> & {progress : number};

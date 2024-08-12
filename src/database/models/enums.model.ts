@@ -1,7 +1,7 @@
 import { pgEnum } from 'drizzle-orm/pg-core';
 
 export const planEnum = pgEnum('plan', ['free', 'premium']);
-export const roleEnum = pgEnum('role', ['teacher', 'admin', 'student']);
+export const roleEnum = pgEnum('role', ['teacher', 'student']);
 
 export const visibilityEnum = pgEnum('visibility', ['publish', 'unpublish']);
 export const chapterVisibilityEnum = pgEnum('chapter_visibility', ['publish', 'draft']);

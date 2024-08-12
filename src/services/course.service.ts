@@ -141,7 +141,7 @@ export const createCourseChapterService = async (videoDetails : Omit<TSelectVide
 const generateHash = (input : string) : string => {
     return crypto.createHash('sha256').update(input).digest('hex');
 }
-// 1. Check way we need to search like `course:${courseId}:chapter:*` and now `course:${courseId}:chapter:${chapterId}`
+
 export const updateCourseChapterService = async (chapterId : string, courseId : string, chapterDetails : Partial<ModifiedChapterDetail>) :
 Promise<TSelectChapter> => {
     try {
@@ -220,7 +220,7 @@ export const courseService = async (currentStudent : TSelectStudent, courseId : 
 
         const studentHasPurchased : boolean | undefined = courseDetail?.purchases?.some(student => student.studentId === currentStudent.id);
         const studentHasSubscribed : boolean | undefined = currentStudent.plan?.includes('premium');
-        const studentRole : boolean | undefined = currentStudent.role?.includes('admin') || currentStudent.role?.includes('teacher');
+        const studentRole : boolean | undefined = currentStudent.role?.includes('teacher');
 
         const canAccessVideo = (video : TSelectVideoDetails) : boolean => studentRole || studentHasPurchased || studentHasSubscribed 
         || video.state === 'free'
@@ -332,7 +332,7 @@ export const coursesService = async (limit : number, startIndex : number) : Prom
     try {
         const coursesCache : TSelectCourse[] = await findManyCache<TSelectCourse>('course:*');
         if (coursesCache.length > 0) {
-            const filteredAndSortedCourses = coursesCache.reduce((acc, course) => {
+            const filteredAndSortedCourses : TSelectCourse[] = coursesCache.reduce((acc, course) => {
                 if (course.id && course.teacherId && course.title && course.description && course.prerequisite && 
                     course.price && course.image && course.visibility && course.createdAt && course.updatedAt) {
                     acc.push(course);
@@ -342,7 +342,7 @@ export const coursesService = async (limit : number, startIndex : number) : Prom
 
             return filteredAndSortedCourses.splice(startIndex, limit);
         }
-        const courses : TSelectCourse[] = Object.keys(coursesCache).length ? coursesCache : await findManyCourse(limit, startIndex);
+        const courses : TSelectCourse[] = await findManyCourse(limit, startIndex);
         return courses;
         
     } catch (err : unknown) {

@@ -21,3 +21,9 @@ export const findStudentWithEmailSearch = async (email : string | null) : Promis
     } while (cursor !== '0');
     return matchedStudent;
 }
+
+export const findStudentStates = async <T>(currentStudentId : string, coursesId : string[]) : Promise<T[]> => {
+    const pipeline = redis.pipeline();
+    coursesId.forEach(id => pipeline.hgetall(`student_state:${currentStudentId}:course:${id}`));
+    return (await pipeline.exec())!.map(course => course[1]).filter(courseData => Object.keys(courseData!).length > 0) as T[];
+};
