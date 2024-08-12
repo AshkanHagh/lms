@@ -19,6 +19,7 @@ declare global {
       ACCESS_TOKEN_EXPIRE : string;
       REFRESH_TOKEN_EXPIRE : string;
       ORIGIN : string;
+      SENTRY_KEY : string;
       STRIPE_MONTHLY_PLAN_LINK : string;
       STRIPE_YEARLY_PLAN_LINK : string;
       STRIPE_MONTHLY_PRICE_ID : string;

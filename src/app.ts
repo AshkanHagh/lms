@@ -1,3 +1,4 @@
+import './configs/instrument';
 import express, { type NextFunction, type Request, type Response, type Express } from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
@@ -20,7 +21,7 @@ app.use(cookieParser());
 app.use(cors({credentials : true}));
 app.use(compression());
 
-app.get('/', (req : Request, res : Response) => res.status(200).json({success : true, message : 'Welcome'}));
+app.all('/', (req : Request, res : Response) => res.status(200).json({success : true, message : 'Welcome'}));
 
 app.use('/api/v1/auth', authRoute);
 app.use('/api/v1/courses', coursesRoute);

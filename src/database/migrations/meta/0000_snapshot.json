@@ -1,5 +1,5 @@
 {
-  "id": "c0850171-93c6-4bfe-9401-49ab46e56587",
+  "id": "94631f62-f727-4342-a5d6-ca3555376431",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1463,7 +1463,6 @@
       "schema": "public",
       "values": [
         "teacher",
-        "admin",
         "student"
       ]
     },
