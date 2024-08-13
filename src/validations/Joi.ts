@@ -105,3 +105,21 @@ export const markAsCompletedSchema : ObjectSchema = Joi.object({
 export const vectorSearchSchema : ObjectSchema = Joi.object({
     query : Joi.string().required().regex(/^[a-zA-Z\s'-]+$/)
 });
+
+export const rateCourseSchema : ObjectSchema = Joi.object({
+    rate : Joi.number().min(1).max(5).valid(1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5).required()
+});
+
+export const sendCommentSchema : ObjectSchema = Joi.object({
+    text : Joi.string().required().max(500)
+});
+
+export const paginationQuerySchema : ObjectSchema = Joi.object({
+    limit : Joi.string().min(0).max(50).required(),
+    startIndex : Joi.string().min(0).required()
+});
+
+export const courseAndCommentIdSchema : ObjectSchema = Joi.object({
+    courseId : Joi.string().required().uuid(),
+    commentId : Joi.string().required().uuid(),
+});

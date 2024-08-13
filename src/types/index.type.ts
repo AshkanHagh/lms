@@ -1,5 +1,5 @@
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
-import type { chapterVideosTable, completeState, courseBenefitTable, courseChaptersTable, courseTable, courseTagsTable, purchaseCoursesTable, 
+import type { chapterVideosTable, commentTable, completeState, courseBenefitTable, courseChaptersTable, courseRatingTable, courseTable, courseTagsTable, purchaseCoursesTable, 
     studentTable, 
     subscriptionTable} from '../database/schema';
 import type { UploadApiResponse } from 'cloudinary';
@@ -188,4 +188,15 @@ export type CourseWithPurchase = {
 }
 export type AnalyticsPurchase = {
     courseId : string; courseTitle : string; totalRevenue : number, purchaseCount : number
+}
+
+export type TSelectRate = InferSelectModel<typeof courseRatingTable>;
+
+export type TSelectComment = InferSelectModel<typeof commentTable>;
+
+export type CommentAuthorDetail = Pick<TSelectStudent, 'id' | 'image' | 'name' | 'role'>;
+export type ModifiedCommentResult = Omit<TSelectComment, 'authorId'> & {author : CommentAuthorDetail};
+
+export type CourseAndCommentId = {
+    courseId : string; commentId : string;
 }

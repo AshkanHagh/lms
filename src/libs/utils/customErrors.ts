@@ -115,6 +115,12 @@ class AlreadyPurchasedError extends ErrorHandler {
     }
 }
 
+class AlreadyRatedError extends ErrorHandler {
+    constructor() {
+        super('You have already rated this course', 400);
+    }
+}
+
 class NeedToPurchaseThisCourseError extends ErrorHandler {
     constructor() {
         super('You need to purchase this course', 400);
@@ -149,5 +155,6 @@ class RequestTimedOutError extends ErrorHandler {
 export {BadRequestError, UnauthorizedError, ForbiddenError, ResourceNotFoundError, InvalidUserIdError, LoginRequiredError, 
     InternalServerError, AccessTokenInvalidError, ValidationError, RoleForbiddenError, TokenRefreshError, RouteNowFoundError, 
     InvalidEmailError, EmailAlreadyExists, InvalidVerifyCode, StudentNotFoundError, AlreadyPurchasedError, NeedToPurchaseThisCourseError, 
-    EventHandlingError, PaymentFailedError, CheckoutError, RequestTimedOutError, CustomerIdNotFoundError, SubscriptionNotFoundError
+    EventHandlingError, PaymentFailedError, CheckoutError, RequestTimedOutError, CustomerIdNotFoundError, SubscriptionNotFoundError,
+    AlreadyRatedError
 };

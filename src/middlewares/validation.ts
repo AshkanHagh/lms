@@ -19,7 +19,7 @@ export const validateQuery = (schema : ObjectSchema) => {
 
 export const validateParams = (schema : ObjectSchema) => {
     return CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
-        req.query = validate(schema, req.params);
+        req.params = validate(schema, req.params);
         next();
     })
 }

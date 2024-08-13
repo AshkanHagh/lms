@@ -40,3 +40,7 @@ export const getSetListCache = async (setKey : string, setIndex : string) => {
 export const getAllSetListCache = async (setKey : string) : Promise<string[]> => {
     return await redis.smembers(setKey);
 }
+
+export const updateCashTTL = async (key : string) => {
+    await redis.expire(key, 604800);
+}
