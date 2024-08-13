@@ -7,7 +7,7 @@ import { getAllHashCache } from '../database/cache/index.cache';
 
 export const isAuthenticated = CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
     const authHeader : string | undefined = req.headers.authorization;
-    if(!authHeader || !authHeader.startsWith('Bearer ')) return next(new LoginRequiredError());
+    if(!authHeader || !authHeader?.startsWith('Bearer ')) return next(new LoginRequiredError());
 
     const accessToken : string | undefined = authHeader.split(' ')[1];
     if(!accessToken) return next(new AccessTokenInvalidError());

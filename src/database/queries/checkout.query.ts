@@ -14,6 +14,5 @@ Promise<CheckPurchaseValue<T>> => {
 }
 
 export const insertPurchase = async (purchaseDetail : Omit<TSelectPurchases, 'id'>) : Promise<TSelectPurchases> => {
-    const [newPurchase] : TSelectPurchases[] = await db.insert(purchaseCoursesTable).values({...purchaseDetail}).returning();
-    return newPurchase
+    return (await db.insert(purchaseCoursesTable).values({...purchaseDetail}).returning())[0];
 }

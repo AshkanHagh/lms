@@ -3,7 +3,7 @@ import type { ObjectSchema } from 'joi';
 import { validate } from '../validations/Joi';
 import { CatchAsyncError } from './catchAsyncError';
 
-export const validationMiddleware = (schema : ObjectSchema) => {
+export const validationMiddleware = (schema : ObjectSchema, ) => {
     return CatchAsyncError(async (req : Request, res : Response, next : NextFunction) => {
         req.body = validate(schema, req.body);
         next()

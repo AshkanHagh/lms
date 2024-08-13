@@ -1,31 +1,36 @@
 import { eq, sql } from 'drizzle-orm';
 import { db } from '..';
 import { courseTable, purchaseCoursesTable, studentTable, subscriptionTable } from '../schema';
-import type { AnalyticsPurchase, CourseWithPurchase, SelectCondition, TInsertSubscription, TModifiedStudent, TSelectStudent, 
-    TSelectSubscription } from '../../types/index.type';
+import type { AnalyticsPurchase, CourseWithPurchase, TInsertSubscription, TSelectStudent, TSelectSubscription } from '../../types/index.type';
 import { deleteHashCache, getAllHashCache, insertHashCache } from '../cache/index.cache';
 
-export const selectWithCondition = async <T extends 'emailOnly' | 'fullData'>(email : string, service : T) : 
-Promise<SelectCondition<T>> => {
-    if(service === 'emailOnly') {
-        const desiredUser : Pick<TModifiedStudent, 'email'>[] = await db.select({email : studentTable.email})
-        .from(studentTable).where(eq(studentTable.email, email));
-        return desiredUser[0] as SelectCondition<T>;
+export type ReturnCondition = 'emailOnly' | 'fullData';
+
+export const selectWithCondition = async <T extends ReturnCondition, B>(email : string, condition : T) : Promise<B> => {
+    const selectFullData = async (email : string) : Promise<B> => {
+        return (await db.select().from(studentTable).where(eq(studentTable.email, email)))[0] as B;
+    };
+    const selectOnlyEmail = async (email : string) : Promise<B> => {
+        return (await db.select({email : studentTable.email}).from(studentTable).where(eq(studentTable.email, email)))[0] as B;
     }
-    const desiredUser : TSelectStudent[] = await db.select().from(studentTable).where(eq(studentTable.email, email));
-    return desiredUser[0] as SelectCondition<T>;
+
+    const conditionHandlers : Record<ReturnCondition, (email : string) => Promise<B>> = {
+        emailOnly : selectOnlyEmail,
+        fullData : selectFullData
+    }
+    return await conditionHandlers[condition](email);
 }
 
 export const insertStudentDetails = async (insertData : Partial<Pick<TSelectStudent, 'name' | 'email' | 'image'>>) : Promise<TSelectStudent> => {
     const [userDetails] : TSelectStudent[] = await db.insert(studentTable).values(
-        insertData as Pick<TSelectStudent, 'name' | 'email' | 'image'>).returning();
+        insertData as Pick<TSelectStudent, 'name' | 'email' | 'image'>
+    ).returning();
     return userDetails;
 }
 
 export const updateInformation = async (name : string, currentStudentId : string) : Promise<{name : string | null}> => {
-    const userDetail : {name : string | null}[] = await db.update(studentTable).set({name}).
-    where(eq(studentTable.id, currentStudentId)).returning({name : studentTable.name});
-    return userDetail[0];
+    return (await db.update(studentTable).set({name})
+    .where(eq(studentTable.id, currentStudentId)).returning({name : studentTable.name}))[0];
 }
 
 export const updateCustomerId = async (currentStudentId : string, customerId : string) : Promise<void> => {
@@ -33,21 +38,17 @@ export const updateCustomerId = async (currentStudentId : string, customerId : s
 }
 
 export const updateStudentPlan = async (currentStudentId : string, plan : 'premium' | 'free') : Promise<TSelectStudent> => {
-    const [currentStudent] : TSelectStudent[] = await db.update(studentTable).set({plan}).
-    where(eq(studentTable.id, currentStudentId)).returning();
-    return currentStudent
+    return (await db.update(studentTable).set({plan}).where(eq(studentTable.id, currentStudentId)).returning())[0];
 }
 
 export const updateSubscription = async (currentStudentId : string, subscriptionDetail : Omit<TInsertSubscription, 'studentId'>) : Promise<TSelectSubscription> => {
-    const [subscription] : TSelectSubscription[] = await db.update(subscriptionTable).set(subscriptionDetail)
-        .where(eq(subscriptionTable.studentId, currentStudentId)).returning();
-    return subscription;
+    return (await db.update(subscriptionTable).set(subscriptionDetail)
+        .where(eq(subscriptionTable.studentId, currentStudentId)
+    ).returning())[0];
 }
 
 export const insertSubscription = async (currentStudentId : string, subscriptionDetail : TInsertSubscription) : Promise<TSelectSubscription> => {
-    const [subscription] : TSelectSubscription[] = await db.insert(subscriptionTable)
-        .values({ ...subscriptionDetail, studentId : currentStudentId }).returning();
-    return subscription;
+    return (await db.insert(subscriptionTable).values({ ...subscriptionDetail, studentId : currentStudentId }).returning())[0];
 }
 
 export const handleSubscription = async (currentStudentId : string, subscriptionDetail : TInsertSubscription) : Promise<TSelectSubscription> => {

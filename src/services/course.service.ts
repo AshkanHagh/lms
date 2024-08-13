@@ -128,7 +128,7 @@ export const createCourseChapterService = async (videoDetails : Omit<TSelectVide
         });
         
         const { chapterDetails, videoDetail } = await insertChapterAndVideos({...chapterDetail, courseId : courseId}, videoDetails);
-        await insertHashCache(`course:${courseId}:chapters:${chapterDetails.id}`, chapterDetails),
+        await insertHashCache(`course:${courseId}:chapters:${chapterDetails.id}`, chapterDetails);
         await Promise.all(videoDetail.map(async video => {insertHashListCache(`course_videos:${video.chapterId}`, video.id, video)}));
         return { chapterDetails : chapterDetails, videoDetail } as ChapterAndVideoDetails;
         
@@ -228,6 +228,7 @@ export const courseService = async (currentStudent : TSelectStudent, courseId : 
         const filteredChapters : FilteredChapters = courseDetail?.chapters?.filter(chapter => chapter.visibility !== 'draft')
         .map(chapter => ({...chapter, videos : chapter.videos.filter(canAccessVideo)}));
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { purchases, ...courseDetails } = courseDetail;
         const modifiedCourse : CourseRelations = {...courseDetails, chapters : filteredChapters} as CourseRelations;
         return modifiedCourse;
@@ -357,7 +358,8 @@ export const mostUsedTagsService = async () : Promise<TSelectTags[]> => {
         const existingTags : TSelectTags[] = tagsRecord.map(tag => Object.values(tag).map(tag => JSON.parse(tag))).flat();
         const tagsMap : Map<string, MostUsedTagsMap> = new Map<string, MostUsedTagsMap>();
         existingTags.forEach(tag => {
-            tagsMap.has(tag.tags) ? tagsMap.get(tag.tags)!.count += 1 : tagsMap.set(tag.tags, {tag, count : 1});
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+            tagsMap.has(tag.tags) ? tagsMap.get(tag.tags)!.count += 1 : tagsMap.set(tag.tags, {tag, count : 1})
         });
         const mostUsedTags : MostUsedTagsMap[] = Array.from(tagsMap.values()).sort((a, b) => b.count - a.count).slice(0, 10);
         return mostUsedTags.map(tag => tag.tag);
@@ -387,7 +389,8 @@ const splitTextIntoSemantic = async (text : string) : Promise<string[]> => {
     const documents : Document<Record<string, string>>[] = await semanticSplitter.createDocuments([text]);
     return documents.map(chunk => chunk.pageContent);
 }
-
+// 1. Add postgres vector search # hard task
+// 2. use select and joins in most queries # Very hard task
 export const vectorSearchService = async (query : string) : Promise<Omit<VectorSeed, 'visibility'>[]> => {
     try {
         const [semanticChunks, wordChunks] : string[][] = await Promise.all([
@@ -399,13 +402,13 @@ export const vectorSearchService = async (query : string) : Promise<Omit<VectorS
             ...wordChunks.map(async wordChunk => {
                 const vectors = await vectorRedis.query({topK : 24, data : wordChunk, includeMetadata : true});
                 vectors.forEach(vector => {
-                    if (vector && vector.score > 0.70) flaggedFor.push({score : vector.score, course : vector.metadata as VectorSeed})
+                    if (vector && vector.score > 0.9) flaggedFor.push({score : vector.score, course : vector.metadata as VectorSeed})
                 });
             }),
             ...semanticChunks.map(async semanticChunk => {
                 const vectors = await vectorRedis.query({topK : 24, data : semanticChunk, includeMetadata : true});
                 vectors.forEach(vector => {
-                    if (vector && vector.score > 0.70) flaggedFor.push({score : vector.score, course : vector.metadata as VectorSeed});
+                    if (vector && vector.score > 0.9) flaggedFor.push({score : vector.score, course : vector.metadata as VectorSeed});
                 });
             })
         ]);

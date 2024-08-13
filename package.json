@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "bun src/server.ts",
-    "dev": "bun --hot src/server.ts",
+    "dev": "bun --watch src/server.ts",
     "db:generate": "bunx drizzle-kit generate",
     "db:migrate": "bun src/database/migrate.ts",
     "db:push": "bun drizzle-kit push",

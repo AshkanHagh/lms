@@ -7,8 +7,7 @@ import { ResourceNotFoundError } from '../../libs/utils';
 import { getHashCache } from '../cache/index.cache';
 
 export const insertCourse = async (details : Pick<InsectCourseDetails, 'title' | 'teacherId'>) : Promise<TSelectCourse> => {
-    const [courseDetail] = await db.insert(courseTable).values(details).returning();
-    return courseDetail
+    return (await db.insert(courseTable).values(details).returning())[0];
 }
 
 export const insertCourseBenefit = async (benefit : Omit<TSelectCourseBenefit, 'id'>[]) : Promise<TSelectCourseBenefit[]> => {
@@ -16,24 +15,19 @@ export const insertCourseBenefit = async (benefit : Omit<TSelectCourseBenefit, '
 }
 
 export const updateCourse = async (courseDetails : Partial<InsectCourseDetails>, courseId : string) : Promise<TSelectCourse> => {
-    const updatedDetails : TSelectCourse[] = await db.update(courseTable).set(courseDetails).where(eq(courseTable.id, courseId)).returning();
-    return updatedDetails[0]
+    return (await db.update(courseTable).set(courseDetails).where(eq(courseTable.id, courseId)).returning())[0];
 }
 
 export const insertChapter = async (chapterDetail : ModifiedChapterDetail, trx = db) : Promise<TSelectChapter> => {
-    const [newChapter] : TSelectChapter[] = await trx.insert(courseChaptersTable).values(chapterDetail).returning();
-    return newChapter;
+    return (await trx.insert(courseChaptersTable).values(chapterDetail).returning())[0];
 }
 
 export const insertChapterVideos = async (videosDetail : Omit<TSelectVideoDetails, 'id'>[], trx = db) : Promise<TSelectVideoDetails[]> => {
-    const newVideos : TSelectVideoDetails[] = await trx.insert(chapterVideosTable).values(videosDetail).returning();
-    return newVideos;
+    return await trx.insert(chapterVideosTable).values(videosDetail).returning();
 }
 
 export const updateChapterVideos = async (videoDetail : InsertVideoDetails, videoId : string) : Promise<TSelectVideoDetails> => {
-    const [updatedVideo] : TSelectVideoDetails[] = await db.update(chapterVideosTable).set(videoDetail)
-    .where(eq(chapterVideosTable.id, videoId)).returning();
-    return updatedVideo
+    return (await db.update(chapterVideosTable).set(videoDetail).where(eq(chapterVideosTable.id, videoId)).returning())[0];
 }
 
 export const insertChapterAndVideos = async (chapterDetail : ModifiedChapterDetail, videosDetail : Omit<TSelectVideoDetails, 'id'>[]) : 
@@ -65,19 +59,17 @@ export const updateTags = async (tagsId : string, newTags : string) : Promise<vo
 }
 
 export const findCourseWithRelations = async (courseId : string) : Promise<CourseRelations> => {
-    const desiredCourse : CourseRelations = await db.query.courseTable.findFirst({
+    return await db.query.courseTable.findFirst({
         where : (table, funcs) => funcs.eq(table.id, courseId),
         with : {benefits : true, chapters : {with : {videos : true}}, tags : true, purchases : {columns : {studentId : true}},
         teacher : {columns : {email : true, id : true, image : true, name : true}}
     }
     });
-    return desiredCourse;
 }
 
 export const patchCourseChapter = async (chapterId : string, chapterDetails : Partial<ModifiedChapterDetail>) : Promise<TSelectChapter> => {
-    const [updatedChapter] : TSelectChapter[] = await db.update(courseChaptersTable).set(chapterDetails)
-    .where(eq(courseChaptersTable.id, chapterId)).returning();
-    return updatedChapter
+    return (await db.update(courseChaptersTable).set(chapterDetails)
+    .where(eq(courseChaptersTable.id, chapterId)).returning())[0];
 }
 
 export const findChapterDetail = async (chapterId : string) : Promise<ChapterDetails | undefined> => {
@@ -118,16 +110,14 @@ export const handelVideoCompletion = async (courseId : string, videoId : string,
 Promise<SelectVideoCompletion> => {
     const currentStudentVideoState : string = await getHashCache<string>(`student_state:${currentStudentId}:course:${courseId}`, videoId);
     const insertNewCompletionDetail = async (courseId : string, videoId : string, currentStudentId : string) : Promise<SelectVideoCompletion> => {
-        const [completionDetail] : SelectVideoCompletion[] = await db.insert(completeState).values({
+        return (await db.insert(completeState).values({
             videoId, courseId, studentId : currentStudentId, completed : true
-        }).returning();
-        return completionDetail;
+        }).returning())[0];
     }
     const updateCompletionState = async (videoId : string, currentStudentId : string, state : boolean) : Promise<SelectVideoCompletion> => {
-        const [updatedState] : SelectVideoCompletion[] = await db.update(completeState).set({completed : state}).where(
+        return (await db.update(completeState).set({completed : state}).where(
             and(eq(completeState.studentId, currentStudentId), eq(completeState.videoId, videoId))
-        ).returning();
-        return updatedState;
+        ).returning())[0];
     }
 
     if(!currentStudentVideoState || currentStudentVideoState.length === 0) {
@@ -142,7 +132,7 @@ export const findCourseState = async (courseId : string, currentStudentId : stri
     });
 }
 
-export const findManyCourse = async (limit : number, startIndex : number) : Promise<TSelectCourse[]> => {
+export const findManyCourse = async (limit : number | undefined, startIndex : number | undefined) : Promise<TSelectCourse[]> => {
     return await db.query.courseTable.findMany({limit, offset : startIndex, orderBy : (table, funcs) => funcs.desc(table.createdAt)});
 }
 

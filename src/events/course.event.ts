@@ -19,9 +19,8 @@ courseEvent.on('seed_vector_one', async (courseId : string) => {
 });
 
 courseEvent.on('seed_vector_many', async () => {
-    console.log('is here');
     try {
-        const courses : TSelectCourse[] = await findManyCourse(0, 0);
+        const courses : TSelectCourse[] = await findManyCourse(undefined, undefined);
         const vectorSeed = courses.map(course => {
             return {id : course.id, data : `${course.title} ${course.description}`, metadata : {
                 id : course.id, image : course.image, title : course.title, description : course.description, price : course.price
