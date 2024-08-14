@@ -1,8 +1,8 @@
 import type { NextFunction, Request, Response } from 'express';
 import { CatchAsyncError } from '../middlewares/catchAsyncError';
-import type { CourseAndCommentId, CourseParams, ModifiedCommentResult, PaginationQuery, TSelectComment, TSelectRate } from '../types/index.type';
-import { courseCommentsService, courseRateDetailService, deleteCommentService, rateCourseService, sendCommentService, 
-    updateCommentService 
+import type { CommentAuthorDetail, CourseAndCommentId, CourseParams, ModifiedCommentResult, ModifiedSendReplay, Pagination, PaginationQuery, ReplayAndCommentId, TSelectComment, TSelectRate, TSelectReplay } from '../types/index.type';
+import { courseCommentsService, courseRateDetailService, deleteCommentService, rateCourseService, removeReplayService, repliesDetailService, sendCommentService, 
+    sendReplayService, updateCommentService, updateReplayService 
 } from '../services/comment.service';
 
 export const rateCourse = CatchAsyncError(async (req : Request, res : Response) => {
@@ -23,9 +23,9 @@ export const courseRateDetail = CatchAsyncError(async (req : Request, res : Resp
 export const sendComment = CatchAsyncError(async (req : Request, res : Response) => {
     const { courseId } = req.params as CourseParams;
     const { text } = req.body as Pick<TSelectComment, 'text'>;
-    const currentStudentId : string = req.student!.id;
+    const { id, image, name, role } : CommentAuthorDetail = req.student!;
 
-    const commentDetail : ModifiedCommentResult = await sendCommentService(currentStudentId, courseId, text);
+    const commentDetail : ModifiedCommentResult = await sendCommentService({id, image, name, role}, courseId, text);
     res.status(200).json({success : true, commentDetail});
 });
 
@@ -51,4 +51,38 @@ export const courseComments = CatchAsyncError(async (req : Request, res : Respon
     const { limit, startIndex } = req.query as PaginationQuery; 
     const commentsDetails : ModifiedCommentResult[] = await courseCommentsService(courseId, +limit, +startIndex);
     res.status(200).json({success : true, commentsDetails});
+});
+
+export const sendReplay = CatchAsyncError(async (req : Request, res : Response) => {
+    const { courseId, commentId } = req.params as CourseAndCommentId;
+    const { text } = req.body as Pick<TSelectReplay, 'text'>;
+    const { id, image, name, role } : CommentAuthorDetail = req.student!;
+
+    const replayDetail : ModifiedSendReplay = await sendReplayService({id, image, name, role}, courseId, commentId, text);
+    res.status(200).json({success : true, replayDetail});
+});
+
+export const updateReplay = CatchAsyncError(async (req : Request, res : Response) => {
+    const { replayId, commentId } = req.params as ReplayAndCommentId;
+    const { text } = req.body as Pick<TSelectReplay, 'text'>;
+    const { id, image, name, role } : CommentAuthorDetail = req.student!;
+
+    const replayDetail : ModifiedSendReplay = await updateReplayService({id, image, name, role}, commentId, replayId, text);
+    res.status(200).json({success : true, replayDetail});
+});
+
+export const removeReplay = CatchAsyncError(async (req : Request, res : Response) => {
+    const { replayId, commentId } = req.params as ReplayAndCommentId;
+    const studentId : string = req.student!.id;
+
+    const message : string = await removeReplayService(studentId, commentId, replayId);
+    res.status(200).json({success : true, message});
+});
+
+export const repliesDetail = CatchAsyncError(async (req : Request, res : Response) => {
+    const { commentId } = req.params as ReplayAndCommentId;
+    const { limit, startIndex } = req.query as PaginationQuery
+
+    const repliesDetail = await repliesDetailService(commentId, +limit, +startIndex);
+    res.status(200).json({success : true, repliesDetail});
 });

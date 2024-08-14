@@ -77,6 +77,10 @@ export const courseParamsSchema: ObjectSchema = Joi.object({
     courseId : Joi.string().required().uuid(),
 });
 
+export const commentParamsSchema: ObjectSchema = Joi.object({
+    commentId : Joi.string().required().uuid(),
+});
+
 export const courseAndChapterIdSchema : ObjectSchema = Joi.object({
     courseId : Joi.string().required().uuid(),
     chapterId : Joi.string().required().uuid(),
@@ -121,5 +125,10 @@ export const paginationQuerySchema : ObjectSchema = Joi.object({
 
 export const courseAndCommentIdSchema : ObjectSchema = Joi.object({
     courseId : Joi.string().required().uuid(),
+    commentId : Joi.string().required().uuid(),
+});
+
+export const replayAndCommentIdSchema : ObjectSchema = Joi.object({
+    replayId : Joi.string().required().uuid(),
     commentId : Joi.string().required().uuid(),
 });

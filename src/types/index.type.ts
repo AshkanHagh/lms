@@ -1,5 +1,6 @@
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import type { chapterVideosTable, commentTable, completeState, courseBenefitTable, courseChaptersTable, courseRatingTable, courseTable, courseTagsTable, purchaseCoursesTable, 
+    repliesTable, 
     studentTable, 
     subscriptionTable} from '../database/schema';
 import type { UploadApiResponse } from 'cloudinary';
@@ -199,4 +200,10 @@ export type ModifiedCommentResult = Omit<TSelectComment, 'authorId'> & {author :
 
 export type CourseAndCommentId = {
     courseId : string; commentId : string;
+}
+
+export type TSelectReplay = InferSelectModel<typeof repliesTable>;
+export type ModifiedSendReplay = Omit<TSelectReplay, 'authorId'> & {author : CommentAuthorDetail};
+export type ReplayAndCommentId = {
+    replayId : string; commentId : string;
 }

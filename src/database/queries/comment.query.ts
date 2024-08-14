@@ -1,7 +1,7 @@
 import { and, desc, eq } from 'drizzle-orm';
 import { db } from '../.';
-import type { TSelectComment, TSelectRate } from '../../types/index.type';
-import { commentTable, courseCommentsTable, courseRatingTable } from '../schema';
+import type { CommentAuthorDetail, TSelectComment, TSelectRate, TSelectReplay } from '../../types/index.type';
+import { commentTable, courseCommentsTable, courseRatingTable, repliesTable, studentTable } from '../schema';
 import { AlreadyRatedError } from '../../libs/utils';
 import { getHashCache } from '../cache/index.cache';
 
@@ -61,4 +61,32 @@ export const courseCommentsDetail = async (courseId : string, limit : number, st
         if(comment.comment) acc.push(comment.comment)
         return acc
     }, [] as TSelectComment[]);
+}
+
+export const insertReplay = async (commentId : string, studentId : string, text : string) : Promise<TSelectReplay> => {
+    return (await db.insert(repliesTable).values({text, authorId : studentId, commentId}).returning())[0];
+}
+
+export const updateReplayDetail = async (replayId : string, text : string) : Promise<TSelectReplay> => {
+    return (await db.update(repliesTable).set({text}).where(eq(repliesTable.id, replayId)).returning())[0];
+}
+
+export const deleteReplay = async (replayId : string) : Promise<void> => {
+    await db.delete(repliesTable).where(eq(repliesTable.id, replayId));
+}
+
+export type RepliesWithAuthor = {replay : TSelectReplay, author : CommentAuthorDetail | null}
+export type ModifiedRepliesWithAuthor = Omit<TSelectReplay, 'authorId'> & {author : CommentAuthorDetail | null}
+
+export const findReplies = async (commentId : string, limit : number, startIndex : number) : Promise<ModifiedRepliesWithAuthor[]> => {
+    const replies : RepliesWithAuthor[] = await db.select({
+        replay : repliesTable, author : {
+            id : studentTable.id, name : studentTable.name, image : studentTable.image, role : studentTable.role
+        }
+    }).from(repliesTable).leftJoin(studentTable, eq(studentTable.id, repliesTable.authorId)).where(eq(repliesTable.commentId, commentId))
+    .limit(limit).offset(startIndex).orderBy(desc(repliesTable.createdAt));
+    return replies.map(({author, replay}) => {
+        const { authorId, ...rest } = replay;
+        return {...rest, author : author}
+    });
 }
