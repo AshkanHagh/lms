@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { cancelPayment, checkout, subscriptionCheckout, subscriptionPortal, verifyPayment, 
-    webhookListening } from '../controllers/checkout.controller';
+    webhookEventListener } from '../controllers/checkout.controller';
 import { isAuthenticated } from '../middlewares/auth';
 import { isCourseExists } from '../middlewares/checkItemExists';
 import { validateParams, validateQuery } from '../middlewares/validation';
@@ -15,7 +15,7 @@ router.get('/verify', validateQuery(CheckoutVerifyQuerySchema), verifyPayment);
 
 router.get('/cancel', cancelPayment);
 
-router.post('/webhooks/stripe', express.raw({type: 'application/json'}), webhookListening);
+router.post('/webhooks/stripe', express.raw({type: 'application/json'}), webhookEventListener);
 
 router.post('/subscription', [isAuthenticated, validateQuery(querySchema)], subscriptionCheckout);
 

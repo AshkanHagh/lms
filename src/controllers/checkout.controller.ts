@@ -26,7 +26,7 @@ export const cancelPayment = CatchAsyncError(async (req : Request, res : Respons
     res.status(200).json({success : true, message : 'Purchase was canceled successfully'});
 });
 
-export const webhookListening = CatchAsyncError(async (req : Request, res : Response) => {
+export const webhookEventListener = CatchAsyncError(async (req : Request, res : Response) => {
     const signature : string | undefined = req.headers['stripe-signature'] as string | undefined;
     const body : string = req.body;
 

@@ -170,12 +170,12 @@ failure_message : string | Stripe.PaymentIntent | null, STRIPE_YEARLY_PRICE_ID :
 
     const priceIds : (string | undefined)[] = linesData.map(line => line.price?.id).filter(Boolean);
     if(!priceIds[0]) {
-        const paymentLink : string = 'http://localhost:7319/api/v1/dashboard/subscription'; // change later
+        const paymentLink : string = `${process.env.STRIPE_BASE_URL}/`; // change later
         emailEvent.emit('invoice.payment_failed', currentStudent!.email, paymentLink, invoiceId);
     }
 
     const planQuery : string = priceIds[0] === STRIPE_YEARLY_PRICE_ID ? 'yearly' : 'monthly';
-    const paymentLink : string = `http://localhost:7319/api/v1/payments/subscription?plan=${planQuery}`;
+    const paymentLink : string = `${process.env.STRIPE_BASE_URL}/api/v1/payments/subscription?plan=${planQuery}`;
     emailEvent.emit('invoice.payment_failed', currentStudent!.email, paymentLink, invoiceId);
     throw new PaymentFailedError(invoiceId, failure_message);
 }
