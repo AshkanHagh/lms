@@ -22,17 +22,10 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY --link bun.lockb package.json ./
-RUN bun install
+RUN bun install --ci
 
 # Copy application code
 COPY --link . .
-
-# Build application
-RUN bun run build
-
-# Remove development dependencies
-RUN rm -rf node_modules && \
-    bun install --ci
 
 
 # Final stage for app image
@@ -42,5 +35,5 @@ FROM base
 COPY --from=build /app /app
 
 # Start the server by default, this can be overwritten at runtime
-EXPOSE 7319
+EXPOSE 3000
 CMD [ "bun", "run", "start" ]

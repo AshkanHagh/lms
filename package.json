@@ -11,7 +11,7 @@
     "db:studio": "bunx drizzle-kit studio",
     "db:seed": "bun src/database/seed/faker.ts",
     "db:build" : "bun run db:generate && bun run db:migrate",
-    "build": "npx tsc && bun run sentry:sourcemaps",
+    "sentry:build": "npx tsc && bun run sentry:sourcemaps",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org haghdoost --project magical-learning ./dist && sentry-cli sourcemaps upload --org haghdoost --project magical-learning ./dist"
   },
   "devDependencies": {
