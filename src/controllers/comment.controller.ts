@@ -1,10 +1,10 @@
 import type { NextFunction, Request, Response } from 'express';
 import { CatchAsyncError } from '../middlewares/catchAsyncError';
-import type { CommentAuthorDetail, CourseAndCommentId, CourseParams, ModifiedCommentResult, ModifiedSendReplay, Pagination, PaginationQuery, ReplayAndCommentId, TSelectComment, TSelectRate, TSelectReplay } from '../types/index.type';
+import type { CommentAuthorDetail, CourseAndCommentId, CourseParams, ModifiedCommentResult, ModifiedSendReplay, PaginationQuery, ReplayAndCommentId, TSelectComment, TSelectRate, TSelectReplay } from '../types/index.type';
 import { courseCommentsService, courseRateDetailService, deleteCommentService, rateCourseService, removeReplayService, repliesDetailService, sendCommentService, 
     sendReplayService, updateCommentService, updateReplayService 
 } from '../services/comment.service';
-
+// subscripted student can comment and replay
 export const rateCourse = CatchAsyncError(async (req : Request, res : Response) => {
     const currentStudentId : string = req.student!.id;
     const { courseId } = req.params as CourseParams;

@@ -3,7 +3,7 @@ import { studentTable } from './student.model';
 import { chapterEnum, chapterVisibilityEnum, visibilityEnum } from './enums.model';
 import { relations } from 'drizzle-orm';
 import { purchaseCoursesTable } from './purchase.model';
-import { courseCommentsTable, courseRatingTable, reviewTable } from './comments.model';
+import { courseCommentsTable, courseRatingTable } from './comments.model';
 
 export const courseTable = pgTable('courses', {
     id : uuid('id').primaryKey().defaultRandom(),
@@ -76,7 +76,6 @@ export const courseTableRelations = relations(courseTable, ({one, many}) => ({
     tags : many(courseTagsTable),
     completeState : many(completeState),
     purchases : many(purchaseCoursesTable),
-    reviews : many(reviewTable),
     comments : many(courseCommentsTable),
     rating : many(courseRatingTable),
 }));

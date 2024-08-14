@@ -389,8 +389,7 @@ const splitTextIntoSemantic = async (text : string) : Promise<string[]> => {
     const documents : Document<Record<string, string>>[] = await semanticSplitter.createDocuments([text]);
     return documents.map(chunk => chunk.pageContent);
 }
-// 1. Add postgres vector search # hard task
-// 2. use select and joins in most queries # Very hard task
+
 export const vectorSearchService = async (query : string) : Promise<Omit<VectorSeed, 'visibility'>[]> => {
     try {
         const [semanticChunks, wordChunks] : string[][] = await Promise.all([
@@ -400,15 +399,15 @@ export const vectorSearchService = async (query : string) : Promise<Omit<VectorS
         const flaggedFor : VectorResult[] = [];
         await Promise.all([
             ...wordChunks.map(async wordChunk => {
-                const vectors = await vectorRedis.query({topK : 24, data : wordChunk, includeMetadata : true});
+                const vectors = await vectorRedis.query({topK : 12, data : wordChunk, includeMetadata : true});
                 vectors.forEach(vector => {
-                    if (vector && vector.score > 0.9) flaggedFor.push({score : vector.score, course : vector.metadata as VectorSeed})
+                    flaggedFor.push({score : vector.score, course : vector.metadata as VectorSeed})
                 });
             }),
             ...semanticChunks.map(async semanticChunk => {
-                const vectors = await vectorRedis.query({topK : 24, data : semanticChunk, includeMetadata : true});
+                const vectors = await vectorRedis.query({topK : 12, data : semanticChunk, includeMetadata : true});
                 vectors.forEach(vector => {
-                    if (vector && vector.score > 0.9) flaggedFor.push({score : vector.score, course : vector.metadata as VectorSeed});
+                    flaggedFor.push({score : vector.score, course : vector.metadata as VectorSeed});
                 });
             })
         ]);

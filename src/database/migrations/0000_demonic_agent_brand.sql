@@ -75,24 +75,9 @@ CREATE TABLE IF NOT EXISTS "ratings" (
 	CONSTRAINT "ratings_course_id_user_id_pk" PRIMARY KEY("course_id","user_id")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "course_reviews" (
-	"course_id" uuid,
-	"review_id" uuid,
-	CONSTRAINT "course_reviews_course_id_review_id_pk" PRIMARY KEY("course_id","review_id")
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "replies" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"comment_id" uuid,
-	"author_id" uuid,
-	"text" text NOT NULL,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now()
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "reviews" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"course_id" uuid,
 	"author_id" uuid,
 	"text" text NOT NULL,
 	"created_at" timestamp DEFAULT now(),
@@ -211,18 +196,6 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "course_reviews" ADD CONSTRAINT "course_reviews_course_id_courses_id_fk" FOREIGN KEY ("course_id") REFERENCES "public"."courses"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "course_reviews" ADD CONSTRAINT "course_reviews_review_id_reviews_id_fk" FOREIGN KEY ("review_id") REFERENCES "public"."reviews"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
  ALTER TABLE "replies" ADD CONSTRAINT "replies_comment_id_comments_id_fk" FOREIGN KEY ("comment_id") REFERENCES "public"."comments"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -230,18 +203,6 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "replies" ADD CONSTRAINT "replies_author_id_users_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "reviews" ADD CONSTRAINT "reviews_course_id_courses_id_fk" FOREIGN KEY ("course_id") REFERENCES "public"."courses"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "reviews" ADD CONSTRAINT "reviews_author_id_users_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -329,8 +290,6 @@ CREATE INDEX IF NOT EXISTS "student_role_index" ON "users" USING btree ("role");
 CREATE INDEX IF NOT EXISTS "authorId_index_comment" ON "comments" USING btree ("author_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "authorId_index_replies" ON "replies" USING btree ("author_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "commentId_index_replies" ON "replies" USING btree ("comment_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "courseId_index_review" ON "reviews" USING btree ("course_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "authorId_index_review" ON "reviews" USING btree ("author_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "courseId_index_chapterDetails" ON "videos" USING btree ("chapter_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "complete_studentId_index" ON "complete_state" USING btree ("student_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "complete_course_id" ON "complete_state" USING btree ("course_id");--> statement-breakpoint

@@ -1,5 +1,5 @@
 {
-  "id": "94631f62-f727-4342-a5d6-ca3555376431",
+  "id": "f312e892-91b8-4fa3-b8cb-07fc14599199",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -315,63 +315,6 @@
       },
       "uniqueConstraints": {}
     },
-    "public.course_reviews": {
-      "name": "course_reviews",
-      "schema": "",
-      "columns": {
-        "course_id": {
-          "name": "course_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "review_id": {
-          "name": "review_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "course_reviews_course_id_courses_id_fk": {
-          "name": "course_reviews_course_id_courses_id_fk",
-          "tableFrom": "course_reviews",
-          "tableTo": "courses",
-          "columnsFrom": [
-            "course_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "course_reviews_review_id_reviews_id_fk": {
-          "name": "course_reviews_review_id_reviews_id_fk",
-          "tableFrom": "course_reviews",
-          "tableTo": "reviews",
-          "columnsFrom": [
-            "review_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "course_reviews_course_id_review_id_pk": {
-          "name": "course_reviews_course_id_review_id_pk",
-          "columns": [
-            "course_id",
-            "review_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {}
-    },
     "public.replies": {
       "name": "replies",
       "schema": "",
@@ -465,113 +408,6 @@
         "replies_author_id_users_id_fk": {
           "name": "replies_author_id_users_id_fk",
           "tableFrom": "replies",
-          "tableTo": "users",
-          "columnsFrom": [
-            "author_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.reviews": {
-      "name": "reviews",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "course_id": {
-          "name": "course_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "author_id": {
-          "name": "author_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "text": {
-          "name": "text",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "courseId_index_review": {
-          "name": "courseId_index_review",
-          "columns": [
-            {
-              "expression": "course_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "authorId_index_review": {
-          "name": "authorId_index_review",
-          "columns": [
-            {
-              "expression": "author_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "reviews_course_id_courses_id_fk": {
-          "name": "reviews_course_id_courses_id_fk",
-          "tableFrom": "reviews",
-          "tableTo": "courses",
-          "columnsFrom": [
-            "course_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "reviews_author_id_users_id_fk": {
-          "name": "reviews_author_id_users_id_fk",
-          "tableFrom": "reviews",
           "tableTo": "users",
           "columnsFrom": [
             "author_id"

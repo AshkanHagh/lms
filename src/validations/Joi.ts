@@ -38,8 +38,8 @@ export const editCourseDetailsSchema : ObjectSchema = Joi.object({
 
 export const courseBenefitSchema : ObjectSchema = Joi.object({
     benefits : Joi.array().items(Joi.object({
-        title : Joi.string().max(255).required().trim().regex(/^[a-zA-Z\s'-]+$/),
-        details : Joi.string().required().trim().regex(/^[a-zA-Z\s'-]+$/)
+        title : Joi.string().max(255).required().trim()/*.regex(/^[a-zA-Z\s'-]+$/)*/,
+        details : Joi.string().required().trim()/*.regex(/^[a-zA-Z\s'-]+$/)*/
     })).required()
 });
 

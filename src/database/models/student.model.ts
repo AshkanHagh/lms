@@ -1,7 +1,7 @@
 import { pgTable, varchar, timestamp, index, text, uuid } from 'drizzle-orm/pg-core';
 import { completeState, courseTable } from './course.model';
 import { purchaseCoursesTable, subscriptionTable } from './purchase.model';
-import { commentTable, courseRatingTable, reviewTable } from './comments.model';
+import { commentTable, courseRatingTable } from './comments.model';
 import { notificationTable } from './notification.model';
 import { relations } from 'drizzle-orm';
 import { planEnum, roleEnum } from './enums.model';
@@ -24,7 +24,6 @@ export const userTableRelations = relations(studentTable, ({one, many}) => ({
     courses : many(courseTable),
     subscription : one(subscriptionTable),
     purchases : many(purchaseCoursesTable),
-    reviews : many(reviewTable),
     comments : many(commentTable),
     ratings : many(courseRatingTable),
     from : one(notificationTable, {
