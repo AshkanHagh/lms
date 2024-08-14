@@ -1,5 +1,5 @@
 # Magic Learning 
-## [Version 1.0]()
+## [Version 1.0](https://magiclearning.up.railway.app/)
 ---
 
 ## Overview
