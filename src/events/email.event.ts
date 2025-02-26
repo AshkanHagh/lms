@@ -1,14 +1,19 @@
-import { EventEmitter } from 'node:events';
-import { sendEmail } from '../libs/utils';
+import { EventEmitter } from "node:events";
+import { sendEmail } from "../libs/utils";
 
 export const emailEvent = new EventEmitter();
 
-emailEvent.on('activation-email', async (email : string, activationCode : string) => {
-  await sendEmail({
+emailEvent.on(
+  "activation-email",
+  // eslint-disable-next-line
+  async (email: string, activationCode: string) => {
+    await sendEmail({
       email,
-      subject : 'Activate Your Account',
-      text : 'Please use the following code to activate your account: ' + activationCode,
-      html : `
+      subject: "Activate Your Account",
+      text:
+        "Please use the following code to activate your account: " +
+        activationCode,
+      html: `
         <div style="font-family: 'Georgia', serif; line-height: 1.8; color: #000; background-color: #f9f9f9; padding: 20px; border: 1px solid #ccc;">
           <h2 style="color: #000; text-align: center; font-size: 24px;">Account Activation</h2>
           <p style="text-align: center; font-size: 18px;">Dear Valued User,</p>
@@ -19,27 +24,31 @@ emailEvent.on('activation-email', async (email : string, activationCode : string
           <p style="text-align: center; font-size: 16px;">If you did not initiate this request, please disregard this email or reach out to our support team for assistance.</p>
           <p style="text-align: center; font-size: 16px;">Warm regards,<br><em>Your Support Team</em></p>
         </div>
-      `
+      `,
     });
-});
+  },
+);
 
-emailEvent.on('invoice.payment_failed', async (email : string, paymentLink : string, invoiceId : string) => {
-  await sendEmail({
-    email,
-    subject : 'Action Required: Complete Your Payment',
-    text: `Dear Esteemed Customer,
+// eslint-diseble-next-line
+emailEvent.on(
+  "invoice.payment_failed",
+  async (email: string, paymentLink: string, invoiceId: string) => {
+    await sendEmail({
+      email,
+      subject: "Action Required: Complete Your Payment",
+      text: `Dear Esteemed Customer,
 
     We regret to inform you that your recent payment attempt for invoice ${invoiceId} was unsuccessful. To finalize your payment, please click on the following link:
-    
+
     ${paymentLink}
-    
+
     Should you have any inquiries or require assistance, please do not hesitate to contact our support team.
-    
+
     Thank you for your prompt attention to this matter.
-    
+
     Sincerely,
     Your Support Team`,
-    html: `
+      html: `
     <div style="font-family: 'Georgia', serif; line-height: 1.8; color: #000; background-color: #f9f9f9; padding: 20px; border: 1px solid #ccc;">
         <h2 style="color: #000; text-align: center; font-size: 24px;">Payment Required: Complete Your Transaction</h2>
         <p style="text-align: center; font-size: 18px;">Dear Esteemed Customer,</p>
@@ -52,6 +61,6 @@ emailEvent.on('invoice.payment_failed', async (email : string, paymentLink : str
         <p style="text-align: center; font-size: 16px;">Sincerely,<br><em>Your Support Team</em></p>
     </div>
 `,
-  });
-
-});
+    });
+  },
+);

@@ -5,6 +5,7 @@
   "scripts": {
     "start": "bun src/server.ts",
     "dev": "bun --watch src/server.ts",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "db:generate": "bunx drizzle-kit generate",
     "db:migrate": "bun src/database/migrate.ts",
     "db:push": "bun drizzle-kit push",
@@ -24,10 +25,10 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/nodemailer": "^6.4.15",
     "drizzle-kit": "^0.24.0",
-    "eslint": "^9.9.0",
     "globals": "^15.9.0",
+    "prettier": "^3.5.2",
     "typescript": "^5.5.4",
-    "typescript-eslint": "^8.0.1"
+    "typescript-eslint": "^8.25.0"
   },
   "dependencies": {
     "@sentry/bun": "^8.25.0",
