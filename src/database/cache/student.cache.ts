@@ -10,7 +10,10 @@ import { redis } from "./redis.config";
 export const findStudentWithEmailSearch = async (
   email: string | null,
 ): Promise<TSelectStudent | undefined> => {
-  if (!email) throw new StudentNotFoundError();
+  if (!email) {
+    throw new StudentNotFoundError();
+  }
+
   let cursor = "0";
   let matchedStudent: TSelectStudent | undefined = undefined;
 
@@ -27,7 +30,9 @@ export const findStudentWithEmailSearch = async (
 
     (await pipeline.exec())!.forEach((studentArray) => {
       const student: TSelectStudent = studentArray[1] as TSelectStudent;
-      if (student.email === email) matchedStudent = student;
+      if (student.email === email) {
+        matchedStudent = student;
+      }
     });
 
     cursor = newCursor;
@@ -65,12 +70,14 @@ export const findTeacherCoursesCache = async (
       "COUNT",
       100,
     );
+
     const pipeline: ChainableCommander = redis.pipeline();
     keys.forEach((key) => pipeline.hgetall(key));
 
     const courses: TSelectCourse[] = (await pipeline.exec())!.map(
       (course) => course[1],
     ) as TSelectCourse[];
+
     courses
       .filter((course) => course.teacherId === currentTeacherId)
       .forEach((course) =>

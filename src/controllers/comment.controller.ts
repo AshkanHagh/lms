@@ -82,7 +82,7 @@ export const updateComment = CatchAsyncError(
 );
 
 export const deleteComment = CatchAsyncError(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, _next: NextFunction) => {
     const { courseId, commentId } = req.params as CourseAndCommentId;
     const studentId: string = req.student!.id;
 
@@ -99,8 +99,13 @@ export const courseComments = CatchAsyncError(
   async (req: Request, res: Response) => {
     const { courseId } = req.params as CourseParams;
     const { limit, startIndex } = req.query as PaginationQuery;
-    const commentsDetails: ModifiedCommentResult[] =
-      await courseCommentsService(courseId, +limit, +startIndex);
+
+    const commentsDetails = await courseCommentsService(
+      courseId,
+      +limit,
+      +startIndex,
+    );
+
     res.status(200).json({ success: true, commentsDetails });
   },
 );

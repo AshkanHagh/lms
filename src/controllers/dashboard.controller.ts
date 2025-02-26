@@ -21,12 +21,15 @@ export const updatePersonalInformation = CatchAsyncError(
     const { firstName, lastName } = req.body as UpdateAccount;
     const student: TSelectStudent = req.student!;
 
-    const { firstName: updatedFirstName, lastName: updatedLastName } =
-      await updatePersonalInformationService(student, { firstName, lastName });
+    const result = await updatePersonalInformationService(student, {
+      firstName,
+      lastName,
+    });
+
     res.status(200).json({
       success: true,
-      firstName: updatedFirstName,
-      lastName: updatedLastName,
+      firstName: result.firstName,
+      lastName: result.lastName,
     });
   },
 );
@@ -34,12 +37,12 @@ export const updatePersonalInformation = CatchAsyncError(
 export const transactionsList = CatchAsyncError(
   async (req: Request, res: Response) => {
     const currentStudentId: string = req.student!.id;
-    const { modifiedPurchase, subscriptionDetail }: TransactionResult =
-      await transactionsListService(currentStudentId);
+    const result = await transactionsListService(currentStudentId);
+
     res.status(200).json({
       success: true,
-      transactions: modifiedPurchase,
-      subscription: subscriptionDetail,
+      transactions: result.modifiedPurchase,
+      subscription: result.subscriptionDetail,
     });
   },
 );
@@ -47,8 +50,8 @@ export const transactionsList = CatchAsyncError(
 export const browseCourses = CatchAsyncError(
   async (req: Request, res: Response) => {
     const currentStudentId: string = req.student!.id;
-    const courses: CoursesProgress[] =
-      await browseCoursesService(currentStudentId);
+    const courses = await browseCoursesService(currentStudentId);
+
     res.status(200).json({ success: true, courses });
   },
 );
@@ -56,8 +59,8 @@ export const browseCourses = CatchAsyncError(
 export const courseAnalysis = CatchAsyncError(
   async (req: Request, res: Response) => {
     const currentTeacherId: string = req.student!.id;
-    const analytics: AnalyticsPurchase[] =
-      await courseAnalysisService(currentTeacherId);
+    const analytics = await courseAnalysisService(currentTeacherId);
+
     res.status(200).json({ success: true, analytics });
   },
 );
@@ -65,10 +68,8 @@ export const courseAnalysis = CatchAsyncError(
 export const teacherCourses = CatchAsyncError(
   async (req: Request, res: Response) => {
     const currentTeacherId: string = req.student!.id;
-    const teacherCourses: Pick<
-      TSelectCourse,
-      "id" | "title" | "price" | "visibility"
-    >[] = await teacherCoursesService(currentTeacherId);
+    const teacherCourses = await teacherCoursesService(currentTeacherId);
+
     res.status(200).json({ success: true, teacherCourses });
   },
 );

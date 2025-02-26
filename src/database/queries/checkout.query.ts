@@ -22,15 +22,14 @@ export const findPurchase = async <T extends CheckPurchaseReturnValue>(
         }
       : undefined;
 
-  const purchase: TSelectPurchases | undefined =
-    await db.query.purchaseCoursesTable.findFirst({
-      where: (table, funcs) =>
-        funcs.and(
-          funcs.eq(table.courseId, courseId),
-          funcs.eq(table.studentId, currentStudentId),
-        ),
-      columns,
-    });
+  const purchase = await db.query.purchaseCoursesTable.findFirst({
+    where: (table, funcs) =>
+      funcs.and(
+        funcs.eq(table.courseId, courseId),
+        funcs.eq(table.studentId, currentStudentId),
+      ),
+    columns,
+  });
   return purchase as CheckPurchaseValue<T>;
 };
 

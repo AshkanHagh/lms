@@ -47,6 +47,7 @@ export const rateCourseService = async (
       : (await findPurchase(courseId, currentStudentId, "modified"))
         ? 1
         : 0;
+
     if (!studentHasPurchased) throw new NeedToPurchaseThisCourseError();
 
     const rateDetail: TSelectRate = await handelRate(
@@ -54,6 +55,7 @@ export const rateCourseService = async (
       courseId,
       rate,
     );
+
     await insertHashListCache(
       `course_rate:${courseId}`,
       currentStudentId,
@@ -89,6 +91,7 @@ export const courseRateDetailService = async (
       (sum, rate) => sum + (rate?.rate || 0),
       0,
     );
+
     return rates.length > 0 ? totalRates / rates.length : 0;
   } catch (err: unknown) {
     const error = err as TErrorHandler;
@@ -118,6 +121,7 @@ export const sendCommentService = async (
       commentDetail.id,
       commentDetail,
     );
+
     return modifiedComment;
   } catch (err: unknown) {
     const error = err as TErrorHandler;
@@ -143,11 +147,7 @@ export const updateCommentService = async (
       throw new BadRequestError();
     }
 
-    const updatedCommentDetail: TSelectComment = await updateCommentDetail(
-      commentId,
-      text,
-    );
-
+    const updatedCommentDetail = await updateCommentDetail(commentId, text);
     await insertHashListCache(
       `course_comments:${courseId}`,
       commentId,
@@ -214,8 +214,7 @@ export const courseCommentsService = async (
       parsedComments.map((comment) => comment.authorId!),
     );
 
-    const commentDetail: TSelectComment[] = Object.keys(commentsDetailCache)
-      .length
+    const commentDetail = Object.keys(commentsDetailCache).length
       ? parsedComments
       : await courseCommentsDetail(courseId, limit, startIndex);
 
@@ -258,6 +257,7 @@ export const sendReplayService = async (
       replayDetail.id,
       replayDetail,
     );
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { authorId, ...rest } = replayDetail;
     return { ...rest, author: student };
@@ -280,18 +280,17 @@ export const updateReplayService = async (
     const replayCache = JSON.parse(
       await getHashCache<string>(`comment_replies:${commentId}`, replayId),
     ) as TSelectReplay;
+
     if (!replayCache || replayCache.authorId !== student.id)
       throw new BadRequestError();
 
-    const updatedReplayDetail: TSelectReplay = await updateReplayDetail(
-      replayId,
-      text,
-    );
+    const updatedReplayDetail = await updateReplayDetail(replayId, text);
     await insertHashListCache(
       `comment_replies:${commentId}`,
       replayId,
       updatedReplayDetail,
     );
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { authorId, ...rest } = updatedReplayDetail;
     return { ...rest, author: student };
@@ -342,6 +341,7 @@ export const repliesDetailService = async (
     const repliesCache: Record<string, string> = await getAllHashCache(
       `comment_replies:${commentId}`,
     );
+
     const sortedAndParsedReplies: TSelectReplay[] = Object.values(repliesCache)
       .map((replay) => JSON.parse(replay) as TSelectReplay)
       .sort(
@@ -353,14 +353,15 @@ export const repliesDetailService = async (
     const repliesAuthor: CommentAuthorDetail[] = await findCommentAuthor(
       sortedAndParsedReplies.map((replay) => replay.authorId!),
     );
-    const combineReplayAndAuthor: ModifiedRepliesWithAuthor[] =
-      sortedAndParsedReplies.map((replay) => {
-        const replayAuthor: CommentAuthorDetail | undefined =
-          repliesAuthor.find((author) => author.id === replay.authorId);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { authorId, ...rest } = replay;
-        return { ...rest, author: replayAuthor! };
-      });
+
+    const combineReplayAndAuthor = sortedAndParsedReplies.map((replay) => {
+      const replayAuthor: CommentAuthorDetail | undefined = repliesAuthor.find(
+        (author) => author.id === replay.authorId,
+      );
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { authorId, ...rest } = replay;
+      return { ...rest, author: replayAuthor! };
+    });
 
     const repliesDetail: ModifiedRepliesWithAuthor[] = sortedAndParsedReplies
       ? combineReplayAndAuthor

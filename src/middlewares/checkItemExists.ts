@@ -14,10 +14,7 @@ export const isCourseExists = <T extends ConditionType>(condition: T) => {
         `course:${courseId}`,
       );
 
-      const conditionHandlers: Record<
-        ConditionType,
-        (desiredCorse: TSelectCourse, req: Request) => void
-      > = {
+      const conditionHandlers = {
         normal: normalCondition,
         teacher_mode: teacherModeCondition,
       };

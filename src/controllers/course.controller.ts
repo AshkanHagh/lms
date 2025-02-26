@@ -61,6 +61,7 @@ export const createCourse = CatchAsyncError(
 export const editCourseDetails = CatchAsyncError(
   async (req: Request, res: Response) => {
     const { courseId } = req.params as CourseParams;
+
     const { title, description, price, image, prerequisite, tags, visibility } =
       req.body as InsectCourseDetailsBody<CourseGeneric<"update">> & {
         tags: string[];
@@ -98,6 +99,7 @@ export const courseBenefit = CatchAsyncError(
         details: benefit.details,
         courseId: courseDetail.id,
       }));
+
     const { course, benefits: courseBenefit } = await courseBenefitService(
       benefitWithCourseId,
       courseDetail,
@@ -113,6 +115,7 @@ export const createCourseChapter = CatchAsyncError(
 
     const chapterAndVideoDetails: ChapterAndVideoDetails =
       await createCourseChapterService(videoDetails, chapterDetails, courseId);
+
     res.status(200).json({ success: true, ...chapterAndVideoDetails });
   },
 );
@@ -143,17 +146,16 @@ export const updateChapterVideoDetail = CatchAsyncError(
     const { state, videoTitle, videoUrl } = req.body as InsertVideoDetails;
     const currentTeacherId: string = req.student!.id;
 
-    const videoDetails: TSelectVideoDetails =
-      await updateChapterVideoDetailService(
-        chapterId,
-        videoId,
-        currentTeacherId,
-        {
-          state,
-          videoTitle,
-          videoUrl,
-        },
-      );
+    const videoDetails = await updateChapterVideoDetailService(
+      chapterId,
+      videoId,
+      currentTeacherId,
+      {
+        state,
+        videoTitle,
+        videoUrl,
+      },
+    );
     res.status(200).json({ status: true, videoDetails });
   },
 );
@@ -161,12 +163,9 @@ export const updateChapterVideoDetail = CatchAsyncError(
 export const courseDetails = CatchAsyncError(
   async (req: Request, res: Response) => {
     const currentStudent: TSelectStudent = req.student!;
-    const currentCourseId: string = req.course!.id;
+    const currentCourseId: string = req.course.id;
 
-    const courseDetail: CourseRelations = await courseService(
-      currentStudent,
-      currentCourseId,
-    );
+    const courseDetail = await courseService(currentStudent, currentCourseId);
     res.status(200).json({ success: true, courseDetail });
   },
 );
@@ -216,10 +215,10 @@ export const courseStateDetail = CatchAsyncError(
     const { courseId } = req.params as CourseParams;
     const { plan, id } = req.student!;
 
-    const courseStateDetail: CourseStateResult = await courseStateDetailService(
-      courseId,
-      { plan, id },
-    );
+    const courseStateDetail = await courseStateDetailService(courseId, {
+      plan,
+      id,
+    });
     res.status(200).json({ success: true, ...courseStateDetail });
   },
 );
@@ -227,6 +226,7 @@ export const courseStateDetail = CatchAsyncError(
 export const courses = CatchAsyncError(async (req: Request, res: Response) => {
   const { startIndex, limit } = req.query as PaginationQuery;
   const courses: TSelectCourse[] = await coursesService(+limit, +startIndex);
+
   res.status(200).json({ success: true, courses });
 });
 
@@ -249,8 +249,8 @@ export const filterCourseByTags = CatchAsyncError(
 export const vectorSearch = CatchAsyncError(
   async (req: Request, res: Response) => {
     const { query } = req.body as { query: string };
-    const similarCourse: Omit<VectorSeed, "visibility">[] =
-      await vectorSearchService(query);
+    const similarCourse = await vectorSearchService(query);
+
     res.status(200).json({ success: true, similarCourse });
   },
 );

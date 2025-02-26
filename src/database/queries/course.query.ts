@@ -90,10 +90,8 @@ export const insertChapterAndVideos = async (
     const newChapter: TSelectChapter = await insertChapter(chapterDetail, trx);
     videosDetail.map((videoDetail) => (videoDetail.chapterId = newChapter.id));
 
-    const newVideos: TSelectVideoDetails[] = await insertChapterVideos(
-      videosDetail,
-      trx,
-    );
+    const newVideos = await insertChapterVideos(videosDetail, trx);
+
     return {
       chapterDetails: newChapter,
       videoDetail: newVideos,

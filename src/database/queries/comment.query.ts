@@ -107,6 +107,7 @@ export const handelInsertComment = async (
       .insert(commentTable)
       .values({ authorId: studentId, text })
       .returning();
+
     await trx
       .insert(courseCommentsTable)
       .values({ commentId: commentDetail.id, courseId });
@@ -214,6 +215,7 @@ export const findReplies = async (
     .limit(limit)
     .offset(startIndex)
     .orderBy(desc(repliesTable.createdAt));
+
   return replies.map(({ author, replay }) => {
     const { authorId, ...rest } = replay;
     return { ...rest, author: author };

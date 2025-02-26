@@ -457,6 +457,7 @@ export const subscriptionCheckoutService = async (
         email: currentStudent.email,
         limit: 1,
       });
+
     const customer: Stripe.Customer =
       customers.data.length > 0
         ? customers.data[0]

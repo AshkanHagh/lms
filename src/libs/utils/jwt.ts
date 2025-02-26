@@ -36,6 +36,7 @@ export const sendToken = async <T extends "refresh" | "login">(
     expiresIn: `${refreshTokenExpire}d`,
   });
 
+  // eslint-disable-next-line
   process.env.NODE_ENV === "production"
     ? (accessTokenOptions.secure = true)
     : (accessTokenOptions.secure = false);
@@ -44,7 +45,10 @@ export const sendToken = async <T extends "refresh" | "login">(
   res.cookie("access_token", accessToken, accessTokenOptions);
   res.cookie("refresh_token", refreshToken, refreshTokenOptions);
 
-  if (tokenFor === "refresh") return { accessToken } as TokenResponse<T>;
+  if (tokenFor === "refresh") {
+    return { accessToken } as TokenResponse<T>;
+  }
+
   const { createdAt, customerId, updatedAt, ...sanitizedStudent } = student;
   return { accessToken, sanitizedStudent } as TokenResponse<T>;
 };

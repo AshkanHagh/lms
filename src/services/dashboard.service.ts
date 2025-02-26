@@ -16,7 +16,6 @@ import type {
   AnalyticsPurchase,
   CoursesProgress,
   ModifiedRelationsCourse,
-  PurchasedCoursesWithRelations,
   PurchaseDetailRes,
   SelectVideoCompletion,
   TErrorHandler,
@@ -40,6 +39,7 @@ export const updatePersonalInformationService = async (
 
     const updatedName = await updateInformation(fullName, currentUser.id);
     await insertHashCache(`user:${currentUser.id}`, updatedName);
+
     return {
       firstName: updatedName.name?.split(" ")[0],
       lastName: updatedName.name?.split(" ")[1],
@@ -60,9 +60,10 @@ export const transactionsListService = async (
     const purchaseList: Record<string, string> = await getAllHashCache(
       `student_purchases:${currentStudentId}`,
     );
-    const purchaseDetail: TSelectPurchases[] = Object.values(purchaseList).map(
-      (purchase) => JSON.parse(purchase),
-    ) as TSelectPurchases[];
+
+    const purchaseDetail = Object.values(purchaseList).map(
+      (purchase) => JSON.parse(purchase) as TSelectPurchases,
+    );
     const subscriptionDetail: TSelectSubscription = await getAllHashCache(
       `student_subscription:${currentStudentId}`,
     );
@@ -91,32 +92,29 @@ export const browseCoursesService = async (
   currentStudentId: string,
 ): Promise<CoursesProgress[]> => {
   try {
-    const purchasedCourses: PurchasedCoursesWithRelations[] =
-      await findPurchasedCourse(currentStudentId);
-    const modifiedCourse: ModifiedRelationsCourse[] = purchasedCourses.map(
-      (obj) => ({
-        ...obj.course,
-        chapters: obj.course!.chapters.map((video) => video.videos).flat(),
-      }),
-    ) as ModifiedRelationsCourse[];
+    const purchasedCourses = await findPurchasedCourse(currentStudentId);
+    const modifiedCourse = purchasedCourses.map((obj) => ({
+      ...obj.course,
+      chapters: obj.course!.chapters.map((video) => video.videos).flat(),
+    })) as ModifiedRelationsCourse[];
 
     const studentStateCache: Record<string, string>[] = await findStudentStates(
       currentStudentId,
       modifiedCourse.map((course) => course?.id || ""),
     );
-    const studentStateDetail: SelectVideoCompletion[] = studentStateCache
+    const studentStateDetail = studentStateCache
+      // eslint-disable-next-line
       .map((state) => Object.values(state).map((state) => JSON.parse(state)))
-      .flat();
+      .flat() as SelectVideoCompletion[];
 
     const coursesProgress: CoursesProgress[] = modifiedCourse.map((course) => {
       const courseVideos: TSelectVideoDetails[] = course.chapters || [];
       const totalVideos: number = courseVideos.length;
 
-      const completedVideos: TSelectVideoDetails[] = courseVideos.filter(
-        (video) =>
-          studentStateDetail.some(
-            (state) => state.videoId === video.id && state.completed,
-          ),
+      const completedVideos = courseVideos.filter((video) =>
+        studentStateDetail.some(
+          (state) => state.videoId === video.id && state.completed,
+        ),
       );
 
       const completedVideosCount: number = completedVideos.length;
@@ -124,6 +122,7 @@ export const browseCoursesService = async (
         totalVideos > 0
           ? Math.round((completedVideosCount / totalVideos) * 100)
           : 0;
+
       const { chapters, ...rest } = course;
       return { ...rest, progress: progressPercentage };
     });

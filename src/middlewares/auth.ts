@@ -18,15 +18,21 @@ export const isAuthenticated = CatchAsyncError(
     }
 
     const accessToken: string | undefined = authHeader.split(" ")[1];
-    if (!accessToken) return next(new AccessTokenInvalidError());
+    if (!accessToken) {
+      return next(new AccessTokenInvalidError());
+    }
 
     const decodedToken: TSelectStudent = decodeAccessToken(accessToken);
-    if (!decodedToken) return next(new AccessTokenInvalidError());
+    if (!decodedToken) {
+      return next(new AccessTokenInvalidError());
+    }
 
     const user: TSelectStudent = await getAllHashCache(
       `student:${decodedToken.id}`,
     );
-    if (!user) return next(new LoginRequiredError());
+    if (!user) {
+      return next(new LoginRequiredError());
+    }
 
     req.student = user;
     next();
@@ -36,8 +42,9 @@ export const isAuthenticated = CatchAsyncError(
 export const authorizedRoles = (...role: string[]) => {
   return CatchAsyncError(
     async (req: Request, res: Response, next: NextFunction) => {
-      if (!role.includes(req.student?.role || ""))
+      if (!role.includes(req.student?.role || "")) {
         return next(new RoleForbiddenError(req.student?.role || "unknown"));
+      }
       next();
     },
   );

@@ -95,6 +95,7 @@ export const findManyCache = async <T>(key: string): Promise<T[]> => {
       "COUNT",
       100,
     );
+
     const pipeline: ChainableCommander = redis.pipeline();
     for (const key of keys) {
       pipeline.hgetall(key);
@@ -112,11 +113,8 @@ export const findManyCache = async <T>(key: string): Promise<T[]> => {
 
 export const filterCourseByTagsCache = async (tags: string[]) => {
   let cursor: string = "0";
-  const similarTags: Map<string, TSelectTags> = new Map<string, TSelectTags>();
-  const similarCourse: Map<string, TSelectCourse> = new Map<
-    string,
-    TSelectCourse
-  >();
+  const similarTags: Map<string, TSelectTags> = new Map();
+  const similarCourse: Map<string, TSelectCourse> = new Map();
 
   do {
     const [newCursor, keys]: [string, string[]] = await redis.scan(
@@ -146,7 +144,8 @@ export const filterCourseByTagsCache = async (tags: string[]) => {
     Array.from(similarTags.values()).forEach((tag) =>
       coursePipeline.hgetall(`course:${tag.courseId}`),
     );
-    const modifiedCourse: TSelectCourse[] = (await coursePipeline.exec())!
+
+    const modifiedCourse = (await coursePipeline.exec())!
       .flat()
       .filter(Boolean) as TSelectCourse[];
     modifiedCourse.forEach((course) => similarCourse.set(course.id, course));

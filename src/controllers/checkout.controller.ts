@@ -42,6 +42,7 @@ export const verifyPayment = CatchAsyncError(
 );
 
 export const cancelPayment = CatchAsyncError(
+  // eslint-disable-next-line
   async (req: Request, res: Response) => {
     res
       .status(200)
@@ -54,7 +55,8 @@ export const webhookEventListener = CatchAsyncError(
     const signature: string | undefined = req.headers["stripe-signature"] as
       | string
       | undefined;
-    const body: string = req.body;
+
+    const body = req.body as string;
 
     const webhookResult: string = await webhookListeningService(
       signature,
@@ -85,6 +87,7 @@ export const subscriptionPortal = CatchAsyncError(
     const customerId: string | undefined = req.student?.customerId ?? undefined;
     const portalUrl: string | null =
       await subscriptionPortalService(customerId);
+
     res.status(200).json({ success: true, portalUrl });
   },
 );
