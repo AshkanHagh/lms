@@ -1,5 +1,5 @@
 {
-  "name": "magical-learning",
+  "name": "lms",
   "module": "src/server.ts",
   "type": "module",
   "scripts": {
@@ -10,7 +10,7 @@
     "db:push": "bun drizzle-kit push",
     "db:studio": "bunx drizzle-kit studio",
     "db:seed": "bun src/database/seed/faker.ts",
-    "db:build" : "bun run db:generate && bun run db:migrate",
+    "db:build": "bun run db:generate && bun run db:migrate",
     "sentry:build": "npx tsc && bun run sentry:sourcemaps",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org haghdoost --project magical-learning ./dist && sentry-cli sourcemaps upload --org haghdoost --project magical-learning ./dist"
   },

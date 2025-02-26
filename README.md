@@ -1,9 +1,8 @@
-# Magic Learning 
+# Lms
 ## [Version 1.0](https://magiclearning.up.railway.app/)
 
 ## Overview
-
-Magic Learning API is a robust RESTful service built to power a Learning Management System (LMS) where students can register, explore, and enroll in various courses. The API supports two primary methods of course access: individual course purchase and subscription-based access. This API is crafted using modern technologies to ensure scalability, high performance, and secure transactions.
+The Lms API powers a Learning Management System, providing students with features like course registration, subscription-based access, and progress tracking. Built with scalability, performance, and security in mind,
 
 ## Key Features
 
@@ -45,59 +44,44 @@ Magic Learning API is a robust RESTful service built to power a Learning Managem
 
 ## Getting Started
 
-To set up the Magic Learning API, follow these steps:
-
-**Clone the repository**:
+### Clone the repository
 ```bash
-git clone https://github.com/AshkanHagh/magic-learning.git
+git clone https://github.com/AshkanHagh/lms.git
+cd lms
 ```
-### Install dependencies:
+
+### Option 1: Using Docker Compose
+The easiest way to get started is using Docker Compose, which will set up all the required services for you.
+
 ```bash
-cd magic-learning
+# Start all services with Docker Compose
+docker-compose up -d
+
+# When done, you can stop all services with
+docker-compose down
+```
+
+### Option 2: Manual Setup
+If you prefer to run the application manually:
+
+1. **Install dependencies**:
+```bash
 bun install
 ```
-### Setup .env file
-Create a .env file in the root directory of your project and add the following environment variables:
-``` shell
-PORT
-NODE_ENV
-DATABASE_URL
-POSTGRES_USER
-POSTGRES_PASSWORD
-POSTGRES_DB
-REDIS_URL
-UPSTASH_VECTOR_REST_URL
-UPSTASH_VECTOR_REST_TOKEN
-CLOUDINARY_CLOUD_NAME
-CLOUDINARY_API_KEY
-CLOUDINARY_API_SECRET
-ACTIVATION_TOKEN
-ACCESS_TOKEN
-REFRESH_TOKEN
-ACCESS_TOKEN_EXPIRE
-REFRESH_TOKEN_EXPIRE
-ORIGIN
-SENTRY_KEY
-STRIPE_MONTHLY_PLAN_LINK
-STRIPE_YEARLY_PLAN_LINK
-STRIPE_MONTHLY_PRICE_ID
-STRIPE_YEARLY_PRICE_ID
-STRIPE_SECRET_KEY
-STRIPE_SUCCESS_URL
-STRIPE_CANCEL_URL
-STRIPE_BASE_URL
-STRIPE_WEBHOOK_SECRET_DEV_ENV
-SMTP_HOST
-SMTP_PORT
-SMTP_SERVICE
-SMTP_MAIL
-SMTP_PASSWORD
+
+2. **Set up your environment**:
+   - Configure your database connection in `.env` file
+   - Make sure you have all required services running locally
+
+3. **Run the application**:
+```bash
+bun run dev # Run in development mode with --watch
 ```
 
-### Scripts
+### Available Scripts
 ```shell
-bun run dev # Run in development mode with --watch
+bun run dev        # Run in development mode with --watch
 bun run db:generate # Generate database schema with Drizzle
-bun run db:migrate # Apply database migrations with Drizzle
-bun run db:studio # Open Drizzle Studio for database management
+bun run db:migrate  # Apply database migrations with Drizzle
+bun run db:studio   # Open Drizzle Studio for database management
 ```
