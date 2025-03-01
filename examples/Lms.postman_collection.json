@@ -1,0 +1,1442 @@
+{
+	"info": {
+		"_postman_id": "13b8ae21-8acd-47e8-9baa-22479f9c0258",
+		"name": "Lms",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33000042"
+	},
+	"item": [
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "/register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\" : \"ashkanHaghdoost01@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/auth/register",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/register/verify",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"activationCode\": \"7509\",\n    \"activationToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdHVkZW50Ijp7ImVtYWlsIjoiYXNoa2FuaGFnaGRvb3N0MDFAZ21haWwuY29tIn0sImFjdGl2YXRpb25Db2RlIjoiNzUwOSIsImlhdCI6MTc0MDU2ODA4MSwiZXhwIjoxNzQwNTY4MzgxfQ.Ya1R7Eh9RkrCSBmLcDxCC3P2q7wzKndpAifzMF6bYWk\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/auth/register/verify",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\" : \"ashkanHaghdoost01@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/auth/login",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/social",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\" : \"robert oppenheimer\",\n    \"email\" : \"robertoppenheimer@gmail.com\",\n    \"image\" : \"https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTFUXT8meONRRD5t53JB4cRpyvlJ7T0GFuiP9qPmftkhUc7OvSiOtHx8YHq6jztL4P2rd28PxRJ4AqZzs6mdoPtUAilckVEEivvL63oYg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/auth/social",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"social"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/login/verify",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"activationCode\": \"2230\",\n    \"activationToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImVtYWlsIjoiYXNoa2FuSGFnaGRvb3N0MDFAZ21haWwuY29tIn0sImFjdGl2YXRpb25Db2RlIjoiMjIzMCIsImlhdCI6MTcyMTI5MjE4MywiZXhwIjoxNzIxMjkyNDgzfQ.B0s1Hs-QIoI3Sc8dj2UcvCQH9ac_AucLCb7R-ezLBT0\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/auth/login/verify",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFzaGthbkhhZ2hkb29zdDAxQGdtYWlsLmNvbSIsImltYWdlIjpudWxsLCJwbGFuIjoiZnJlZSIsIm5hbWUiOm51bGwsImNyZWF0ZWRBdCI6IjIwMjQtMDctMThUMDc6MzY6MTIuNzQwWiIsInJvbGUiOiJ1c2VyIiwidXBkYXRlZEF0IjoiMjAyNC0wNy0xOFQwNzozNjoxMi43NDBaIiwiY3VzdG9tZXJJZCI6bnVsbCwiaWQiOiI5MDA4MGVhZS1jZGIwLTQ0MDctOTdlMC0yNGU1MzI3ZGQ0YjMiLCJpYXQiOjE3MjEyOTU4NzQsImV4cCI6MTcyMTI5NzY3NH0.yj5WrUxLUq8nyXKGjezBcfLVosTloo-q1zp9i-qF4PE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:7319/api/v1/auth/logout",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/refresh",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:7319/api/v1/auth/refresh",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "dashboard",
+			"item": [
+				{
+					"name": "/information",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGFuIjoiZnJlZSIsImNyZWF0ZWRBdCI6IjIwMjQtMDctMTlUMTg6MTI6MTUuOTcxWiIsImlkIjoiN2E5NGFlOWYtOWZmYi00YTg4LTgyZmMtMDU1ZDY3M2U0YjM1IiwidXBkYXRlZEF0IjoiMjAyNC0wNy0xOVQxODoxMjoxNS45NzFaIiwiZW1haWwiOiJhc2hrYW5oYWdoMDFAZ21haWwuY29tIiwiY3VzdG9tZXJJZCI6bnVsbCwiaW1hZ2UiOiJodHRwczovL2kueXRpbWcuY29tL3ZpL2lEeVdXdFktWGF3L21heHJlc2RlZmF1bHQuanBnIiwibmFtZSI6ImFzaGthbiBoYWdoZG9vc3QiLCJyb2xlIjoidXNlciIsImlhdCI6MTcyMTQ3ODYwNCwiZXhwIjoxNzIxNDgwNDA0fQ.efQ-LJ7YhAnz0Hs2fCXZwQdOm6ju6y2DqmqFh4DF1Lc",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\" : \"Ashkan\",\r\n    \"lastName\" : \"Haghdoost\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/dashboard/information",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"dashboard",
+								"information"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transactions",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNkZmFhMzQ4LWRkZWMtNDkyMS05YjVjLTlmYWQ0MTU1MTg5ZCIsInBsYW4iOiJwcmVtaXVtIiwiaW1hZ2UiOiJodHRwczovL2VuY3J5cHRlZC10Ym4yLmdzdGF0aWMuY29tL2ltYWdlcz9xPXRibjpBTmQ5R2NTbWx5QmZnUkF3Y05MMFB3SDA5TUc1eFFKUzNwUU0xeVltaGVXd2ozYXgwMWVRaTFlVmc4WW1Mam9IeWYxb1dwVENsZ1FaTV9BTkJYempPYzBXTXpoOU5KRmwzV3V1RHdKcHRIZFNMclEiLCJlbWFpbCI6ImFsYmVydGVpbnN0ZWluQGdtYWlsLmNvbSIsImN1c3RvbWVySWQiOiJjdXNfUWRSR0JLTkozMjZUM2giLCJuYW1lIjoiYWxiZXJ0IGVpbnN0ZWluIiwidXBkYXRlZEF0IjoiU2F0IEF1ZyAxMCAyMDI0IDEyOjA1OjA2IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwiY3JlYXRlZEF0IjoiRnJpIEF1ZyAwOSAyMDI0IDIwOjQ4OjU1IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzIzMjkwMTc2LCJleHAiOjE3MjMyOTE5NzZ9.Jy3gpqIifzs0o49FV50Z7LcUEuaGLbJGbByuAJ5kCJM",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7319/api/v1/student/dashboard/transactions",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"student",
+								"dashboard",
+								"transactions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/browse",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNkZmFhMzQ4LWRkZWMtNDkyMS05YjVjLTlmYWQ0MTU1MTg5ZCIsInBsYW4iOiJwcmVtaXVtIiwiaW1hZ2UiOiJodHRwczovL2VuY3J5cHRlZC10Ym4yLmdzdGF0aWMuY29tL2ltYWdlcz9xPXRibjpBTmQ5R2NTbWx5QmZnUkF3Y05MMFB3SDA5TUc1eFFKUzNwUU0xeVltaGVXd2ozYXgwMWVRaTFlVmc4WW1Mam9IeWYxb1dwVENsZ1FaTV9BTkJYempPYzBXTXpoOU5KRmwzV3V1RHdKcHRIZFNMclEiLCJlbWFpbCI6ImFsYmVydGVpbnN0ZWluQGdtYWlsLmNvbSIsImN1c3RvbWVySWQiOiJjdXNfUWRSR0JLTkozMjZUM2giLCJuYW1lIjoiYWxiZXJ0IGVpbnN0ZWluIiwidXBkYXRlZEF0IjoiU2F0IEF1ZyAxMCAyMDI0IDEyOjA1OjA2IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwiY3JlYXRlZEF0IjoiRnJpIEF1ZyAwOSAyMDI0IDIwOjQ4OjU1IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzIzNDQ4MzUzLCJleHAiOjE3MjM0NTAxNTN9.ZHwnswQcck840EDWRzfGM40PBQjQ8TR3pXGxn-ny_js",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7319/api/v1/student/dashboard/browse",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"student",
+								"dashboard",
+								"browse"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/analytics",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNkZmFhMzQ4LWRkZWMtNDkyMS05YjVjLTlmYWQ0MTU1MTg5ZCIsInBsYW4iOiJwcmVtaXVtIiwiaW1hZ2UiOiJodHRwczovL2VuY3J5cHRlZC10Ym4yLmdzdGF0aWMuY29tL2ltYWdlcz9xPXRibjpBTmQ5R2NTbWx5QmZnUkF3Y05MMFB3SDA5TUc1eFFKUzNwUU0xeVltaGVXd2ozYXgwMWVRaTFlVmc4WW1Mam9IeWYxb1dwVENsZ1FaTV9BTkJYempPYzBXTXpoOU5KRmwzV3V1RHdKcHRIZFNMclEiLCJlbWFpbCI6ImFsYmVydGVpbnN0ZWluQGdtYWlsLmNvbSIsImN1c3RvbWVySWQiOiJjdXNfUWRSR0JLTkozMjZUM2giLCJuYW1lIjoiYWxiZXJ0IGVpbnN0ZWluIiwidXBkYXRlZEF0IjoiU2F0IEF1ZyAxMCAyMDI0IDEyOjA1OjA2IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwiY3JlYXRlZEF0IjoiRnJpIEF1ZyAwOSAyMDI0IDIwOjQ4OjU1IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwicm9sZSI6InRlYWNoZXIiLCJpYXQiOjE3MjM0NzE4MDAsImV4cCI6MTcyMzQ3MzYwMH0.sHtVlFzx5AJMOiAlLY1oxxOG9HEf48_trrwJE-xjbY8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7319/api/v1/student/dashboard/analytics",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"student",
+								"dashboard",
+								"analytics"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/courses",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNkZmFhMzQ4LWRkZWMtNDkyMS05YjVjLTlmYWQ0MTU1MTg5ZCIsInBsYW4iOiJwcmVtaXVtIiwiaW1hZ2UiOiJodHRwczovL2VuY3J5cHRlZC10Ym4yLmdzdGF0aWMuY29tL2ltYWdlcz9xPXRibjpBTmQ5R2NTbWx5QmZnUkF3Y05MMFB3SDA5TUc1eFFKUzNwUU0xeVltaGVXd2ozYXgwMWVRaTFlVmc4WW1Mam9IeWYxb1dwVENsZ1FaTV9BTkJYempPYzBXTXpoOU5KRmwzV3V1RHdKcHRIZFNMclEiLCJlbWFpbCI6ImFsYmVydGVpbnN0ZWluQGdtYWlsLmNvbSIsImN1c3RvbWVySWQiOiJjdXNfUWRSR0JLTkozMjZUM2giLCJuYW1lIjoiYWxiZXJ0IGVpbnN0ZWluIiwidXBkYXRlZEF0IjoiU2F0IEF1ZyAxMCAyMDI0IDEyOjA1OjA2IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwiY3JlYXRlZEF0IjoiRnJpIEF1ZyAwOSAyMDI0IDIwOjQ4OjU1IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwicm9sZSI6InRlYWNoZXIiLCJpYXQiOjE3MjM0NzE4MDAsImV4cCI6MTcyMzQ3MzYwMH0.sHtVlFzx5AJMOiAlLY1oxxOG9HEf48_trrwJE-xjbY8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:7319/api/v1/student/dashboard/courses",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"student",
+								"dashboard",
+								"courses"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "courses",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFzaGthbmhhZ2hkb29zdDAxQGdtYWlsLmNvbSIsImN1c3RvbWVySWQiOiIiLCJpZCI6ImMxOTAwNGViLWU3MjItNGUxYi05ZGRjLTcyYjcwMjdiNmY1NSIsImltYWdlIjoiIiwicGxhbiI6ImZyZWUiLCJyb2xlIjoic3R1ZGVudCIsIm5hbWUiOiIiLCJ1cGRhdGVkQXQiOiJXZWQgRmViIDI2IDIwMjUgMTQ6Mzg6MjAgR01UKzAzMzAgKElyYW4gU3RhbmRhcmQgVGltZSkiLCJjcmVhdGVkQXQiOiJXZWQgRmViIDI2IDIwMjUgMTQ6Mzg6MjAgR01UKzAzMzAgKElyYW4gU3RhbmRhcmQgVGltZSkiLCJpYXQiOjE3NDA1NjgxMzUsImV4cCI6MTc0MDU2OTkzNX0.g1yiobKi-6abbl8umHf55NyPLcDBhvYRFFze23sNX6M",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\" : \"Node js\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/courses/",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"courses",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:courseId",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFzaGthbmhhZ2hkb29zdDAxQGdtYWlsLmNvbSIsImN1c3RvbWVySWQiOiIiLCJpZCI6ImMxOTAwNGViLWU3MjItNGUxYi05ZGRjLTcyYjcwMjdiNmY1NSIsImltYWdlIjoiIiwicGxhbiI6ImZyZWUiLCJyb2xlIjoic3R1ZGVudCIsIm5hbWUiOiIiLCJ1cGRhdGVkQXQiOiJXZWQgRmViIDI2IDIwMjUgMTQ6Mzg6MjAgR01UKzAzMzAgKElyYW4gU3RhbmRhcmQgVGltZSkiLCJjcmVhdGVkQXQiOiJXZWQgRmViIDI2IDIwMjUgMTQ6Mzg6MjAgR01UKzAzMzAgKElyYW4gU3RhbmRhcmQgVGltZSkiLCJpYXQiOjE3NDA1NjgxMzUsImV4cCI6MTc0MDU2OTkzNX0.g1yiobKi-6abbl8umHf55NyPLcDBhvYRFFze23sNX6M",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:7319/api/v1/courses/57e92eef-fc8d-4dba-9f5a-25e61dd4ca09",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"courses",
+								"57e92eef-fc8d-4dba-9f5a-25e61dd4ca09"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:7319/api/v1/courses?limit=8&startIndex=0",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"courses"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "8"
+								},
+								{
+									"key": "startIndex",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFzaGthbmhhZ2hkb29zdDAxQGdtYWlsLmNvbSIsImN1c3RvbWVySWQiOiIiLCJpZCI6ImMxOTAwNGViLWU3MjItNGUxYi05ZGRjLTcyYjcwMjdiNmY1NSIsImltYWdlIjoiIiwicGxhbiI6ImZyZWUiLCJyb2xlIjoic3R1ZGVudCIsIm5hbWUiOiIiLCJ1cGRhdGVkQXQiOiJXZWQgRmViIDI2IDIwMjUgMTQ6Mzg6MjAgR01UKzAzMzAgKElyYW4gU3RhbmRhcmQgVGltZSkiLCJjcmVhdGVkQXQiOiJXZWQgRmViIDI2IDIwMjUgMTQ6Mzg6MjAgR01UKzAzMzAgKElyYW4gU3RhbmRhcmQgVGltZSkiLCJpYXQiOjE3NDA1NjgxMzUsImV4cCI6MTc0MDU2OTkzNX0.g1yiobKi-6abbl8umHf55NyPLcDBhvYRFFze23sNX6M",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\" : \"node js and express js\",\r\n    \"visibility\" : \"publish\",\r\n    \"description\" : \"a simple backend course with node js and express js\",\r\n    \"price\" : 10,\r\n    \"prerequisite\" : [\"js\", \"node js\"],\r\n    \"image\" : \"https://plus.unsplash.com/premium_photo-1722617928954-519d6a16acf2?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyfHx8ZW58MHx8fHx8\",\r\n    \"tags\" : [\"js\", \"express\", \"backend\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/courses/57e92eef-fc8d-4dba-9f5a-25e61dd4ca09",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"courses",
+								"57e92eef-fc8d-4dba-9f5a-25e61dd4ca09"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/benefit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFzaGthbmhhZ2hkb29zdDAxQGdtYWlsLmNvbSIsImN1c3RvbWVySWQiOiIiLCJpZCI6ImMxOTAwNGViLWU3MjItNGUxYi05ZGRjLTcyYjcwMjdiNmY1NSIsImltYWdlIjoiIiwicGxhbiI6ImZyZWUiLCJyb2xlIjoic3R1ZGVudCIsIm5hbWUiOiIiLCJ1cGRhdGVkQXQiOiJXZWQgRmViIDI2IDIwMjUgMTQ6Mzg6MjAgR01UKzAzMzAgKElyYW4gU3RhbmRhcmQgVGltZSkiLCJjcmVhdGVkQXQiOiJXZWQgRmViIDI2IDIwMjUgMTQ6Mzg6MjAgR01UKzAzMzAgKElyYW4gU3RhbmRhcmQgVGltZSkiLCJpYXQiOjE3NDA1NjgxMzUsImV4cCI6MTc0MDU2OTkzNX0.g1yiobKi-6abbl8umHf55NyPLcDBhvYRFFze23sNX6M",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"benefits\" : [\r\n        {\r\n            \"title\" : \"what you will be agter this course\",\r\n            \"details\" : \"mid-level backend developer\"\r\n        },\r\n                {\r\n            \"title\" : \"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor\",\r\n            \"details\" : \"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi\"\r\n        },\r\n                {\r\n            \"title\" : \"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliquanisi est si\",\r\n            \"details\" : \"nteger vitae justo eget magna fermentum iaculis eu non diam. Arcu cursus euismod quis viverra nibh cras pulvinar mattis. Amet volutpat consequat mauris nunc. Dui faucibus in ornare quam viverra orci sagittis eu\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/courses/benefit/57e92eef-fc8d-4dba-9f5a-25e61dd4ca09",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"courses",
+								"benefit",
+								"57e92eef-fc8d-4dba-9f5a-25e61dd4ca09"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/chapter",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFzaGthbmhhZ2hkb29zdDAxQGdtYWlsLmNvbSIsImN1c3RvbWVySWQiOiIiLCJpZCI6ImMxOTAwNGViLWU3MjItNGUxYi05ZGRjLTcyYjcwMjdiNmY1NSIsImltYWdlIjoiIiwicGxhbiI6ImZyZWUiLCJyb2xlIjoic3R1ZGVudCIsIm5hbWUiOiIiLCJ1cGRhdGVkQXQiOiJXZWQgRmViIDI2IDIwMjUgMTQ6Mzg6MjAgR01UKzAzMzAgKElyYW4gU3RhbmRhcmQgVGltZSkiLCJjcmVhdGVkQXQiOiJXZWQgRmViIDI2IDIwMjUgMTQ6Mzg6MjAgR01UKzAzMzAgKElyYW4gU3RhbmRhcmQgVGltZSkiLCJpYXQiOjE3NDA1NjgxMzUsImV4cCI6MTc0MDU2OTkzNX0.g1yiobKi-6abbl8umHf55NyPLcDBhvYRFFze23sNX6M",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"chapterDetails\" : {\r\n        \"title\" : \"Node js\",\r\n        \"description\" : \"In this chapter we learn how to create a backend server with Node js\",\r\n        \"visibility\" : \"publish\"\r\n    },\r\n    \"videoDetails\" : [\r\n        // {\r\n        //     \"videoTitle\" : \"Exoress js\",\r\n        //     \"videoUrl\" : \"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4\",\r\n        //     \"state\" : \"free\"\r\n        // },\r\n        {\r\n            \"videoTitle\" : \"What is node js\",\r\n            \"videoUrl\" : \"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4\",\r\n            \"state\" : \"free\"\r\n        },\r\n        {\r\n            \"videoTitle\" : \"hello world with node js\",\r\n            \"videoUrl\" : \"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4\"\r\n        },\r\n        {\r\n            \"videoTitle\" : \"Module\",\r\n            \"videoUrl\" : \"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4\"\r\n        },  \r\n        {\r\n            \"videoTitle\" : \"Ecmascript vs common js\",\r\n            \"videoUrl\" : \"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4\"\r\n        }\r\n    ]\r\n\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/courses/chapter/57e92eef-fc8d-4dba-9f5a-25e61dd4ca09",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"courses",
+								"chapter",
+								"57e92eef-fc8d-4dba-9f5a-25e61dd4ca09"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/chapter",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM5OGUyODQ1LWI5YjUtNDE3YS04N2ZjLWQzYjc1MzNjNDFiMiIsIm5hbWUiOiJoYWdoZG9vc3QiLCJlbWFpbCI6ImFzaGthbmhhZ2hkb29zdEBnbWFpbC5jb20iLCJwbGFuIjoiZnJlZSIsImN1c3RvbWVySWQiOiIiLCJyb2xlIjoiYWRtaW4iLCJpbWFnZSI6Imh0dHBzOi8vYXZhdGFyLmlyYW4ubGlhcmEucnVuL3B1YmxpYy8yMCIsImNyZWF0ZWRBdCI6IlRodSBBdWcgMDggMjAyNCAxNzoxOTo1OCBHTVQrMDMzMCAoSXJhbiBTdGFuZGFyZCBUaW1lKSIsInVwZGF0ZWRBdCI6IlRodSBBdWcgMDggMjAyNCAxNzoxOTo1OCBHTVQrMDMzMCAoSXJhbiBTdGFuZGFyZCBUaW1lKSIsImlhdCI6MTcyMzEzNDMzNywiZXhwIjoxNzIzMTM2MTM3fQ.w4TI0wr-IoZQg_YScb503-2mxItdYHbR0Dt5p-nz17A",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\" : \"Backend server with node js 3\",\r\n    \"description\" : \"In this chapter we learn how to create a backend server with node js\",\r\n    \"visibility\" : \"publish\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/courses/chapter/a00d070b-9b6b-4b44-ad3e-7869868cdf07/0bc1cfc6-6499-434d-a310-74b8a9a42335",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"courses",
+								"chapter",
+								"a00d070b-9b6b-4b44-ad3e-7869868cdf07",
+								"0bc1cfc6-6499-434d-a310-74b8a9a42335"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/chapter/video",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiaGFnaGRvb3N0IiwicGxhbiI6ImZyZWUiLCJyb2xlIjoiYWRtaW4iLCJ1cGRhdGVkQXQiOiJTYXQgQXVnIDAzIDIwMjQgMTk6Mjc6MjQgR01UKzAzMzAgKElyYW4gU3RhbmRhcmQgVGltZSkiLCJpZCI6ImJkZjAxOWM3LWZmMjItNDMyNS05ZTBiLWE1ZTU0MTczOGQwYiIsImltYWdlIjoiaHR0cHM6Ly9hdmF0YXIuaXJhbi5saWFyYS5ydW4vcHVibGljLzE1IiwiZW1haWwiOiJhc2hrYW5oYWdoZG9vc3QwMUBnbWFpbC5jb20iLCJjdXN0b21lcklkIjoiIiwiY3JlYXRlZEF0IjoiU2F0IEF1ZyAwMyAyMDI0IDE5OjI3OjI0IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwiaWF0IjoxNzIyNzc0MzMxLCJleHAiOjE3MjI3NzYxMzF9.y_rR5qKegwLGT52RBjIdchIpxH5H8UaFXf1-ADgOXEY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"videoTitle\" : \"What is node js and how to installet\",\r\n    \"videoUrl\" : \"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4\",\r\n    \"state\" : \"free\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/courses/chapter/video/5ddab0d6-15ae-4e27-89c6-3e5e3fa98643/4df3a183-2017-4e2a-9e48-f0e517f40495",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"courses",
+								"chapter",
+								"video",
+								"5ddab0d6-15ae-4e27-89c6-3e5e3fa98643",
+								"4df3a183-2017-4e2a-9e48-f0e517f40495"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/chapter",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMzZmY1OGE0LWExY2YtNDU0ZS1hNzA1LTZiMzUwYjJhY2FkMCIsIm5hbWUiOiJhc2hrYW4gaGFnaGRvb3N0IiwiZW1haWwiOiJhc2hrYW5oYWdoZG9vc3QwMUBnbWFpbC5jb20iLCJwbGFuIjoiZnJlZSIsImN1c3RvbWVySWQiOiIiLCJyb2xlIjoiYWRtaW4iLCJpbWFnZSI6Imh0dHBzOi8vYXZhdGFyLmlyYW4ubGlhcmEucnVuL3B1YmxpYy8yMCIsImNyZWF0ZWRBdCI6IldlZCBBdWcgMDcgMjAyNCAxMjoxMzoxMSBHTVQrMDMzMCAoSXJhbiBTdGFuZGFyZCBUaW1lKSIsInVwZGF0ZWRBdCI6IldlZCBBdWcgMDcgMjAyNCAxMjoxMzoxMSBHTVQrMDMzMCAoSXJhbiBTdGFuZGFyZCBUaW1lKSIsImlhdCI6MTcyMzAyMzc4OCwiZXhwIjoxNzIzMDI1NTg4fQ.PZYnytl52yP2ul1pmNHog3K4pGB2DuJoNAnwC3GXV1I",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:7319/api/v1/courses/chapter/082269d7-e2ea-4b8a-a4c8-e42d46875d9a/4126b357-d606-4bf2-ae07-3a9e9b0af7da",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"courses",
+								"chapter",
+								"082269d7-e2ea-4b8a-a4c8-e42d46875d9a",
+								"4126b357-d606-4bf2-ae07-3a9e9b0af7da"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/chapter/video",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM5OGUyODQ1LWI5YjUtNDE3YS04N2ZjLWQzYjc1MzNjNDFiMiIsIm5hbWUiOiJoYWdoZG9vc3QiLCJlbWFpbCI6ImFzaGthbmhhZ2hkb29zdEBnbWFpbC5jb20iLCJwbGFuIjoiZnJlZSIsImN1c3RvbWVySWQiOiIiLCJyb2xlIjoiYWRtaW4iLCJpbWFnZSI6Imh0dHBzOi8vYXZhdGFyLmlyYW4ubGlhcmEucnVuL3B1YmxpYy8yMCIsImNyZWF0ZWRBdCI6IlRodSBBdWcgMDggMjAyNCAxNzoxOTo1OCBHTVQrMDMzMCAoSXJhbiBTdGFuZGFyZCBUaW1lKSIsInVwZGF0ZWRBdCI6IlRodSBBdWcgMDggMjAyNCAxNzoxOTo1OCBHTVQrMDMzMCAoSXJhbiBTdGFuZGFyZCBUaW1lKSIsImlhdCI6MTcyMzEzMzY4MCwiZXhwIjoxNzIzMTM1NDgwfQ.mZMryCdtxSEMjGlsCZSEhMYX5WWlRXF_NF6KssubGDI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:7319/api/v1/courses/chapter/video/133527fd-8b40-441d-be18-319a75a413d1/0bc1cfc6-6499-434d-a310-74b8a9a42335",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"courses",
+								"chapter",
+								"video",
+								"133527fd-8b40-441d-be18-319a75a413d1",
+								"0bc1cfc6-6499-434d-a310-74b8a9a42335"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/state",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNkZmFhMzQ4LWRkZWMtNDkyMS05YjVjLTlmYWQ0MTU1MTg5ZCIsInBsYW4iOiJwcmVtaXVtIiwiaW1hZ2UiOiJodHRwczovL2VuY3J5cHRlZC10Ym4yLmdzdGF0aWMuY29tL2ltYWdlcz9xPXRibjpBTmQ5R2NTbWx5QmZnUkF3Y05MMFB3SDA5TUc1eFFKUzNwUU0xeVltaGVXd2ozYXgwMWVRaTFlVmc4WW1Mam9IeWYxb1dwVENsZ1FaTV9BTkJYempPYzBXTXpoOU5KRmwzV3V1RHdKcHRIZFNMclEiLCJlbWFpbCI6ImFsYmVydGVpbnN0ZWluQGdtYWlsLmNvbSIsImN1c3RvbWVySWQiOiJjdXNfUWRSR0JLTkozMjZUM2giLCJuYW1lIjoiYWxiZXJ0IGVpbnN0ZWluIiwidXBkYXRlZEF0IjoiU2F0IEF1ZyAxMCAyMDI0IDEyOjA1OjA2IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwiY3JlYXRlZEF0IjoiRnJpIEF1ZyAwOSAyMDI0IDIwOjQ4OjU1IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzIzNDAyOTk3LCJleHAiOjE3MjM0MDQ3OTd9.vvp-srfgahqpGShJvuSokLhuuLqp9tX00iWPlZ5m_vQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"state\" : true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/courses/state/888edd3e-19c6-4614-ab22-79bc7bcc383f/85fe1d0c-3324-4aa6-b27f-459f7de1b9b6",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"courses",
+								"state",
+								"888edd3e-19c6-4614-ab22-79bc7bcc383f",
+								"85fe1d0c-3324-4aa6-b27f-459f7de1b9b6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/state",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM5OGUyODQ1LWI5YjUtNDE3YS04N2ZjLWQzYjc1MzNjNDFiMiIsIm5hbWUiOiJoYWdoZG9vc3QiLCJlbWFpbCI6ImFzaGthbmhhZ2hkb29zdEBnbWFpbC5jb20iLCJwbGFuIjoiZnJlZSIsImN1c3RvbWVySWQiOiIiLCJyb2xlIjoiYWRtaW4iLCJpbWFnZSI6Imh0dHBzOi8vYXZhdGFyLmlyYW4ubGlhcmEucnVuL3B1YmxpYy8yMCIsImNyZWF0ZWRBdCI6IlRodSBBdWcgMDggMjAyNCAxNzoxOTo1OCBHTVQrMDMzMCAoSXJhbiBTdGFuZGFyZCBUaW1lKSIsInVwZGF0ZWRBdCI6IlRodSBBdWcgMDggMjAyNCAxNzoxOTo1OCBHTVQrMDMzMCAoSXJhbiBTdGFuZGFyZCBUaW1lKSIsImlhdCI6MTcyMzEyNzQyOCwiZXhwIjoxNzIzMTI5MjI4fQ.-9tezxtSLydt8ejA3E1_6ZAZnSbblCQ_wDG0-33B5Zs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:7319/api/v1/courses/state/a00d070b-9b6b-4b44-ad3e-7869868cdf07",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"courses",
+								"state",
+								"a00d070b-9b6b-4b44-ad3e-7869868cdf07"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/tags",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:7319/api/v1/courses/tags",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"courses",
+								"tags"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/filter/tag",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"tags\" : [\"express\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/courses/filter/tag",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"courses",
+								"filter",
+								"tag"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/vector/search",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"query\" : \"express\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/courses/vector/search",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"courses",
+								"vector",
+								"search"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "checkout",
+			"item": [
+				{
+					"name": "/checkout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFzaGthbmhhZ2hkb29zdDAxQGdtYWlsLmNvbSIsImN1c3RvbWVySWQiOiIiLCJpZCI6ImMxOTAwNGViLWU3MjItNGUxYi05ZGRjLTcyYjcwMjdiNmY1NSIsImltYWdlIjoiIiwicGxhbiI6ImZyZWUiLCJyb2xlIjoic3R1ZGVudCIsIm5hbWUiOiIiLCJ1cGRhdGVkQXQiOiJXZWQgRmViIDI2IDIwMjUgMTQ6Mzg6MjAgR01UKzAzMzAgKElyYW4gU3RhbmRhcmQgVGltZSkiLCJjcmVhdGVkQXQiOiJXZWQgRmViIDI2IDIwMjUgMTQ6Mzg6MjAgR01UKzAzMzAgKElyYW4gU3RhbmRhcmQgVGltZSkiLCJpYXQiOjE3NDA1NjgxMzUsImV4cCI6MTc0MDU2OTkzNX0.g1yiobKi-6abbl8umHf55NyPLcDBhvYRFFze23sNX6M",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7319/api/v1/payments/checkout/57e92eef-fc8d-4dba-9f5a-25e61dd4ca09",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"payments",
+								"checkout",
+								"57e92eef-fc8d-4dba-9f5a-25e61dd4ca09"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/subscription",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijk1MjM0ZDRmLWY2MjMtNDdmZi1hYTVkLTY4NDM2YzFhYWVhNyIsIm5hbWUiOiJyb2JlcnQgb3BwZW5oZWltZXIiLCJlbWFpbCI6InJvYmVydG9wcGVuaGVpbWVyQGdtYWlsLmNvbSIsInBsYW4iOiJmcmVlIiwiY3VzdG9tZXJJZCI6bnVsbCwicm9sZSI6InN0dWRlbnQiLCJpbWFnZSI6Imh0dHBzOi8vZW5jcnlwdGVkLXRibjEuZ3N0YXRpYy5jb20vaW1hZ2VzP3E9dGJuOkFOZDlHY1RGVVhUOG1lT05SUkQ1dDUzSkI0Y1JweXZsSjdUMEdGdWlQOXFQbWZ0a2hVYzdPdlNpT3RIeDhZSHE2anp0TDRQMnJkMjhQeFJKNEFxWnpzNm1kb1B0VUFpbGNrVkVFaXZ2TDYzb1lnIiwiY3JlYXRlZEF0IjoiMjAyNC0wOC0xNFQxMjoxMDo1OS4zNTZaIiwidXBkYXRlZEF0IjoiMjAyNC0wOC0xNFQxMjoxMDo1OS4zNTZaIiwiaWF0IjoxNzIzNjM4MDcxLCJleHAiOjE3MjM2Mzk4NzF9.b2-z851lKHJsRhB13yLC5cIe5NKJDtJpzFlmagW1wvk",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7319/api/v1/payments/subscription?plan=yearly",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"payments",
+								"subscription"
+							],
+							"query": [
+								{
+									"key": "plan",
+									"value": "yearly"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/subscription/portal",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJmZmFkYjYzLWY1YTUtNDc4YS1iMzViLWI5YjNmMzM5OWU1OSIsIm5hbWUiOiJhc2hrYW4gaGFnaGRvb3N0IiwiZW1haWwiOiJhc2hrYW5oYWdoZG9vc3QwMUBnbWFpbC5jb20iLCJwbGFuIjoiZnJlZSIsImN1c3RvbWVySWQiOm51bGwsInJvbGUiOiJzdHVkZW50IiwiaW1hZ2UiOiJodHRwczovL2F2YXRhci5pcmFuLmxpYXJhLnJ1bi9wdWJsaWMvMjAiLCJjcmVhdGVkQXQiOiIyMDI0LTA4LTA2VDExOjI4OjI1LjM2N1oiLCJ1cGRhdGVkQXQiOiIyMDI0LTA4LTA2VDExOjI4OjI1LjM2N1oiLCJpYXQiOjE3MjI5NDM3NjUsImV4cCI6MTcyMjk0NTU2NX0.JKf319LSLRUZ4a9jD1iElmeGBK_07_5kGfpnWOx23yY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:7319/api/v1/payments/subscription/portal",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"payments",
+								"subscription",
+								"portal"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "comments",
+			"item": [
+				{
+					"name": "/rate/:courseId",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijk1MjM0ZDRmLWY2MjMtNDdmZi1hYTVkLTY4NDM2YzFhYWVhNyIsIm5hbWUiOiJyb2JlcnQgb3BwZW5oZWltZXIiLCJlbWFpbCI6InJvYmVydG9wcGVuaGVpbWVyQGdtYWlsLmNvbSIsInBsYW4iOiJmcmVlIiwiY3VzdG9tZXJJZCI6bnVsbCwicm9sZSI6InN0dWRlbnQiLCJpbWFnZSI6Imh0dHBzOi8vZW5jcnlwdGVkLXRibjEuZ3N0YXRpYy5jb20vaW1hZ2VzP3E9dGJuOkFOZDlHY1RGVVhUOG1lT05SUkQ1dDUzSkI0Y1JweXZsSjdUMEdGdWlQOXFQbWZ0a2hVYzdPdlNpT3RIeDhZSHE2anp0TDRQMnJkMjhQeFJKNEFxWnpzNm1kb1B0VUFpbGNrVkVFaXZ2TDYzb1lnIiwiY3JlYXRlZEF0IjoiMjAyNC0wOC0xNFQxMjoxMDo1OS4zNTZaIiwidXBkYXRlZEF0IjoiMjAyNC0wOC0xNFQxMjoxMDo1OS4zNTZaIiwiaWF0IjoxNzIzNjM4MDcxLCJleHAiOjE3MjM2Mzk4NzF9.b2-z851lKHJsRhB13yLC5cIe5NKJDtJpzFlmagW1wvk",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"rate\" : 4\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/comments/rate/58b761fc-7562-48af-a654-40362a9b3eb2",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"comments",
+								"rate",
+								"58b761fc-7562-48af-a654-40362a9b3eb2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/rate/:courseId",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:7319/api/v1/comments/rate/c776d147-081e-476a-a6bf-9ca528057fe1",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"comments",
+								"rate",
+								"c776d147-081e-476a-a6bf-9ca528057fe1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:coursId",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNkZmFhMzQ4LWRkZWMtNDkyMS05YjVjLTlmYWQ0MTU1MTg5ZCIsInBsYW4iOiJwcmVtaXVtIiwiaW1hZ2UiOiJodHRwczovL2VuY3J5cHRlZC10Ym4yLmdzdGF0aWMuY29tL2ltYWdlcz9xPXRibjpBTmQ5R2NTbWx5QmZnUkF3Y05MMFB3SDA5TUc1eFFKUzNwUU0xeVltaGVXd2ozYXgwMWVRaTFlVmc4WW1Mam9IeWYxb1dwVENsZ1FaTV9BTkJYempPYzBXTXpoOU5KRmwzV3V1RHdKcHRIZFNMclEiLCJlbWFpbCI6ImFsYmVydGVpbnN0ZWluQGdtYWlsLmNvbSIsImN1c3RvbWVySWQiOiJjdXNfUWRSR0JLTkozMjZUM2giLCJuYW1lIjoiYWxiZXJ0IGVpbnN0ZWluIiwidXBkYXRlZEF0IjoiU2F0IEF1ZyAxMCAyMDI0IDEyOjA1OjA2IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwiY3JlYXRlZEF0IjoiRnJpIEF1ZyAwOSAyMDI0IDIwOjQ4OjU1IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwicm9sZSI6InRlYWNoZXIiLCJpYXQiOjE3MjM1NzY2MTAsImV4cCI6MTcyMzU3ODQxMH0.ZT1Sow9CGt3m5uiROxjWwgH3ArhzTUdTUqb0SI5dEGo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"text\" : \"my 2 friend use react btw\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/comments/c776d147-081e-476a-a6bf-9ca528057fe1",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"comments",
+								"c776d147-081e-476a-a6bf-9ca528057fe1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:courseId/:commentId",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNkZmFhMzQ4LWRkZWMtNDkyMS05YjVjLTlmYWQ0MTU1MTg5ZCIsInBsYW4iOiJwcmVtaXVtIiwiaW1hZ2UiOiJodHRwczovL2VuY3J5cHRlZC10Ym4yLmdzdGF0aWMuY29tL2ltYWdlcz9xPXRibjpBTmQ5R2NTbWx5QmZnUkF3Y05MMFB3SDA5TUc1eFFKUzNwUU0xeVltaGVXd2ozYXgwMWVRaTFlVmc4WW1Mam9IeWYxb1dwVENsZ1FaTV9BTkJYempPYzBXTXpoOU5KRmwzV3V1RHdKcHRIZFNMclEiLCJlbWFpbCI6ImFsYmVydGVpbnN0ZWluQGdtYWlsLmNvbSIsImN1c3RvbWVySWQiOiJjdXNfUWRSR0JLTkozMjZUM2giLCJuYW1lIjoiYWxiZXJ0IGVpbnN0ZWluIiwidXBkYXRlZEF0IjoiU2F0IEF1ZyAxMCAyMDI0IDEyOjA1OjA2IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwiY3JlYXRlZEF0IjoiRnJpIEF1ZyAwOSAyMDI0IDIwOjQ4OjU1IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwicm9sZSI6InRlYWNoZXIiLCJpYXQiOjE3MjM1NjU2ODYsImV4cCI6MTcyMzU2NzQ4Nn0.elwAINhxUI5Y9Qo--2aaCfCZYBhEBuDqfEheITJhmJw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"text\" : \"i use express with ts btw\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/comments/c776d147-081e-476a-a6bf-9ca528057fe1/f42815a2-939d-42cb-8f4c-aec284e92423",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"comments",
+								"c776d147-081e-476a-a6bf-9ca528057fe1",
+								"f42815a2-939d-42cb-8f4c-aec284e92423"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:courseId/:commentId",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNkZmFhMzQ4LWRkZWMtNDkyMS05YjVjLTlmYWQ0MTU1MTg5ZCIsInBsYW4iOiJwcmVtaXVtIiwiaW1hZ2UiOiJodHRwczovL2VuY3J5cHRlZC10Ym4yLmdzdGF0aWMuY29tL2ltYWdlcz9xPXRibjpBTmQ5R2NTbWx5QmZnUkF3Y05MMFB3SDA5TUc1eFFKUzNwUU0xeVltaGVXd2ozYXgwMWVRaTFlVmc4WW1Mam9IeWYxb1dwVENsZ1FaTV9BTkJYempPYzBXTXpoOU5KRmwzV3V1RHdKcHRIZFNMclEiLCJlbWFpbCI6ImFsYmVydGVpbnN0ZWluQGdtYWlsLmNvbSIsImN1c3RvbWVySWQiOiJjdXNfUWRSR0JLTkozMjZUM2giLCJuYW1lIjoiYWxiZXJ0IGVpbnN0ZWluIiwidXBkYXRlZEF0IjoiU2F0IEF1ZyAxMCAyMDI0IDEyOjA1OjA2IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwiY3JlYXRlZEF0IjoiRnJpIEF1ZyAwOSAyMDI0IDIwOjQ4OjU1IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwicm9sZSI6InRlYWNoZXIiLCJpYXQiOjE3MjM1NjU2ODYsImV4cCI6MTcyMzU2NzQ4Nn0.elwAINhxUI5Y9Qo--2aaCfCZYBhEBuDqfEheITJhmJw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:7319/api/v1/comments/c776d147-081e-476a-a6bf-9ca528057fe1/f42815a2-939d-42cb-8f4c-aec284e92423",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"comments",
+								"c776d147-081e-476a-a6bf-9ca528057fe1",
+								"f42815a2-939d-42cb-8f4c-aec284e92423"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:courseId",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:7319/api/v1/comments/c776d147-081e-476a-a6bf-9ca528057fe1?limit=10&startIndex=0",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"comments",
+								"c776d147-081e-476a-a6bf-9ca528057fe1"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "startIndex",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/replies/:courseId/:commentId",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNkZmFhMzQ4LWRkZWMtNDkyMS05YjVjLTlmYWQ0MTU1MTg5ZCIsInBsYW4iOiJwcmVtaXVtIiwiaW1hZ2UiOiJodHRwczovL2VuY3J5cHRlZC10Ym4yLmdzdGF0aWMuY29tL2ltYWdlcz9xPXRibjpBTmQ5R2NTbWx5QmZnUkF3Y05MMFB3SDA5TUc1eFFKUzNwUU0xeVltaGVXd2ozYXgwMWVRaTFlVmc4WW1Mam9IeWYxb1dwVENsZ1FaTV9BTkJYempPYzBXTXpoOU5KRmwzV3V1RHdKcHRIZFNMclEiLCJlbWFpbCI6ImFsYmVydGVpbnN0ZWluQGdtYWlsLmNvbSIsImN1c3RvbWVySWQiOiJjdXNfUWRSR0JLTkozMjZUM2giLCJuYW1lIjoiYWxiZXJ0IGVpbnN0ZWluIiwidXBkYXRlZEF0IjoiU2F0IEF1ZyAxMCAyMDI0IDEyOjA1OjA2IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwiY3JlYXRlZEF0IjoiRnJpIEF1ZyAwOSAyMDI0IDIwOjQ4OjU1IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwicm9sZSI6InRlYWNoZXIiLCJpYXQiOjE3MjM1NzY2MTAsImV4cCI6MTcyMzU3ODQxMH0.ZT1Sow9CGt3m5uiROxjWwgH3ArhzTUdTUqb0SI5dEGo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"text\" : \"i use express js btw\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/comments/replies/c776d147-081e-476a-a6bf-9ca528057fe1/2a3eedb4-6942-4ba8-97c7-6c43df4350d6",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"comments",
+								"replies",
+								"c776d147-081e-476a-a6bf-9ca528057fe1",
+								"2a3eedb4-6942-4ba8-97c7-6c43df4350d6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/replies/:replayId/:commentId",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNkZmFhMzQ4LWRkZWMtNDkyMS05YjVjLTlmYWQ0MTU1MTg5ZCIsInBsYW4iOiJwcmVtaXVtIiwiaW1hZ2UiOiJodHRwczovL2VuY3J5cHRlZC10Ym4yLmdzdGF0aWMuY29tL2ltYWdlcz9xPXRibjpBTmQ5R2NTbWx5QmZnUkF3Y05MMFB3SDA5TUc1eFFKUzNwUU0xeVltaGVXd2ozYXgwMWVRaTFlVmc4WW1Mam9IeWYxb1dwVENsZ1FaTV9BTkJYempPYzBXTXpoOU5KRmwzV3V1RHdKcHRIZFNMclEiLCJlbWFpbCI6ImFsYmVydGVpbnN0ZWluQGdtYWlsLmNvbSIsImN1c3RvbWVySWQiOiJjdXNfUWRSR0JLTkozMjZUM2giLCJuYW1lIjoiYWxiZXJ0IGVpbnN0ZWluIiwidXBkYXRlZEF0IjoiU2F0IEF1ZyAxMCAyMDI0IDEyOjA1OjA2IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwiY3JlYXRlZEF0IjoiRnJpIEF1ZyAwOSAyMDI0IDIwOjQ4OjU1IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwicm9sZSI6InRlYWNoZXIiLCJpYXQiOjE3MjM2MjA0NjEsImV4cCI6MTcyMzYyMjI2MX0.OHL5sVyJBcCJhm9c8DjinVKM-YipenrYV_xt5UlFdS4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"text\" : \"i use express ts btw\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/comments/replies/0c25d491-aeb5-4999-8f10-32b1966f22a9/2a3eedb4-6942-4ba8-97c7-6c43df4350d6",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"comments",
+								"replies",
+								"0c25d491-aeb5-4999-8f10-32b1966f22a9",
+								"2a3eedb4-6942-4ba8-97c7-6c43df4350d6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/replies/:replayId/:commentId",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNkZmFhMzQ4LWRkZWMtNDkyMS05YjVjLTlmYWQ0MTU1MTg5ZCIsInBsYW4iOiJwcmVtaXVtIiwiaW1hZ2UiOiJodHRwczovL2VuY3J5cHRlZC10Ym4yLmdzdGF0aWMuY29tL2ltYWdlcz9xPXRibjpBTmQ5R2NTbWx5QmZnUkF3Y05MMFB3SDA5TUc1eFFKUzNwUU0xeVltaGVXd2ozYXgwMWVRaTFlVmc4WW1Mam9IeWYxb1dwVENsZ1FaTV9BTkJYempPYzBXTXpoOU5KRmwzV3V1RHdKcHRIZFNMclEiLCJlbWFpbCI6ImFsYmVydGVpbnN0ZWluQGdtYWlsLmNvbSIsImN1c3RvbWVySWQiOiJjdXNfUWRSR0JLTkozMjZUM2giLCJuYW1lIjoiYWxiZXJ0IGVpbnN0ZWluIiwidXBkYXRlZEF0IjoiU2F0IEF1ZyAxMCAyMDI0IDEyOjA1OjA2IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwiY3JlYXRlZEF0IjoiRnJpIEF1ZyAwOSAyMDI0IDIwOjQ4OjU1IEdNVCswMzMwIChJcmFuIFN0YW5kYXJkIFRpbWUpIiwicm9sZSI6InRlYWNoZXIiLCJpYXQiOjE3MjM1NzY2MTAsImV4cCI6MTcyMzU3ODQxMH0.ZT1Sow9CGt3m5uiROxjWwgH3ArhzTUdTUqb0SI5dEGo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"text\" : \"i use express js btw\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7319/api/v1/comments/replies/c776d147-081e-476a-a6bf-9ca528057fe1/2a3eedb4-6942-4ba8-97c7-6c43df4350d6",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"comments",
+								"replies",
+								"c776d147-081e-476a-a6bf-9ca528057fe1",
+								"2a3eedb4-6942-4ba8-97c7-6c43df4350d6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/replies/:commentId",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:7319/api/v1/comments/replies/2a3eedb4-6942-4ba8-97c7-6c43df4350d6?limit=10&startIndex=0",
+							"host": [
+								"localhost"
+							],
+							"port": "7319",
+							"path": [
+								"api",
+								"v1",
+								"comments",
+								"replies",
+								"2a3eedb4-6942-4ba8-97c7-6c43df4350d6"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "startIndex",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

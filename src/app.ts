@@ -1,4 +1,4 @@
-import "./configs/instrument";
+// import "./configs/instrument";
 import express, {
   type NextFunction,
   type Request,
@@ -17,8 +17,10 @@ import commentRoute from "./routes/comment.route";
 
 import { RouteNowFoundError } from "./libs/utils";
 import { ErrorMiddleware } from "./middlewares/error";
+import { migration } from "./database/migrate";
 
 const app: Express = express();
+await migration();
 
 app.use("/api/v1/payments", checkoutRoute); // stripe use express.row
 app.use(express.json({ limit: "10mb" }));
